@@ -6,7 +6,7 @@ deps:
 	$(MAKE) -C deps download_deps build_deps
 
 libsecurity-c:
-	mkdir -p ./libsecurity/bin
+	mkdir -p $(LIBSECURITY_DIR)/bin
 	$(MAKE) -C $(LIBSECURITY_DIR)/accounts
 	$(MAKE) -C $(LIBSECURITY_DIR)/acl
 	$(MAKE) -C $(LIBSECURITY_DIR)/entity
@@ -15,13 +15,13 @@ libsecurity-c:
 	$(MAKE) -C $(LIBSECURITY_DIR)/salt
 	$(MAKE) -C $(LIBSECURITY_DIR)/utils
 	$(MAKE) -C $(LIBSECURITY_DIR)/storage
-	$(MAKE) -C $(LIBSECURITY_DIR)/examples/fullExample
-	$(MAKE) -C $(LIBSECURITY_DIR)/examples/secureStorageExample
+	$(MAKE) -C $(LIBSECURITY_DIR)/../examples
 
 depsclean:
 	$(MAKE) -C deps clean
 
 clean:
+	rm -Rf $(LIBSECURITY_DIR)/bin/
 	$(MAKE) -C $(LIBSECURITY_DIR)/accounts clean
 	$(MAKE) -C $(LIBSECURITY_DIR)/acl clean
 	$(MAKE) -C $(LIBSECURITY_DIR)/entity clean
@@ -30,7 +30,6 @@ clean:
 	$(MAKE) -C $(LIBSECURITY_DIR)/salt clean
 	$(MAKE) -C $(LIBSECURITY_DIR)/utils clean
 	$(MAKE) -C $(LIBSECURITY_DIR)/storage clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/examples/fullExample clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/examples/secureStorageExample clean
-
+	$(MAKE) -C $(LIBSECURITY_DIR)/../examples clean
+	
 .PHONY: all clean depclean deps libsecurity-c

@@ -1,3 +1,6 @@
+#ifndef  SECC_LIB_ITEMLIST_INT_H
+#define  SECC_LIB_ITEMLIST_INT_H
+
 #pragma once
 
 #include <stdio.h>
@@ -19,3 +22,4 @@
 
 STATIC void clearItemList(void (*removeItem)(void *item), ItemsHolder **items);
 STATIC bool containItemsList(bool (*itemEqual)(const void *item1, const void *item2), const ItemsHolder *items1, const ItemsHolder *items2);
+#endif // SECC_LIB_ITEMLIST_INT_H

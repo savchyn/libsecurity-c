@@ -1,3 +1,6 @@
+#ifndef SECC_LIB_ENTRY_MANAGER_H
+#define SECC_LIB_ENTRY_MANAGER_H
+
 #pragma once
 
 #include "libsecurity/utils/utils.h"
@@ -46,3 +49,4 @@ bool EntityManager_IsEntityInList(const EntityManager *entityManager, const char
 bool EntityManager_IsEntityInUsersList(const EntityManager *entityManager, const char *name);
 bool EntityManager_IsEntityInGroupsList(const EntityManager *entityManager, const char *name);
 bool EntityManager_IsEntityInResourcesList(const EntityManager *entityManager, const char *name);
+#endif //SECC_LIB_ENTRY_MANAGER_H

@@ -144,7 +144,7 @@ void EntityManager_New(EntityManager *entityManager) {
 STATIC bool checkAddValidParams(EntityManager *entityManager, const char *name) {
   if (entityManager == NULL || name == NULL) {
     snprintf(errStr, sizeof(errStr), "entityManager (isNull %d) and user name '%s' must not be NULL", entityManager == NULL, name);
-    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && false);
     return false;
   }
   if (EntityManager_IsEntityInList(entityManager, name) == true) {
@@ -212,7 +212,7 @@ bool EntityManager_AddResource(EntityManager *entityManager, const char *name) {
 
 STATIC bool getGroup(const EntityManager *entityManager, const char *name, void **item) {
   if (entityManager == NULL || name == NULL) {
-    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && false);
     return false;
   }
   return ItemsList_GetItem(entityManager->Groups, name, item);
@@ -220,7 +220,7 @@ STATIC bool getGroup(const EntityManager *entityManager, const char *name, void 
 
 STATIC bool getUser(const EntityManager *entityManager, const char *name, void **item) {
   if (entityManager == NULL) {
-    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && false);
     return false;
   }
   return ItemsList_GetItem(entityManager->Users, name, item);
@@ -228,7 +228,7 @@ STATIC bool getUser(const EntityManager *entityManager, const char *name, void *
 
 STATIC bool getResource(const EntityManager *entityManager, const char *name, void **item) {
   if (entityManager == NULL) {
-    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && false);
     return false;
   }
   return ItemsList_GetItem(entityManager->Resources, name, item);
@@ -271,7 +271,7 @@ bool EntityManager_IsEntityInList(const EntityManager *entityManager, const char
 STATIC bool checkDataAndGetGroup(const EntityManager *entityManager, const char *groupName, const char *userName, groupData **gEntity) {
   if (entityManager == NULL) {
     snprintf(errStr, sizeof(errStr), "entityManager must not be NULL");
-    assert(LIB_NAME "EntityManager structure must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure must not be NULL" && false);
     return false;
   }
   if (EntityManager_IsEntityInGroupsList(entityManager, groupName) == false) {
@@ -341,7 +341,7 @@ STATIC bool removeUserFromAllGroups(EntityManager *entityManager, const char *na
   groupData *g = NULL;
 
   if (entityManager == NULL || name == NULL) {
-    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && false);
     return false;
   }
   t = entityManager->Groups->Items;
@@ -360,7 +360,7 @@ STATIC bool removeUserFromAllResources(EntityManager *entityManager, const char 
   void *a = NULL;
 
   if (entityManager == NULL || name == NULL) {
-    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure and name string must not be NULL" && false);
     return false;
   }
   t = entityManager->Resources->Items;
@@ -514,7 +514,7 @@ bool EntityManager_Load(EntityManager **entityManager, const char *fileName, con
 
 STATIC bool getEntity(EntityManager *entityManager, const char *entityName, void **entity) {
   if (entityManager == NULL || entityName == NULL) {
-    assert(LIB_NAME "EntityManager structure and entityName string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "EntityManager structure and entityName string must not be NULL" && false);
     return false;
   }
   if (EntityManager_IsEntityInUsersList(entityManager, entityName) == true) {
@@ -533,15 +533,26 @@ STATIC bool getEntity(EntityManager *entityManager, const char *entityName, void
 bool EntityManager_RegisterProperty(EntityManager *entityManager, const char *entityName, const char *propertyName, void *itemData) {
   void *entity = NULL;
 
-  if (entityManager == NULL || propertyName == NULL || entityName == NULL || itemData == NULL) {
-    if (Entity_TestMode == false) {
-      snprintf(errStr, sizeof(errStr), "Internal error in EntityManager_RegisterProperty: entityManager, property "
-                                       "name '%s' entityName and data must not be NULL\n",
-               propertyName);
-      Utils_Abort(errStr);
-    } else
-      return false;
-  }
+    if (entityManager == NULL)
+    {
+        snprintf(errStr, sizeof(errStr), "Internal error in EntityManager_RegisterProperty: entityManager is NULL\n");
+        Utils_Abort(errStr);
+        return false;
+    }
+    
+    if( propertyName == NULL )
+    {
+        snprintf(errStr, sizeof(errStr), "Internal error in EntityManager_RegisterProperty: property "
+                 "name is NULL\n");
+        Utils_Abort(errStr);
+        return false;
+    }
+    
+    if(itemData == NULL) {
+        snprintf(errStr, sizeof(errStr), "Internal error in EntityManager_RegisterProperty: itemData is NULL\n" );
+        Utils_Abort(errStr);
+        return false;
+    }
   if (getEntity(entityManager, entityName, &entity) == false) {
     snprintf(errStr, sizeof(errStr), "EntityManager_RegisterProperty: entity '%s' is not in entityManager", entityName);
     return false;
@@ -572,12 +583,10 @@ bool EntityManager_RemoveProperty(EntityManager *entityManager, const char *enti
   void *entity = NULL;
 
   if (entityManager == NULL || propertyName == NULL || entityName == NULL) {
-    if (Entity_TestMode == false) {
       snprintf(errStr, sizeof(errStr), "Internal error in EntityManager_RemoveProperty: entityManager, property "
                                        "name '%s' and entityName must not be NULL\n",
                propertyName);
       Utils_Abort(errStr);
-    } else
       return false;
   }
   getEntity(entityManager, entityName, &entity);
@@ -596,12 +605,10 @@ bool EntityManager_GetProperty(const EntityManager *entityManager, const char *e
   ItemsHolder *propertyData;
 
   if (entityManager == NULL || propertyName == NULL || entityName == NULL) {
-    if (Entity_TestMode == false) {
       snprintf(errStr, sizeof(errStr), "Internal error in EntityManager_GetProperty: entityManager (isNull? %d), "
                                        "property name '%s' and entityName '%s' must not be NULL\n",
                entityManager == NULL, propertyName, entityName);
       Utils_Abort(errStr);
-    } else
       return false;
   }
   if (EntityManager_IsEntityInUsersList(entityManager, entityName) == true) {

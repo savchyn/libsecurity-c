@@ -32,7 +32,7 @@ STATIC bool testAddPermission() {
              "'%s', error: %s\n",
              name, ALL_ACL_NAME, errStr);
       pass = false;
-    } else if (ret == true && (strlen(name) == 0 || strlen(name) > MAX_PERMISSION_NAME_LEN)) {
+    } else if (ret && (strlen(name) == 0 || strlen(name) > MAX_PERMISSION_NAME_LEN)) {
       printf("testAddAclEntry fail: permission with illegal name '%s' (length "
              "%d), length must be "
              "%d-%d was added to ACL entry '%s'\n",
@@ -46,7 +46,7 @@ STATIC bool testAddPermission() {
       pass = false;
     }
     ret = addPermissionToEntry(aclEntryRef, name);
-    if (ret == true && isEqualEntry(aclEntry, aclEntryRef) == true) {
+    if (ret && isEqualEntry(aclEntry, aclEntryRef) == true) {
       printf("testAddAclEntry fail: unequal ACL entries found equal\n");
       Acl_PrintPermissionsList(stdout, "", aclEntry);
       Acl_PrintPermissionsList(stdout, "", aclEntryRef);
@@ -269,7 +269,7 @@ STATIC bool testAclCorners() {
 
   namesLen = sizeof(names) / sizeof(char *);
   Acl_NewPermissionsList("test", &aclEntry);
-  if (updateEntryPermissions(aclEntry, NULL) == true || updateEntryPermissions(NULL, &aclEntry) == true) {
+  if (updateEntryPermissions(aclEntry, NULL) || updateEntryPermissions(NULL, &aclEntry) == true) {
     printf("testAclCorners fail updateEntryPermissions with NULL return successfully\n");
     pass = false;
   }
@@ -284,7 +284,7 @@ STATIC bool testAclCorners() {
       printf("testAclCorners fail testAclCorners failed to removed entry '%s' from ACL\n", names[i]);
       pass = false;
     }
-    if (Acl_RemoveEntry(a, names[i]) == true || Acl_RemoveEntry(a, NULL) == true) {
+    if (Acl_RemoveEntry(a, names[i]) || Acl_RemoveEntry(a, NULL) == true) {
       printf("testAclCorners fail testAclCorners removed successfully already removed entry '%s' from ACL\n", names[i]);
       pass = false;
     }
@@ -293,7 +293,7 @@ STATIC bool testAclCorners() {
     printf("testAclCorners fail testAclCorners: Successfully add entry to NULL entry name\n");
     pass = false;
   }
-  if (Acl_AddPermissionToResource(entityManager, NULL, AclResourceName, permission) == true ||
+  if (Acl_AddPermissionToResource(entityManager, NULL, AclResourceName, permission) ||
       Acl_AddPermissionToResource(NULL, AclResourceName, NULL, permission) == true) {
     printf("testAclCorners fail testAclCorners: Successfully add permission to NULL ACL or resource name\n");
     pass = false;
@@ -303,7 +303,7 @@ STATIC bool testAclCorners() {
     printf("testAclCorners fail testAclCorners: error while add permission to resource, error: %s\n", errStr);
     pass = false;
   }
-  if (Acl_RemovePermissionFromResource(entityManager, NULL, AclResourceName, permission) == true ||
+  if (Acl_RemovePermissionFromResource(entityManager, NULL, AclResourceName, permission) ||
       Acl_RemovePermissionFromResource(NULL, AclResourceName, names[0], permission) == true) {
     printf("testAclCorners fail testAclCorners: Successfully remove permission from NULL ACL or resource "
            "name\n");
@@ -383,12 +383,8 @@ int main()
 #endif
 {
   bool pass = true;
-  Acl_TestMode = true;
   int16_t i = 0, len = 0;
   char *res = NULL;
-
-  Acl_TestMode = true;
-  AclEntry_TestMode = true;
 
   Utils_TestFuncS callFunc[] = { { "testAddPermission", testAddPermission },
                                  { "testAddRemoveCheckPermission", testAddRemoveCheckPermission },

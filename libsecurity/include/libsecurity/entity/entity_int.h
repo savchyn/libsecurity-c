@@ -1,3 +1,6 @@
+#ifndef SECC_LIB_ENTRY_INT_H
+#define SECC_LIB_ENTRY_INT_H
+
 #pragma once
 
 #include <stdio.h>
@@ -39,7 +42,6 @@
     if (EN_DEBUG) DEBUG(fmt, __VA_ARGS__);                                                                                                 \
   }
 
-extern bool AclEntry_TestMode;
 
 bool newUser(userData **entity, const char *name);
 bool newGroup(groupData **entity, const char *name);
@@ -84,3 +86,4 @@ bool removeProperty(ItemsHolder *propertiesData, const char *propertyName, bool 
 bool getProperty(const ItemsHolder *propertiesData, const char *propertyName, void **data);
 
 void freePropertyList(ItemsHolder *propertiesData);
+#endif // SECC_LIB_ENTRY_INT_H

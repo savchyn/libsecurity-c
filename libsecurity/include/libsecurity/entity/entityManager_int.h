@@ -1,3 +1,6 @@
+#ifndef SECC_LIB_ENTRY_MANAGER_INT_H
+#define SECC_LIB_ENTRY_MANAGER_INT_H
+
 #pragma once
 
 #include <stdio.h>
@@ -26,3 +29,4 @@ STATIC bool checkAddValidParams(EntityManager *entityManager, const char *name);
 STATIC bool getEntity(EntityManager *entityManager, const char *entityName, void **entity);
 STATIC bool removeUserFromAllGroups(EntityManager *entityManager, const char *name);
 STATIC bool removeUserFromAllResources(EntityManager *entityManager, const char *name);
+#endif // SECC_LIB_ENTRY_MANAGER_INT_H

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "libsecurity/utils/crypto.h"
 #include "libsecurity/storage/secureStorage.h"
 
 #define TOTAL_STR_FMT "%03d"
@@ -29,8 +30,6 @@
   {                                                                                                                                        \
     if (SECURE_DEBUG) DEBUG(fmt, __VA_ARGS__);                                                                                             \
   }
-
-extern bool Storage_TestMode;
 
 STATIC void calcHashXor(unsigned char *dst, const unsigned char *in, int16_t len);
 STATIC bool calcHash(const SecureStorageS *storage, unsigned char *hash);

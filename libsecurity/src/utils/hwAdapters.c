@@ -9,7 +9,6 @@
 #include "mbed-drivers/mbed.h"
 #include "minar-platform/minar_platform.h"
 
-extern "C" {
 /* Use the low-power ticker to emulate gettimeofday() response. Note that this
  * is not a proper real-world clock; use it only to measure duration between
  * two time points, and not for telling the current time since 1970.
@@ -28,11 +27,8 @@ int16_t HwAdapters_Sleep(int32_t sec, int32_t nanosec) {
   wait_us((int64_t)(sec * 1000000 + nanosec / 1000));
   return true;
 }
-}
 
 #else
-
-extern "C" {
 
 int16_t HwAdapters_Sleep(int32_t sec, int32_t nanosec) {
   struct timespec tim;
@@ -40,7 +36,6 @@ int16_t HwAdapters_Sleep(int32_t sec, int32_t nanosec) {
   tim.tv_nsec = nanosec;
 
   return nanosleep(&tim, NULL);
-}
 }
 
 #endif

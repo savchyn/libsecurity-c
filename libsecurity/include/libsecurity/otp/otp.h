@@ -4,8 +4,7 @@
 #include "libsecurity/storage/secureStorage.h"
 #include "libsecurity/libsecurity/libsecurity_params.h"
 
-#define MIN_SECRET_LEN 8 // TODO 16 // RFC 4226 R6, for OCRA examples it must be 8
-#define MAX_SECRET_LEN 255
+
 
 // One Time Password
 typedef struct {

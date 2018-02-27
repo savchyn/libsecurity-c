@@ -17,9 +17,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <ifaddrs.h>
-#include <linux/if_link.h>
+//#include <linux/if_link.h>
 #include <sys/ioctl.h>
-#include <linux/if.h>
+//#include <linux/if.h>
 #include <netdb.h>
 #include <unistd.h>
 

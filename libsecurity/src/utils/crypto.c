@@ -1,4 +1,5 @@
-#include "libsecurity/utils/crypto_int.h"
+#include <stdlib.h>
+#include "libsecurity/utils/crypto.h"
 
 #if defined(MBEDTLS_CRYPTO)
 

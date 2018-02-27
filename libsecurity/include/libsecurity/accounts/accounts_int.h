@@ -1,3 +1,5 @@
+#ifndef SECC_LIB_ACCOUNTS_INT_H
+#define SECC_LIB_ACCOUNTS_INT_H
 #pragma once
 
 #include <stdio.h>
@@ -5,13 +7,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "libsecurity/utils/crypto.h"
+//#include "libsecurity/utils/crypto.h"
 #include "libsecurity/password/password.h"
 #include "libsecurity/entity/entity.h"
 #include "libsecurity/accounts/accounts.h"
 #include "libsecurity/libsecurity/libsecurity_params.h"
-
-extern bool Accounts_TestMode;
 
 #define ROOT_PWD_EXPIRATION_DAYS 3550
 #define PWD_EXPIRATION_DAYS 90
@@ -33,3 +33,5 @@ extern const char *usersPrivilege[NUM_OF_PRIVILEGE];
 STATIC bool checkPrivilegeValidity(const char *privilege, PrivilegeType *privilegeType);
 STATIC MicroSecTimeStamp getPwdExpiration(AmUserInfoS *user, const char *userName);
 STATIC bool amStructToStr(const AmUserInfoS *user, char *str, int16_t maxStrLen);
+
+#endif // SECC_LIB_ACCOUNTS_INT_H

@@ -1,3 +1,5 @@
+#ifndef SECC_LIB_EXAMPLE_H
+#define SECC_LIB_EXAMPLE_H
 #pragma once
 
 #include <stdio.h>
@@ -28,3 +30,4 @@ bool AddAcl(EntityManager *entityManager);
 bool AddOtp(EntityManager *entityManager, int16_t userId);
 bool AddPwd(EntityManager *entityManager, int16_t userId);
 bool StoreData(EntityManager *entityManager);
+#endif // SECC_LIB_EXAMPLE_H 

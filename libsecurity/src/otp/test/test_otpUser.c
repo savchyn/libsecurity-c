@@ -85,7 +85,7 @@ bool OtpUser_TestUserHOTPCode() {
         printf("OtpUser_TestUserHOTPCode failed, code wasn't match as expected, index %d, expected: user code %s, ret %d, Error: %s\n",
                i, val1, ret, errStr);
         pass = false;
-      } else if (ret == true && expected[u] == false) {
+      } else if (ret && expected[u] == false) {
         printf("OtpUser_TestUserHOTPCode failed, user code %s was matched unexpectedly, index %d\n", val1, i);
         pass = false;
       }
@@ -153,6 +153,16 @@ bool Test_CheckErrorThrottling() {
   return pass;
 }
 
+// for testing get the automatic unblock timer
+STATIC MicroSecTimeStamp getAutoUnBlockedTimer(OtpUserS *u) {
+    if (u == NULL) {
+        snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
+        assert(LIB_NAME "OTP user structure must not be NULL" && false);
+        return DEFAULT_UNBLOCK_SEC;
+    }
+    return u->Throttle->unblockTimer;
+}
+
 // Check that when the user is locked out, after predefined delay it is
 // automatically unblocked
 bool Test_CheckAutomaticUnblockUser() {
@@ -196,7 +206,7 @@ bool Test_CheckAutomaticUnblockUser() {
                "automatically unblocked before %d seconds, but it was unblocked after %d sec\n",
                (int16_t)ret, (int16_t)user->Throttle->AutoUnblockSec, (int16_t)user->Throttle->AutoUnblockSec + offsetsSec[i]);
         pass = false;
-      } else if (blocked == true && offsetsSec[i] >= 0) {
+      } else if (blocked && offsetsSec[i] >= 0) {
         printf("Test_CheckAutomaticUnblockUser failed, code match %d, user must be automatically "
                "unblocked after %d seconds, time pass since blocked %d sec\n",
                (int16_t)ret, (int16_t)user->Throttle->AutoUnblockSec, (int16_t)user->Throttle->AutoUnblockSec + offsetsSec[i]);
@@ -249,11 +259,11 @@ bool OtpUser_TestUserTOTPCode() {
       printf("OtpUser_TestUserTOTPCode failed, code wasn't match as expected, index %d, expected: user code %s, ret %d, Error: %s\n",
              u, val1, ret, errStr);
       pass = false;
-    } else if (ret == true && expected[u] == false) {
+    } else if (ret && expected[u] == false) {
       printf("OtpUser_TestUserTOTPCode failed, user code %s was matched unexpectedly, index %d\n", val1, u);
       pass = false;
     }
-    if (ret == true && OtpUser_VerifyCode(user[u], val1, TOTP_TYPE) == true) {
+    if (ret && OtpUser_VerifyCode(user[u], val1, TOTP_TYPE) == true) {
       printf("OtpUser_TestUserTOTPCode failed, The same code %s was matched twice, index %d\n", val1, u);
       pass = false;
     }
@@ -304,11 +314,11 @@ bool OtpUser_TestCorners() {
   bool pass = true, tmp;
   OtpUserS *user = NULL;
 
-  if (OtpUser_NewSimpleUser(&user, NULL) == true || OtpUser_GetBlockState(NULL) == true || getAutoUnBlockedTimer(NULL) == true ||
-      initAutoUnblockTimer(NULL) == true || OtpUser_SetBlockedState(NULL, true) == true || findHotpCodeMatch(NULL, OTHER_SECRET, 1, NULL, NULL) == true ||
-      findHotpCodeMatch(user, NULL, 1, NULL, NULL) == true || findTotpCodeMatch(NULL, NULL, 1, NULL) == true ||
-      findTotpCodeMatch(NULL, OTHER_SECRET, 1, &tmp) == true || handleErrorCode(NULL, 1) == true || handleOkCode(NULL, NULL, 1, 1) == true ||
-      verifyUserCodeHelper(NULL, NULL, 1, 1) == true || OtpUser_VerifyCode(NULL, NULL, 1) == true || OtpUser_IsUserBlocked(NULL) == true) {
+  if (OtpUser_NewSimpleUser(&user, NULL) || OtpUser_GetBlockState(NULL) || getAutoUnBlockedTimer(NULL) ||
+      initAutoUnblockTimer(NULL) || OtpUser_SetBlockedState(NULL, true) || findHotpCodeMatch(NULL, OTHER_SECRET, 1, NULL, NULL) ||
+      findHotpCodeMatch(user, NULL, 1, NULL, NULL) || findTotpCodeMatch(NULL, NULL, 1, NULL) ||
+      findTotpCodeMatch(NULL, OTHER_SECRET, 1, &tmp) || handleErrorCode(NULL, 1) || handleOkCode(NULL, NULL, 1, 1) ||
+      verifyUserCodeHelper(NULL, NULL, 1, 1) || OtpUser_VerifyCode(NULL, NULL, 1) || OtpUser_IsUserBlocked(NULL) == true) {
     printf("OtpUser_TestCorners failed, function with NULL parameters retured true\n");
     pass = false;
   }

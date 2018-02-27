@@ -34,7 +34,7 @@ endif
 endif
 endif
 
-CFLAGS_COMMON = $(TARGET) $(CRYPTO_TYPE) $(STATIC_F) $(DEBUG) -Wall -Wextra\
+CFLAGS_COMMON = $(TARGET) $(CRYPTO_TYPE)  $(DEBUG) -Wall -Wextra\
     -Wmissing-declarations -Wpointer-arith \
     -Wwrite-strings -Wcast-qual -Wcast-align \
     -Wformat-security  -Wformat-nonliteral \
@@ -69,9 +69,9 @@ ifdef COV
 endif
 
 ifdef TEST_DIR
-	LIBSECURITY_DIR=../../..
+	LIBSECURITY_DIR=../..
 else ifdef EXAMPLES_DIR
-	LIBSECURITY_DIR=../../..
+	LIBSECURITY_DIR=../..
 endif
 
 DEPS_PATH=$(LIBSECURITY_DIR)/../deps

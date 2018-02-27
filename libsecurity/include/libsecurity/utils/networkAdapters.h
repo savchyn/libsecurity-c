@@ -6,11 +6,13 @@
 #define MAC_ADDRESS_LEN 6
 #define MAC_ADDRESS_STR_LEN (3 * MAC_ADDRESS_LEN)
 
+#include "crypto.h"
+
 #ifdef __cplusplus
 extern "C" {
-#endif
+#else
 
-#include <stdint.h>
+#endif
 
 bool NetworkAdapters_SetIpToHostName(char hostName[MAX_HOST_NAME]);
 bool NetworkAdapters_GetMacAddress(unsigned char mac[MAC_ADDRESS_LEN]);

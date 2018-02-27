@@ -1,6 +1,5 @@
 #include "libsecurity/entity/entity_int.h"
 
-bool Entity_TestMode = false;
 ItemsHolder *callModulesList = NULL;
 const char *HandledModuleNameList[NUM_OF_LOAD_STORE_PROPERTIES] = { OTP_PROPERTY_NAME, AM_PROPERTY_NAME, PWD_PROPERTY_NAME, ACL_PROPERTY_NAME };
 
@@ -8,7 +7,7 @@ void setData(const char *name, char **namePtr, ItemsHolder **propertiesData) {
   char *nameStr = NULL;
 
   if (name == NULL) {
-    assert(LIB_NAME "Name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Name string must not be NULL" && false);
   }
   Utils_CreateAndCopyString(&nameStr, name, strlen(name));
   *namePtr = nameStr;
@@ -20,7 +19,7 @@ void setData(const char *name, char **namePtr, ItemsHolder **propertiesData) {
 
 bool newUser(userData **entity, const char *name) {
   if (name == NULL) {
-    assert(LIB_NAME "Name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Name string must not be NULL" && false);
     return false;
   }
   if (Utils_CheckNameValidity("newUser", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) == false) return false;
@@ -31,7 +30,7 @@ bool newUser(userData **entity, const char *name) {
 
 bool newGroup(groupData **entity, const char *name) {
   if (name == NULL) {
-    assert(LIB_NAME "Name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Name string must not be NULL" && false);
     return false;
   }
   if (Utils_CheckNameValidity("newGroup", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) == false) return false;
@@ -43,7 +42,7 @@ bool newGroup(groupData **entity, const char *name) {
 
 bool newResource(resourceData **entity, const char *name) {
   if (name == NULL) {
-    assert(LIB_NAME "Name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Name string must not be NULL" && false);
     return false;
   }
   if (Utils_CheckNameValidity("newResource", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) == false) return false;
@@ -61,7 +60,7 @@ void removeNone(void *item) {
 // Must be used in a loop
 bool removeUserFromGroup(htab *t, const char *name) {
   if (t == NULL || name == NULL) {
-    assert(LIB_NAME "Hash tab structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Hash tab structure and name string must not be NULL" && false);
     return false;
   }
   if (hfind(t, (const ub1 *)name, (ub4)strlen(name)) == true) {
@@ -76,7 +75,7 @@ bool removeAUserFromGroup(const groupData *entity, const char *name) {
   htab *t = NULL;
 
   if (entity == NULL || name == NULL) {
-    assert(LIB_NAME "group data structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "group data structure and name string must not be NULL" && false);
     return false;
   }
   t = entity->Members;
@@ -128,7 +127,7 @@ bool addUserToGroup(const groupData *entity, const char *name) {
 
   if (entity == NULL || name == NULL) {
     snprintf(errStr, sizeof(errStr), "Error: addUserToGroup: entityData and member name must not be NULL");
-    assert(LIB_NAME "Group data structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Group data structure and name string must not be NULL" && false);
     return false;
   }
   if (hfind(entity->Members, (const ub1 *)name, (ub4)strlen(name)) == true) {
@@ -146,7 +145,7 @@ bool addUserToGroup(const groupData *entity, const char *name) {
 
 bool isUserPartOfGroup(const groupData *entity, const char *name) {
   if (entity == NULL || name == NULL) {
-    assert(LIB_NAME "Group data structure and name string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Group data structure and name string must not be NULL" && false);
     return false;
   }
   return hfind(entity->Members, (const ub1 *)name, (ub4)strlen(name));
@@ -228,7 +227,7 @@ bool storeMembers(const groupData *entity, const SecureStorageS *storage, const 
   htab *t;
 
   if (entity == NULL || storage == NULL || prefix == NULL) {
-    assert(LIB_NAME "Group data and storage structures as well as prefix must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Group data and storage structures as well as prefix must not be NULL" && false);
     return false;
   }
   if (Utils_IsPrefixValid("storeMembers", prefix) == false) return false;
@@ -263,7 +262,7 @@ bool loadMembers(groupData **entity, const SecureStorageS *storage, const char *
 
   if (storage == NULL) {
     snprintf(errStr, sizeof(errStr), "Storage must initiated first");
-    assert(LIB_NAME "Storage structure must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Storage structure must not be NULL" && false);
     return false;
   }
   if (Utils_IsPrefixValid("loadMembers", prefix) == false) return false;
@@ -313,7 +312,7 @@ bool store(const void *entity, const SecureStorageS *storage, const char *module
   char *prefix = NULL;
 
   if (entity == NULL || storage == NULL) {
-    assert(LIB_NAME "Storage and entity structures must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Storage and entity structures must not be NULL" && false);
     return false;
   }
   if (Utils_IsPrefixValid("Store", modulePrefix) == false) return false;
@@ -326,7 +325,7 @@ bool store(const void *entity, const SecureStorageS *storage, const char *module
 
 bool storeUsers(const void *entity, const SecureStorageS *storage, const char *prefix) {
   if (entity == NULL || storage == NULL || prefix == NULL) {
-    assert(LIB_NAME "Entity and storage structures as well as prefix string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Entity and storage structures as well as prefix string must not be NULL" && false);
     return false;
   }
   return store(entity, storage, prefix, false, ((const userData *)entity)->Name, ((const userData *)entity)->PropertiesData);
@@ -334,7 +333,7 @@ bool storeUsers(const void *entity, const SecureStorageS *storage, const char *p
 
 bool storeGroups(const void *entity, const SecureStorageS *storage, const char *prefix) {
   if (entity == NULL || storage == NULL || prefix == NULL) {
-    assert(LIB_NAME "Entity and storage structures as well as prefix string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Entity and storage structures as well as prefix string must not be NULL" && false);
     return false;
   }
   return store(entity, storage, prefix, true, ((const groupData *)entity)->Name, ((const groupData *)entity)->PropertiesData);
@@ -342,7 +341,7 @@ bool storeGroups(const void *entity, const SecureStorageS *storage, const char *
 
 bool storeResources(const void *entity, const SecureStorageS *storage, const char *prefix) {
   if (entity == NULL || storage == NULL || prefix == NULL) {
-    assert(LIB_NAME "Entity and storage structures as well as prefix string must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Entity and storage structures as well as prefix string must not be NULL" && false);
     return false;
   }
   return store(entity, storage, prefix, false, ((const resourceData *)entity)->Name, ((const resourceData *)entity)->PropertiesData);
@@ -354,7 +353,7 @@ bool load(void **entity, const SecureStorageS *storage, const char *modulePrefix
   ItemsHolder *propertyData = NULL;
 
   if (storage == NULL) {
-    assert(LIB_NAME "Storage structure must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Storage structure must not be NULL" && false);
     snprintf(errStr, sizeof(errStr), "Storage must initiated first");
     return false;
   }
@@ -410,7 +409,7 @@ bool isContainsMembers(const groupData *entity1, const groupData *entity2) {
   htab *t1 = NULL;
 
   if (entity1 == NULL || entity2 == NULL) {
-    assert(LIB_NAME "Entity structure must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Entity structure must not be NULL" && false);
     return false;
   }
   t1 = entity1->Members;
@@ -430,14 +429,14 @@ bool isEqualMembers(const groupData *entity1, const groupData *entity2) {
   if (entity1 == NULL || entity2 == NULL) {
     return false;
   }
-  return isContainsMembers(entity1, entity2) == true && (hcount(entity1->Members) == hcount(entity2->Members));
+  return isContainsMembers(entity1, entity2) && (hcount(entity1->Members) == hcount(entity2->Members));
 }
 
 bool isEqualUsers(const void *u1, const void *u2) {
   const userData *entity1 = NULL, *entity2 = NULL;
 
   if (u1 == NULL || u2 == NULL) {
-    assert(LIB_NAME "User data structure must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "User data structure must not be NULL" && false);
     return false;
   }
   entity1 = (const userData *)u1;
@@ -450,7 +449,7 @@ bool isEqualGroups(const void *u1, const void *u2) {
   const groupData *entity1 = NULL, *entity2 = NULL;
 
   if (u1 == NULL || u2 == NULL) {
-    assert(LIB_NAME "Group data structure must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Group data structure must not be NULL" && false);
     return false;
   }
   entity1 = (const groupData *)u1;
@@ -466,7 +465,7 @@ bool isEqualResources(const void *u1, const void *u2) {
   const resourceData *entity1 = NULL, *entity2 = NULL;
 
   if (u1 == NULL || u2 == NULL) {
-    assert(LIB_NAME "Resource data structure must not be NULL" && (false || Entity_TestMode));
+    assert(LIB_NAME "Resource data structure must not be NULL" && false);
     return false;
   }
   entity1 = (const resourceData *)u1;
@@ -492,10 +491,8 @@ bool registerPropertyHandleFunc(const char *propertyName, void (*removeItem)(voi
   bool ret = false;
 
   if (propertyName == NULL) {
-    if (Entity_TestMode == false) {
       snprintf(errStr, sizeof(errStr), "Internal error in RegisterRemoveProperty: module name '%s' must not be NULL\n", propertyName);
       Utils_Abort(errStr);
-    } else
       return false;
   }
   debug_print("Add remove func property of module '%s'\n", propertyName);
@@ -520,13 +517,11 @@ void removeRegisteredPropertyList() {
 
 bool registerProperty(const ItemsHolder *propertiesData, const char *propertyName, void *itemData) {
   if (propertyName == NULL || itemData == NULL || propertiesData == NULL) {
-    if (Entity_TestMode == false) {
       snprintf(errStr, sizeof(errStr), "Internal error in EntitysList_RegisterPropertyStruct: "
                                        "property name '%s' "
                                        "entity and data must not be NULL\n",
                propertyName);
       Utils_Abort(errStr);
-    } else
       return false;
   }
   debug_print("Add property '%s'\n", propertyName);
@@ -539,12 +534,10 @@ bool removeProperty(ItemsHolder *propertiesData, const char *propertyName, bool 
   char funcName[MAX_FUNC_NAME + 1];
 
   if (propertyName == NULL || propertiesData == NULL) {
-    if (Entity_TestMode == false) {
       snprintf(errStr, sizeof(errStr), "Internal error in removeProperty: property name '%s' "
                                        "and entity must not be NULL\n",
                (const char *)propertyName);
       Utils_Abort(errStr);
-    } else
       return false;
   }
 
@@ -563,13 +556,20 @@ bool removeProperty(ItemsHolder *propertiesData, const char *propertyName, bool 
   return false;
 }
 
-bool getProperty(const ItemsHolder *propertiesData, const char *name, void **data) {
-  if (name == NULL || propertiesData == NULL) {
-    if (Entity_TestMode == false)
-      fprintf(stderr, "Error in getProperty: name '%s' and property data (isNull %d) must not be NULL\n", name, propertiesData == NULL);
-    return false;
-  }
-  return ItemsList_GetItem(propertiesData, name, data);
+bool getProperty(const ItemsHolder *propertiesData, const char *name, void **data)
+{
+    if (name == NULL)
+    {
+        fprintf(stderr, "Error in getProperty: name is NULL\n");
+        return false;
+    }
+    
+    if( propertiesData == NULL)
+    {
+        fprintf(stderr, "Error in getProperty: property data is NULL\n");
+        return false;
+    }
+    return ItemsList_GetItem(propertiesData, name, data);
 }
 
 void freePropertyList(ItemsHolder *propertyData) {

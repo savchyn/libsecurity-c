@@ -12,7 +12,6 @@
 
 #include "libsecurity/accounts/accounts_int.h"
 
-bool Accounts_TestMode = false;
 const char *usersPrivilegeStr[NUM_OF_PRIVILEGE] = { SUPER_USER_PERMISSION_STR, ADMIN_PERMISSION_STR, USER_PERMISSION_STR };
 
 void Accounts_Print(FILE *ofp, const char *header, const void *u) {
@@ -30,7 +29,7 @@ STATIC bool checkPrivilegeValidity(const char *privilege, PrivilegeType *idx) {
   int16_t i = 0, len = 0;
 
   if (privilege == NULL) {
-    assert(LIB_NAME "Privilege string must not be NULL" && (false || Accounts_TestMode));
+    assert(LIB_NAME "Privilege string must not be NULL" && false);
     return false;
   }
   len = sizeof(usersPrivilegeStr) / sizeof(char *);
@@ -56,7 +55,7 @@ bool Accounts_SetUserPrivilege(AmUserInfoS *user, const char *privilege) {
 
 STATIC MicroSecTimeStamp getPwdExpiration(AmUserInfoS *user, const char *userName) {
   if (user == NULL || userName == NULL) {
-    assert(LIB_NAME "User structure and userName string must not be NULL" && (false || Accounts_TestMode));
+    assert(LIB_NAME "User structure and userName string must not be NULL" && false );
     return Utils_GetBeginningOfTime();
   }
   if (strcmp(userName, ROOT_USER_NAME) == 0) { // root password dosn't have expiration limit
@@ -68,20 +67,35 @@ STATIC MicroSecTimeStamp getPwdExpiration(AmUserInfoS *user, const char *userNam
 
 // If the user is valid, add it (or override) to the list
 bool Accounts_NewUser(AmUserInfoS **user, const char *privilege, const unsigned char *sPwd, const unsigned char *sSalt, PasswordStreangthType minPwdStrength) {
-  PrivilegeType privilegeType = USER_PERMISSION;
-  PwdS *p = NULL;
+    PrivilegeType privilegeType = USER_PERMISSION;
+  
+    PwdS *p = NULL;
 
-  if (sPwd == NULL || sSalt == NULL || privilege == NULL) {
-    snprintf(errStr, sizeof(errStr), "Accounts_NewUser: pwd (isNull? %d), salt (isNull? %d) and "
-                                     "privilege ('%s') must not be NULL",
-             sPwd == NULL, sSalt == NULL, privilege);
-    return false;
-  }
-  if (checkPrivilegeValidity(privilege, &privilegeType) == false) {
-    return false;
-  }
-  if (Pwd_NewUserPwd(&p, sPwd, sSalt, minPwdStrength) == false) {
-    Utils_AddPrefixToErrorStr("AccountManagement: AddNewUser failed, error: ");
+    if (sPwd == NULL)
+    {
+        snprintf(errStr, sizeof(errStr), "Password is NULL");
+        
+        return false;
+    }
+    if(sSalt == NULL)
+    {
+        snprintf(errStr, sizeof(errStr), "Salt is NULL");
+        
+        return false;
+    }
+    
+    if(privilege == NULL)
+    {
+        snprintf(errStr, sizeof(errStr), "Privilege is NULL");
+        
+        return false;
+    }
+    
+    if (checkPrivilegeValidity(privilege, &privilegeType) == false) {
+        return false;
+    }
+    if (Pwd_NewUserPwd(&p, sPwd, sSalt, minPwdStrength) == false) {
+        Utils_AddPrefixToErrorStr("AccountManagement: AddNewUser failed, error: ");
     return false;
   }
   EntityManager_RegisterPropertyHandleFunc(AM_PROPERTY_NAME, Accounts_FreeUser, Accounts_Store, Accounts_Load, Accounts_Print, Accounts_IsEqual);
@@ -110,7 +124,6 @@ bool Accounts_UpdateUserPwd(AmUserInfoS *user, const char *userName, const unsig
 bool Accounts_VerifyPassword(AmUserInfoS *user, const unsigned char *sPwd) {
   if (user == NULL || sPwd == NULL) return false;
   if (Pwd_VerifyPassword(user->Pwd, sPwd) == false) {
-    if (Accounts_TestMode == false) Utils_Sleep(0, 1000000L);
     user->Pwd->ErrorsCounter = 0; // the throttling is enougth
     return false;
   }
@@ -119,7 +132,7 @@ bool Accounts_VerifyPassword(AmUserInfoS *user, const unsigned char *sPwd) {
 
 STATIC bool amStructToStr(const AmUserInfoS *user, char *str, int16_t maxStrLen) {
   if (user == NULL || str == NULL) {
-    assert(LIB_NAME "User structure and input string must not be NULL" && (false || Accounts_TestMode));
+    assert(LIB_NAME "User structure and input string must not be NULL" && false );
     return false;
   }
   snprintf(str, maxStrLen, AM_STRUCT_FMT, user->Privilege);

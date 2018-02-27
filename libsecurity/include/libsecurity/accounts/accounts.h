@@ -1,7 +1,9 @@
+#ifndef SECC_LIB_ACCOUNTS_H
+#define SECC_LIB_ACCOUNTS_H
 #pragma once
 
-#include "libsecurity/storage/secureStorage.h"
-#include "libsecurity/utils/itemsList.h"
+//#include "libsecurity/storage/secureStorage.h"
+//#include "libsecurity/utils/itemsList.h"
 
 typedef struct {
   PwdS *Pwd;
@@ -17,3 +19,4 @@ bool Accounts_VerifyPassword(AmUserInfoS *user, const unsigned char *sPwd);
 bool Accounts_Store(const void *u, const SecureStorageS *storage, const char *prefix);
 bool Accounts_Load(void **u, const SecureStorageS *storage, const char *prefix, char **retName);
 bool Accounts_IsEqual(const void *u1, const void *u2);
+#endif //opSECC_LIB_ACCOUNTS_H

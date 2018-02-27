@@ -24,16 +24,14 @@
 //  - To guarantee that the data is not altered or corrupted, the storage is signed using HMAC. The signature is added to the secure
 //  storage. When the storage is loaded,
 //    the HMAC is calculated and compared with the stored signature to verify that the file is genuine.
-
 #include "libsecurity/storage/secureStorage_int.h"
 
-bool Storage_TestMode = false;
 
 STATIC void calcHashXor(unsigned char *dst, const unsigned char *in, int16_t len) {
   int16_t i = 0, loopLen = 0;
 
   if (dst == NULL || in == NULL) {
-    assert(LIB_NAME "Input and output strings must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Input and output strings must not be NULL" && false);
   }
   loopLen = min(SHA256_LEN, len);
   for (i = 0; i < loopLen; i++) {
@@ -48,7 +46,7 @@ STATIC bool calcHash(const SecureStorageS *storage, unsigned char *hash) {
   unsigned char *data = NULL;
 
   if (storage == NULL || hash == NULL) {
-    assert(LIB_NAME "Storage structure and hash string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure and hash string must not be NULL" && false);
     return false;
   }
   t = storage->Data;
@@ -78,7 +76,7 @@ STATIC bool getValue(htab *t, const unsigned char *key, unsigned char **val) {
   int16_t len = 0;
 
   if (t == NULL || key == NULL) {
-    assert(LIB_NAME "Hash structure and key string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Hash structure and key string must not be NULL" && false);
     return false;
   }
   if (Utils_GetCharArrayLen(key, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
@@ -96,7 +94,7 @@ STATIC bool clearKey(const SecureStorageS *storage, const unsigned char *key) {
   htab *t = NULL;
 
   if (storage == NULL || key == NULL) {
-    assert(LIB_NAME "Storage structure and key string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure and key string must not be NULL" && false);
     return false;
   }
   t = storage->Data;
@@ -126,7 +124,7 @@ STATIC bool updateData(const SecureStorageS *storage, const unsigned char *key, 
   htab *t = NULL;
 
   if (storage == NULL || key == NULL || val == NULL) {
-    assert(LIB_NAME "Storage structure and key, value strings must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure and key, value strings must not be NULL" && false);
     return false;
   }
   t = storage->Data;
@@ -150,7 +148,7 @@ STATIC bool isSaltValid(const unsigned char *caSalt) {
   int16_t len = 0;
 
   if (caSalt == NULL) {
-    assert(LIB_NAME "Salt string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Salt string must not be NULL" && false);
     return false;
   }
   if (Utils_GetCharArrayLen(caSalt, &len, MIN_SALT_LEN, KEY_VAL_MAX_STR_LEN) == false) { // salt can be empty string
@@ -163,17 +161,19 @@ STATIC bool isSecretValid(const unsigned char *caSecret) {
   int16_t len = 0;
 
   if (caSecret == NULL) {
-    assert(LIB_NAME "Secret string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Secret string must not be NULL" && false);
     return false;
   }
   if (Utils_GetCharArrayLen(caSecret, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) {
     return false;
   }
   // in NaCl it must be at least 32, so the common is exactly 32B
-  if (len != SECRET_LEN) {
-    snprintf(errStr, sizeof(errStr), "AES key length is not valid (%d), secret length must be exactly %d Bytes", len, SECRET_LEN);
+  /* looks very wrong 
+   if (len != SECRET_LEN) {
+    snprintf(errStr, sizeof(errStr), "AES  is not valid (%d), secret length must be exactly %d Bytes", len, SECRET_LEN);
     return false;
   }
+   */
   return true;
 }
 
@@ -182,7 +182,7 @@ STATIC bool isLengthValid(const unsigned char *caStr, int16_t minLen, int16_t ma
 
   if (caStr == NULL) {
     len = 0;
-    assert(LIB_NAME "Input string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Input string must not be NULL" && false);
   } else {
     if (Utils_GetCharArrayLen(caStr, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
   }
@@ -242,7 +242,7 @@ STATIC bool encrypt(const unsigned char *caText, unsigned char *ivStr, const uns
 
   *caData = NULL;
   if (caText == NULL || caSecret == NULL || ivStr == NULL) {
-    assert(LIB_NAME "Input text, initiation vector and secret strings must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Input text, initiation vector and secret strings must not be NULL" && false);
     return false;
   }
   if (Utils_GetCharArrayLen(caText, &textLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
@@ -275,7 +275,7 @@ STATIC bool decrypt(unsigned char *caText, const unsigned char *caSecret, unsign
   unsigned char ivStr[IV_LEN + 1];
 
   if (caText == NULL || caSecret == NULL) {
-    assert(LIB_NAME "TExt and secret strings must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "TExt and secret strings must not be NULL" && false);
     return false;
   }
   if (Utils_GetCharArrayLen((unsigned char *)caText, &len, KEY_VAL_MIN_STR_LEN + FULL_IV_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
@@ -302,7 +302,7 @@ STATIC void getHKey(const unsigned char *caKey, unsigned char *cahKey) {
   unsigned char hash[crypto_hash_BYTES]; // to avoid NaCl problems
 
   if (caKey == NULL) {
-    assert(LIB_NAME "Input key string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Input key string must not be NULL" && false);
     return;
   }
   memset(cahKey, 0, SHA256_LEN);
@@ -323,7 +323,7 @@ STATIC bool getRandomFromKey(const SecureStorageS *storage, const unsigned char 
   htab *t = NULL;
 
   if (storage == NULL || caKey == NULL) {
-    assert(LIB_NAME "Storage structure and key string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure and key string must not be NULL" && false);
     return false;
   }
   t = storage->Data;
@@ -347,7 +347,7 @@ STATIC void generateRandomToKey(const unsigned char *key, unsigned char *hKey, u
   unsigned char random[IV_LEN + 1]; // in NaCl the IV len is fixed
 
   if (key == NULL) {
-    assert(LIB_NAME "Input key string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Input key string must not be NULL" && false);
     return;
   }
   getHKey(key, hKey);
@@ -362,12 +362,12 @@ STATIC bool generateAlignedCharAray(const unsigned char *input, int16_t len, uns
   unsigned char *tStr = NULL;
 
   if (input == NULL) {
-    assert(LIB_NAME "Input string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Input string must not be NULL" && false);
     return false;
   }
   if (len < 0) {
     snprintf(errStr, sizeof(errStr), "generateAlignedCharAray: string length must be positive");
-    assert(LIB_NAME "Input length must be positive" && (false || Storage_TestMode));
+    assert(LIB_NAME "Input length must be positive" && false);
     return false;
   }
   newLen = len + saltLen + Crypto_GetAesPadFactor(len + saltLen + UTILS_STR_LEN_SIZE);
@@ -568,7 +568,7 @@ STATIC bool calcHMac(const SecureStorageS *storage, unsigned char *caData) {
   int16_t secretLen = 0;
 
   if (storage == NULL) {
-    assert(LIB_NAME "Storage structure must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure must not be NULL" && false);
     return false;
   }
   memset(hash, 0, SHA256_LEN);
@@ -592,7 +592,7 @@ STATIC bool calcHMac(const SecureStorageS *storage, unsigned char *caData) {
 
 STATIC bool writeHeader(FILE *fp, SecureStorageS *storage) {
   if (storage == NULL || storage->caSalt == NULL) {
-    assert(LIB_NAME "Storage structure and storage salt string must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure and storage salt string must not be NULL" && false);
     return false;
   }
   if (Utils_WriteCharArray(fp, storage->caSalt) == false) return false;
@@ -606,7 +606,7 @@ STATIC bool readHeader(FILE *fp, SecureStorageS *storage) {
   int16_t len = 0;
 
   if (storage == NULL) {
-    assert(LIB_NAME "Storage structure must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure must not be NULL" && false);
   }
   if (Utils_ReadCharArray(fp, caSalt, KEY_VAL_MAX_STR_LEN) == false) {
     return false;
@@ -626,7 +626,7 @@ STATIC void printDecryptedData(const char *header, unsigned char *caKey, unsigne
   unsigned char *dKey = NULL, *dVal = NULL;
 
   if (caKey == NULL || caVal == false) {
-    assert(LIB_NAME "Key and value strings must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Key and value strings must not be NULL" && false);
     return;
   }
   if (Utils_GetCharArrayLen(caKey, &keyLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false ||
@@ -652,7 +652,7 @@ STATIC void writeKeyValue(FILE *fp, const SecureStorageS *storage) {
   htab *t = NULL;
 
   if (storage == NULL) {
-    assert(LIB_NAME "Storage structure must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure must not be NULL" && false);
     return;
   }
   t = storage->Data;
@@ -676,7 +676,7 @@ STATIC bool readKeyValue(FILE *fp, const SecureStorageS *storage) {
   unsigned char caKey[KEY_VAL_MAX_STR_LEN], caVal[KEY_VAL_MAX_STR_LEN];
 
   if (storage == NULL) {
-    assert(LIB_NAME "Storage structure must not be NULL" && (false || Storage_TestMode));
+    assert(LIB_NAME "Storage structure must not be NULL" && false);
     return false;
   }
   snprintf(errStr, sizeof(errStr), "File is not valid"); // the default error
@@ -740,7 +740,7 @@ bool SecureStorage_LoadSecureStorageFromFile(const char *fileName, const unsigne
   if (readHeader(ifp, storage) == false) return false;
   ret = readKeyValue(ifp, storage);
   FileAdapters_Fclose(ifp);
-  if (ret == false && Storage_TestMode == false) {
+  if (ret == false) {
     printf("%s\n", errStr);
     return false;
   }

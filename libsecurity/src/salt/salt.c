@@ -2,7 +2,6 @@
 
 #include "libsecurity/salt/salt_int.h"
 
-bool Salt_TestMode = false;
 
 void Salt_Print(FILE *ofp, const char *header, const SaltS *salt) {
   if (header != NULL) fprintf(ofp, "%s", header);
@@ -13,7 +12,7 @@ void Salt_Print(FILE *ofp, const char *header, const SaltS *salt) {
 STATIC bool isValidOutputLen(int16_t val) {
   if (val < MIN_OUTPUT_LEN || val > MAX_OUTPUT_LEN) {
     snprintf(errStr, sizeof(errStr), "Error: Salt struct is not valid, the used output length %d must be between %d-%d", val, MIN_OUTPUT_LEN, MAX_OUTPUT_LEN);
-    assert(LIB_NAME "Salt structure, output length is not valid" && (false || Salt_TestMode));
+    assert(LIB_NAME "Salt structure, output length is not valid" && false);
     return false;
   }
   return true;
@@ -23,7 +22,7 @@ STATIC bool isValidSaltSecret(const unsigned char *caSecret) {
   int16_t len = 0;
 
   if (caSecret == NULL) {
-    assert(LIB_NAME "Salt secret string must not be NULL" && (false || Salt_TestMode));
+    assert(LIB_NAME "Salt secret string must not be NULL" && false);
     return false;
   }
   Utils_GetCharArrayLen(caSecret, &len, MIN_SECRET_LEN, MAX_SECRET_LEN);
@@ -38,7 +37,7 @@ STATIC bool isValidSalt(const unsigned char *caSalt) {
   int16_t len = 0;
 
   if (caSalt == NULL) {
-    assert(LIB_NAME "Salt string must not be NULL" && (false || Salt_TestMode));
+    assert(LIB_NAME "Salt string must not be NULL" && false);
     return false;
   }
   Utils_GetCharArrayLen(caSalt, &len, MIN_SALT_LEN, MAX_SALT_LEN);
@@ -54,7 +53,7 @@ STATIC bool isValidNumOfIterations(int16_t val) {
     snprintf(errStr, sizeof(errStr), "Error: Salt struct is not valid, the number of itterations %d "
                                      "is less than the minimum %d",
              val, MIN_NUM_OF_ITERATIONS);
-    assert(LIB_NAME "Number of iterations is not valid" && (false || Salt_TestMode));
+    assert(LIB_NAME "Number of iterations is not valid" && false);
     return false;
   }
   return true;
@@ -111,7 +110,7 @@ STATIC bool getRandomSalt(int16_t len, unsigned char **caNewSalt) {
 
   if (len < MIN_SALT_LEN || len > MAX_SALT_LEN) {
     snprintf(errStr, sizeof(errStr), "Error: required random salt size was %d, must be between %d-%d", len, MIN_SALT_LEN, MAX_SALT_LEN);
-    assert(LIB_NAME "Salt length must be valid" && (false || Salt_TestMode));
+    assert(LIB_NAME "Salt length must be valid" && false);
     return false;
   }
   Utils_Malloc((void **)caNewSalt, len + 1 + UTILS_STR_LEN_SIZE);

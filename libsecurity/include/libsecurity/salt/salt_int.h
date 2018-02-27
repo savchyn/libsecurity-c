@@ -17,11 +17,8 @@
 
 #define MIN_OUTPUT_LEN 6
 #define MAX_OUTPUT_LEN 512
-#define MIN_SECRET_LEN 4
-#define MAX_SECRET_LEN 255
 #define MIN_NUM_OF_ITERATIONS 1
 
-extern bool Salt_TestMode;
 
 STATIC bool isValidOutputLen(int16_t val);
 STATIC bool isValidSaltSecret(const unsigned char *caSecret);

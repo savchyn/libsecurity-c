@@ -1,3 +1,5 @@
+#ifndef  SECC_LIB_ITEMLIST_H
+#define  SECC_LIB_ITEMLIST_H
 #pragma once
 
 #include "libsecurity/storage/secureStorage.h"
@@ -25,3 +27,4 @@ bool ItemsList_AddToStorage(bool (*storeItem)(const void *item, const SecureStor
 bool ItemsList_LoadFromStorage(bool (*itemLoad)(void **item, const SecureStorageS *storage, const char *prefix, char **retName),
                                ItemsHolder **items, const SecureStorageS *storage, const char *prefix, void (*itemFree)(void *item));
 bool ItemsList_IsEqual(bool (*itemEqual)(const void *item1, const void *item2), const ItemsHolder *items1, const ItemsHolder *items2);
+#endif // SECC_LIB_ITEMLIST_H

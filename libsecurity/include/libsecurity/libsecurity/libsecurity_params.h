@@ -1,3 +1,6 @@
+#ifndef SECC_LIB_PARAMS_H
+#define SECC_LIB_PARAMS_H
+
 #pragma once
 
 #define	ROOT_USER_NAME		"root"
@@ -20,9 +23,6 @@ typedef enum {SUPER_USER_PERMISSION, ADMIN_PERMISSION, USER_PERMISSION} Privileg
 
 #define LIB_NAME	"Libsecurity-c"
 
-#ifdef STATIC_F // for testing mode
-#define STATIC
-#else
 #define STATIC static
-#endif
 
+#endif //#ifndef SECC_LIB_PARAMS_H

@@ -6,7 +6,7 @@
 #include "libsecurity/otp/otp_int.h"
 #include "libsecurity/otp/otpUser_int.h"
 
-#define SECRET ((unsigned char *)"12345678901234567890123456789012")
+#define SECRET ((unsigned char const *)"12345678901234567890123456789012")
 #define NUM_OF_USERS 4
 
 bool OtpTestUser_SetUser(OtpUserS **user, unsigned char *secret);
@@ -29,7 +29,7 @@ STATIC bool testOtpCreationCorrectness() {
   strcpy(secret, "");
   for (i = 0; i < MAX_SECRET_LEN + offset; i++) {
     ret = Otp_NewAdvance(&otp, (unsigned char *)secret, DEFAULT_NUM_OF_DIGITS, SHA256_FUNC_IDX);
-    if (ret == true && (i < MIN_SECRET_LEN || i > MAX_SECRET_LEN)) {
+    if (ret && (i < MIN_SECRET_LEN || i > MAX_SECRET_LEN)) {
       printf("Test testOtpCreationCorrectness failed: ilegal secret length %d "
              "was exepted\n",
              i);
@@ -48,7 +48,7 @@ STATIC bool testOtpCreationCorrectness() {
   }
   for (i = 0; i < MAX_NUM_OF_DIGITS + offset; i++) {
     ret = Otp_NewAdvance(&otp, SECRET, i, SHA256_FUNC_IDX);
-    if (ret == true && (i < MIN_NUM_OF_DIGITS || i > MAX_NUM_OF_DIGITS)) {
+    if (ret && (i < MIN_NUM_OF_DIGITS || i > MAX_NUM_OF_DIGITS)) {
       printf("Test testOtpCreationCorrectness failed: ilegal number of digits "
              "%d was exepted\n",
              i);
@@ -63,7 +63,7 @@ STATIC bool testOtpCreationCorrectness() {
   }
   for (i = 0; i < MAX_DIGEST_IDX + offset; i++) {
     ret = Otp_NewAdvance(&otp, SECRET, DEFAULT_NUM_OF_DIGITS, i);
-    if (ret == true && (i < MIN_DIGEST_IDX || i > MAX_DIGEST_IDX)) {
+    if (ret && (i < MIN_DIGEST_IDX || i > MAX_DIGEST_IDX)) {
       printf("Test testOtpCreationCorrectness failed: ilegal digest index %d "
              "was exepted\n",
              i);
@@ -95,7 +95,7 @@ STATIC bool testOtpAreEqual() {
     else if (i == 3)
       Otp_ReplaceSecret(otp1, (unsigned char *)"lalalala");
     ret = Otp_IsEqual(otp1, otp2);
-    if ((ret == true && i > 0) || (ret == false && i == 0)) {
+    if ((ret && i > 0) || (ret == false && i == 0)) {
       if (i > 0)
         printf("Test testOtpAreEqual failed: different otp was found equal\n");
       else
@@ -254,8 +254,8 @@ STATIC bool testOtpCorners() {
   key[crypto_auth_BYTES + 1] = 0;
   Utils_Free(otp1->Secret);
   otp1->Secret = NULL;
-  if (generateHmac(otp, "abc", NULL) == true || generateHmac(otp1, key, NULL) == true || Otp_New(&otp, NULL) == true ||
-      timeCode(NULL, 1) != 1 || Otp_IsEqual(otp, otp1) == true || isValidInterval(MIN_INTERVAL_SEC - 1) == true) {
+  if (generateHmac(otp, "abc", NULL) || generateHmac(otp1, key, NULL) || Otp_New(&otp, NULL) ||
+      timeCode(NULL, 1) != 1 || Otp_IsEqual(otp, otp1) || isValidInterval(MIN_INTERVAL_SEC - 1) == true) {
     printf("testOtpCorners failed, function with invalid parameters retured true\n");
     pass = false;
   }
@@ -273,9 +273,6 @@ int32_t main()
   bool pass = true;
   int16_t i, len = 0;
   char *res;
-
-  Otp_TestMode = true;
-  OtpUser_TestMode = true;
 
   Utils_TestFuncS callFunc[] = { 
                                  { "testOtpCreationCorrectness", testOtpCreationCorrectness },

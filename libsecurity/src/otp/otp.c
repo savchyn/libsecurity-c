@@ -20,9 +20,10 @@
 //     encoded string.
 //  3. The option for resetting a HOTP counter to another value of counter is
 //  currently not implemented as it is defined as an extension in the RFC
-#include "libsecurity/otp/otp_int.h"
 
-bool Otp_TestMode = false;
+#include "libsecurity/otp/otp_int.h"
+#include "libsecurity/utils/crypto.h"
+
 
 void Otp_Print(FILE *ofp, const char *header, const OtpS *otp) {
   fprintf(ofp, "%s", header); // print the header no meter what is the value of th otp
@@ -38,7 +39,7 @@ STATIC bool isValidDigits(int16_t val) {
     snprintf(errStr, sizeof(errStr), "The OTP struct is not valid, the used number of digits %d is "
                                      "not valid in must be between %d-%d",
              val, MIN_NUM_OF_DIGITS, len);
-    assert(LIB_NAME "OTP structure, number of digits is not valid" && (false || Otp_TestMode));
+    assert(LIB_NAME "OTP structure, number of digits is not valid" && false);
     return false;
   }
   return true;
@@ -50,25 +51,14 @@ STATIC bool isValidDigest(int16_t val) {
     snprintf(errStr, sizeof(errStr), "The OTP struct is not valid, the used "
                                      "digest index %d is not in the range %d-%d",
              val, MIN_DIGEST_IDX, MAX_DIGEST_IDX);
-    assert(LIB_NAME "OTP structure, digest type is not valid" && (false || Otp_TestMode));
+    assert(LIB_NAME "OTP structure, digest type is not valid" && false);
     return false;
   }
   return true;
 }
 
 STATIC bool isValidOtpSecret(const unsigned char *secret) {
-  int16_t len = 0;
-
-  if (secret == NULL) return false;
-  len = strlen((const char *)secret);
-  if (len < MIN_SECRET_LEN || len > MAX_SECRET_LEN) {
-    snprintf(errStr, sizeof(errStr), "The secret key has an illegal length (%d), "
-                                     "the length must be between %d and %d",
-             len, MIN_SECRET_LEN, MAX_SECRET_LEN);
-    assert(LIB_NAME "OTP structure, secret is not valid" && (false || Otp_TestMode));
-    return false;
-  }
-  return true;
+    return NULL!=secret;
 }
 
 STATIC bool isValidOtp(const OtpS *otp) {
@@ -76,13 +66,13 @@ STATIC bool isValidOtp(const OtpS *otp) {
   if (isValidDigest(otp->DigestType) == false) return false;
   return true;
 }
-
+/*
 // set he secret string to be exactly crypto_auth_BYTES bytes
 STATIC bool setSecretStr(unsigned char fixedSecret[crypto_auth_BYTES + 1], const unsigned char *secret) {
   int16_t sLen = 0;
 
   if (secret == NULL) {
-    assert(LIB_NAME "secret string must not be NULL" && (false || Otp_TestMode));
+    assert(LIB_NAME "secret string must not be NULL" && false);
     return false;
   }
   sLen = strlen((const char *)secret);
@@ -92,18 +82,15 @@ STATIC bool setSecretStr(unsigned char fixedSecret[crypto_auth_BYTES + 1], const
   fixedSecret[crypto_auth_BYTES] = 0;
   return true;
 }
-
+*/
 // Generate Otp
 bool Otp_NewAdvance(OtpS **otp, const unsigned char *secret, int16_t numOfDigits, int16_t digestType) {
-  unsigned char *secretStr, fixedSecret[crypto_auth_BYTES + 1];
-
+  
   if (isValidOtpSecret(secret) == false) return false;
   if (isValidDigits(numOfDigits) == false) return false;
   if (isValidDigest(digestType) == false) return false;
-  setSecretStr(fixedSecret, secret);
   Utils_Malloc((void **)(otp), sizeof(OtpS));
-  Utils_CreateAndCopyUcString(&secretStr, fixedSecret, strlen((const char *)fixedSecret));
-  (*otp)->Secret = secretStr;
+  (*otp)->Secret = (unsigned char *)strdup((const void *)secret);
   (*otp)->Digits = numOfDigits;
   (*otp)->DigestType = digestType;
   return true;
@@ -126,12 +113,12 @@ void Otp_Free(OtpS *otp) {
 STATIC bool generateHmac(const OtpS *otp, char *key, char **val) {
   int16_t mask = 0xf, offset = 0, len = crypto_auth_BYTES, sLen = 0;
   int32_t code;
-  unsigned char digest[crypto_auth_BYTES], secret[crypto_auth_BYTES + 1];
+  unsigned char digest[crypto_auth_BYTES], * secret;
   char fmt[10];
 
   if (otp == NULL || key == NULL || otp->Secret == NULL) {
     snprintf(errStr, sizeof(errStr), "OTP: generateHmac, The OTP, secret and key must not be NULL");
-    assert(LIB_NAME "OTP structure, OTP secret and key strings must not be NULL" && (false || Otp_TestMode));
+    assert(LIB_NAME "OTP structure, OTP secret and key strings must not be NULL" && false);
     return false;
   }
   setSecretStr(secret, otp->Secret);
@@ -162,8 +149,8 @@ STATIC bool generateHmac(const OtpS *otp, char *key, char **val) {
 STATIC MicroSecTimeStamp timeCode(const TotpS *tp, MicroSecTimeStamp t) {
   if (tp == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error in timeCode, tp was not set, use timeCode of 1");
-    if (Otp_TestMode == false) fprintf(stderr, "%s\n", errStr);
-    assert(LIB_NAME "OTP TOTP structure must not be NULL" && (false || Otp_TestMode));
+    fprintf(stderr, "%s\n", errStr);
+    assert(LIB_NAME "OTP TOTP structure must not be NULL" && false);
     return 1;
   }
   if (tp->Interval == 0) {
@@ -223,7 +210,7 @@ STATIC bool isValidInterval(int16_t val) {
     snprintf(errStr, sizeof(errStr), "The TOTP struct is not valid, the interval "
                                      "%d must be between %d-%d seconds",
              val, MIN_INTERVAL_SEC, MAX_INTERVAL_SEC);
-    assert(LIB_NAME "OTP TOTP interval is not valid" && (false || Otp_TestMode));
+    assert(LIB_NAME "OTP TOTP interval is not valid" && false);
     return false;
   }
   return true;
@@ -231,7 +218,7 @@ STATIC bool isValidInterval(int16_t val) {
 
 STATIC bool isValidTotp(const TotpS *totp) {
   if (totp == NULL) {
-    assert(LIB_NAME "OTP TOTP structure must not be NULL" && (false || Otp_TestMode));
+    assert(LIB_NAME "OTP TOTP structure must not be NULL" && false);
     return false;
   }
   return (isValidInterval(totp->Interval));
@@ -349,7 +336,7 @@ void Otp_PrintHotp(FILE *ofp, const char *header, const HotpS *hotp) {
 
 STATIC void hotpStructToStr(const HotpS *hotp, char *str, int16_t maxStrLen) {
   if (hotp == NULL || str == NULL) {
-    assert(LIB_NAME "OTP HOTP structure and input string must not be NULL" && (false || Otp_TestMode));
+    assert(LIB_NAME "OTP HOTP structure and input string must not be NULL" && false);
   }
   snprintf(str, maxStrLen, HOTP_STRUCT_FMT, hotp->BaseOtp->Secret, hotp->BaseOtp->Digits, hotp->BaseOtp->DigestType, (long int)hotp->Count);
 }

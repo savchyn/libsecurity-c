@@ -1,4 +1,4 @@
-include ../build/common.mk
+include ../../build/common.mk
 
 EXTRA_CFLAGS =
 
@@ -22,14 +22,14 @@ $(OUTDIR)/sysLog.o: sysLog.c $(INCLUDE_PATH)/utils/sysLog_int.h $(INCLUDE_PATH)/
 $(OUTDIR)/crypto.o: crypto.c $(INCLUDE_PATH)/utils/crypto_int.h $(INCLUDE_PATH)/utils/crypto.h
 	$(CC) $(CFLAGS_COMMON) $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_COMMON) $(CFLAGS-C) $(INC) crypto.c -o $(OUTDIR)/crypto.o
 
-$(OUTDIR)/hwAdapters.o: hwAdapters.cpp $(INCLUDE_PATH)/utils/hwAdapters.h
-	$(CC) $(CFLAGS_COMMON) $(CPPFLAGS) $(EXTRA_CFLAGS) $(INC) hwAdapters.cpp -o $(OUTDIR)/hwAdapters.o
+$(OUTDIR)/networkAdapters.o: networkAdapters.c $(INCLUDE_PATH)/utils/networkAdapters_int.h $(INCLUDE_PATH)/utils/networkAdapters.h
+	$(CC) $(CFLAGS_COMMON) $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS-C) $(INC) networkAdapters.c -o $(OUTDIR)/networkAdapters.o
 
-$(OUTDIR)/fileAdapters.o: fileAdapters.cpp $(INCLUDE_PATH)/utils/fileAdapters.h
-	$(CC) $(CFLAGS_COMMON) $(CPPFLAGS) $(EXTRA_CFLAGS) $(INC) fileAdapters.cpp -o $(OUTDIR)/fileAdapters.o
+$(OUTDIR)/hwAdapters.o: hwAdapters.c $(INCLUDE_PATH)/utils/hwAdapters.h
+	$(CC) $(CFLAGS_COMMON) $(CFLAGS) $(EXTRA_CFLAGS)  $(CFLAGS-C) $(INC) hwAdapters.c -o $(OUTDIR)/hwAdapters.o
 
-$(OUTDIR)/networkAdapters.o: networkAdapters.cpp $(INCLUDE_PATH)/utils/networkAdapters_int.h $(INCLUDE_PATH)/utils/networkAdapters.h
-	$(CC) $(CFLAGS_COMMON) $(CPPFLAGS) $(EXTRA_CFLAGS) $(INC) networkAdapters.cpp -o $(OUTDIR)/networkAdapters.o
+$(OUTDIR)/fileAdapters.o: fileAdapters.c $(INCLUDE_PATH)/utils/fileAdapters.h
+	$(CC) $(CFLAGS_COMMON) $(CFLAGS) $(EXTRA_CFLAGS) $(INC) fileAdapters.c -o $(OUTDIR)/fileAdapters.o
 
 $(OUTDIR)/dtlsClient.o: dtlsClient.cpp $(INCLUDE_PATH)/utils/dtlsClient.h
 	$(CC) $(CFLAGS_COMMON) $(CPPFLAGS) $(EXTRA_CFLAGS) $(INC) dtlsClient.cpp -o $(OUTDIR)/dtlsClient.o

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "libsecurity/utils/crypto.h"
 #include "libsecurity/libsecurity/libsecurity_params.h"
 #include "libsecurity/utils/utils.h"
 #include "libsecurity/utils/fileAdapters.h"

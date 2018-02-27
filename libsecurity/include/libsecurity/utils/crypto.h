@@ -1,6 +1,19 @@
+#ifndef SECC_LIB_CRYPTO_H
+#define SECC_LIB_CRYPTO_H
+
 #pragma once
 
-#include "libsecurity/utils/utils.h"
+#ifndef STATIC
+#define STATIC static
+#endif
+
+#include <stdint.h>
+
+#define MIN_SECRET_LEN 16 // RFC 4226 R6, for OCRA examples it must be 8
+#define MAX_SECRET_LEN 255
+#define crypto_auth_BYTES 32
+#define crypto_stream_KEYBYTES 32
+
 
 #define AES_BLOCK_SIZE 16
 
@@ -16,7 +29,6 @@
 #define SHA256_LEN 32
 #define IV_LEN 16
 #define AES_OUTPUT_LEN 32
-#define crypto_auth_BYTES 32
 #define crypto_hash_BYTES 32
 
 #define ALIGN_FACTOR UTILS_STR_LEN_SIZE
@@ -43,8 +55,8 @@
 #define IV_LEN AES_BLOCK_SIZE
 
 #define SHA256_LEN 32
-#define crypto_auth_BYTES 32
 #define crypto_hash_BYTES 32
+
 
 #define ALIGN_FACTOR 0
 
@@ -57,13 +69,25 @@
 
 #if defined(NaCl_CRYPTO)
 
-#include "crypto_hash.h"
-#include "crypto_auth.h"
-#include "crypto_auth_hmacsha256.h"
-#include "randombytes.h"
-#include "crypto_stream.h"
-#include "crypto_hash_sha256.h"
-#include "crypto_hash_sha512.h"
+//#include "crypto_hash.h"
+//#include "crypto_auth.h"
+//#include "crypto_auth_hmacsha256.h"
+//#include "randombytes.h"
+//#include "crypto_stream.h"
+//#include "crypto_hash_sha256.h"
+//#include "crypto_hash_sha512.h"
+
+#ifndef crypto_stream_NONCEBYTES
+#define crypto_stream_NONCEBYTES 16
+#endif
+
+#ifndef crypto_hash_sha256_BYTES
+#define crypto_hash_sha256_BYTES 256
+#endif
+
+#ifndef crypto_hash_BYTES
+#define crypto_hash_BYTES 32
+#endif
 
 #define SHA256_LEN crypto_hash_sha256_BYTES
 #define IV_LEN crypto_stream_NONCEBYTES
@@ -84,9 +108,33 @@
 // IV string prefix is its length
 #define FULL_IV_LEN (IV_LEN + UTILS_STR_LEN_SIZE)
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#else
+//typedef int bool;
+#ifndef false
+#define false 0
+#endif
+    
+#ifndef true
+#define true (!false)
+#endif
+   
+#endif
+
 bool Crypto_CalcHmac(const unsigned char *key, int16_t keyLen, const unsigned char *input, size_t inputLen, unsigned char *output);
 int Crypto_EncryptDecryptAesCbc(int16_t mode, uint16_t len, const unsigned char *key, int16_t keyLen, unsigned char iv[IV_LEN],
                                  const unsigned char *input, unsigned char *output);
 bool Crypto_SHA256(const unsigned char *key, int16_t keyLen, unsigned char *output);
 bool Crypto_Random(unsigned char *random, int16_t len);
 int16_t Crypto_GetAesPadFactor(int16_t textLen);
+
+#ifdef __cplusplus
+}
+#endif
+    
+#endif //SECC_LIB_CRYPTO_H_UKRAINIAN_EDITION

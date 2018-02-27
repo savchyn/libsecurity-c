@@ -63,7 +63,7 @@ bool Utils_IsPrefixValid(const char *errStrPrefix, const char *prefix) {
 void Utils_AddPrefixToErrorStr(const char *str) {
   int16_t i = 0, len = 0, strLen = -1, errStrLen = -1;
 
-  if (str == NULL || errStr == NULL) return;
+  if (str == NULL) return;
   strLen = strlen(str);
   errStrLen = strlen(errStr);
   len = errStrLen + strLen;

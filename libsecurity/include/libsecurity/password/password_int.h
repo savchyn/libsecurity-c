@@ -46,8 +46,6 @@
     if (PWD_DEBUG) DEBUG(fmt, __VA_ARGS__);                                                                                                \
   }
 
-extern bool Pwd_TestMode;
-
 STATIC bool newUserPwdHandler(PwdS **newPwd, const unsigned char *sPwd, int16_t pwdLen, const unsigned char *sSalt, int16_t saltLen, PasswordStreangthType minPwdStrength, bool isPwdHashed);
 STATIC bool isPwdLengthValid(const unsigned char *caPwd);
 STATIC int16_t countOldHashedPassword();

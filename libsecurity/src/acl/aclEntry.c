@@ -1,14 +1,12 @@
 #include "libsecurity/acl/aclEntry_int.h"
 
-bool AclEntry_TestMode = false;
-
 // If the permission is valid and was not set yet, add it to the AclPermissionsS's permission list
 bool addPermissionToEntry(AclPermissionsS *aclEntry, const char *permission) {
   char *keyStr = NULL;
   htab *t = NULL;
 
   if (aclEntry == NULL) {
-    assert(LIB_NAME "Permission structure must not be NULL" && (false || AclEntry_TestMode));
+    assert(LIB_NAME "Permission structure must not be NULL" && false);
     return false;
   }
   if (checkPermissionValidity(permission) == false) return false;
@@ -25,7 +23,7 @@ bool addPermissionToEntry(AclPermissionsS *aclEntry, const char *permission) {
 bool checkPermissionValidity(const char *permission) {
   if (permission == NULL) {
     snprintf(errStr, sizeof(errStr), "Error: permission is not valid, its length must be larger than 0");
-    assert(LIB_NAME "Permission structure and permission string must not be NULL" && (false || AclEntry_TestMode));
+    assert(LIB_NAME "Permission structure and permission string must not be NULL" && false);
     return false;
   } else if (strlen(permission) == 0) {
     snprintf(errStr, sizeof(errStr), "Error: permission is not valid, its length is 0");
@@ -43,7 +41,7 @@ bool removePermissionFromEntry(const AclPermissionsS *aclEntry, const char *perm
   htab *t = NULL;
 
   if (aclEntry == NULL) {
-    assert(LIB_NAME "Permission structure must not be NULL" && (false || AclEntry_TestMode));
+    assert(LIB_NAME "Permission structure must not be NULL" && false);
     return false;
   }
   if (checkPermissionValidity(permission) == false) return false;
@@ -61,7 +59,7 @@ bool updateEntryPermissions(const AclPermissionsS *srcEntry, AclPermissionsS **d
 
   if (srcEntry == NULL || destEntry == NULL || *destEntry == NULL) {
     snprintf(errStr, sizeof(errStr), "Can't update permissions of NULL aclEntry");
-    assert(LIB_NAME "Permission structures must not be NULL" && (false || AclEntry_TestMode));
+    assert(LIB_NAME "Permission structures must not be NULL" && false);
     return false;
   }
   t = srcEntry->Permissions;
@@ -76,7 +74,7 @@ bool updateEntryPermissions(const AclPermissionsS *srcEntry, AclPermissionsS **d
 // Check if a given permission is in the AclPermissionsS's list
 bool checkPermissionOfEntry(const AclPermissionsS *aclPermissions, const char *permission) {
   if (aclPermissions == NULL) {
-    assert(LIB_NAME "Permission structures must not be NULL" && (false || AclEntry_TestMode));
+    assert(LIB_NAME "Permission structures must not be NULL" && false);
     return false;
   }
   if (checkPermissionValidity(permission) == false) return false;

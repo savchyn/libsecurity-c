@@ -1,3 +1,6 @@
+#ifndef SECC_LIB_FILEADAPTER_H
+#define SECC_LIB_FILEADAPTER_H
+
 #pragma once
 
 #ifdef __cplusplus
@@ -23,3 +26,4 @@ int16_t FileAdapters_Remove(const char *fileName);
 #else
 
 #endif
+#endif // SECC_LIB_FILEADAPTER_H

@@ -1,3 +1,5 @@
+#ifndef SECC_LIB_ENTRY_H
+#define SECC_LIB_ENTRY_H
 #pragma once
 
 #include "libsecurity/storage/secureStorage.h"
@@ -27,4 +29,4 @@ typedef struct {
 #define NUM_OF_LOAD_STORE_PROPERTIES 4
 extern const char *HandledModuleNameList[NUM_OF_LOAD_STORE_PROPERTIES];
 
-extern bool Entity_TestMode;
+#endif // SECC_LIB_ENTRY_H

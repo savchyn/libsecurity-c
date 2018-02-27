@@ -1,3 +1,5 @@
+#ifndef UDPSYSLOG_H
+#define UDPSYSLOG_H
 #ifdef MBED_OS
 #include "mbed-drivers/mbed.h"
 #include "EthernetInterface.h"
@@ -51,4 +53,5 @@ class UDPSyslog {
   int16_t close(void);
 };
 
-#endif
+#endif //MBED_OS
+#endif //UDPSYSLOG_H

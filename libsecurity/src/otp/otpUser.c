@@ -24,11 +24,9 @@
 
 #include "libsecurity/otp/otpUser_int.h"
 
-bool OtpUser_TestMode = false;
-
 STATIC void printThrottlingParameters(FILE *ofp, const throttelingS *t) {
   if (t == NULL) {
-    assert(LIB_NAME "OTP throttling structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP throttling structure must not be NULL" && false);
     return;
   }
   fprintf(ofp, "OTP data: Cliff: %d, Durattion Sec: %d, throttlingTimerHotp %" MY_PRId64 ", throttlingTimerHotp %" MY_PRId64 ","
@@ -54,7 +52,7 @@ void OtpUser_PrintUser(FILE *ofp, const char *header, const void *u) {
 // Convert the user struct to string to be stored using the secure storage
 STATIC void otpUserStructToStr(const OtpUserS *user, char *str, int16_t maxStrLen) {
   if (user == NULL || str == NULL) {
-    assert(LIB_NAME "OTP user structure and input string must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure and input string must not be NULL" && false);
   }
   snprintf(str, maxStrLen, OTP_USER_STRUCT_FMT, user->BaseHotp->BaseOtp->Secret, (int)user->Blocked);
 }
@@ -62,7 +60,7 @@ STATIC void otpUserStructToStr(const OtpUserS *user, char *str, int16_t maxStrLe
 // Convert the throttling struct to string to be stored using the secure storage
 STATIC void throttlingStructToStr(const throttelingS *thr, char *str, int16_t maxStrLen) {
   if (thr == NULL || str == NULL) {
-    assert(LIB_NAME "OTP throtling structure and input string must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP throtling structure and input string must not be NULL" && false);
     return;
   }
   snprintf(str, maxStrLen, THROTTLING_STRUCT_PRINT_FMT, (int32_t)thr->Cliff, (int32_t)thr->DurationSec, (int32_t)(thr->throttlingTimerHotp >> 32), (uint32_t)(thr->throttlingTimerHotp),
@@ -200,22 +198,12 @@ bool OtpUser_GetBlockState(const OtpUserS *u) {
   return u->Blocked;
 }
 
-#ifdef STATIC_F // for testing get the automatic unblock timer
-STATIC MicroSecTimeStamp getAutoUnBlockedTimer(OtpUserS *u) {
-  if (u == NULL) {
-    snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
-    return DEFAULT_UNBLOCK_SEC;
-  }
-  return u->Throttle->unblockTimer;
-}
-#endif
 
 // set the automatic unblock timer
 STATIC bool initAutoUnblockTimer(OtpUserS *u) {
   if (u == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (u->Throttle->AutoUnblockSec != MANUEL_UNBLOCK_SEC) {
@@ -239,7 +227,7 @@ bool OtpUser_SetBlockedState(OtpUserS *u, bool val) {
 STATIC bool checkAndUpdateUnBlockStateHelper(OtpUserS *u, int16_t timeOffset) {
   if (u == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (OtpUser_GetBlockState(u) && u->Throttle->AutoUnblockSec != MANUEL_UNBLOCK_SEC) {
@@ -261,7 +249,7 @@ STATIC bool findHotpCodeMatch(OtpUserS *u, const char *code, int16_t size, bool 
 
   if (u == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (code == NULL) {
@@ -300,7 +288,7 @@ STATIC bool findTotpCodeMatch(OtpUserS *u, const char *code, int16_t timeOffsetS
   *found = false;
   if (u == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   offset = timeOffsetSec;
@@ -347,7 +335,7 @@ STATIC bool handleErrorCode(OtpUserS *u, OtpType otpType) {
 
   if (u == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (u->Throttle->consErrorCounter < u->Throttle->Cliff) {
@@ -374,7 +362,7 @@ STATIC bool handleOkCode(OtpUserS *u, const char *code, OtpType otpType, int16_t
 
   if (u == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (code == NULL) return false;
@@ -400,7 +388,7 @@ STATIC bool handleOkCode(OtpUserS *u, const char *code, OtpType otpType, int16_t
 
 STATIC bool isUserBlockedHelper(OtpUserS *user, int16_t offsetTime) {
   if (user == NULL) {
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (checkAndUpdateUnBlockStateHelper(user, offsetTime) == false) return false;
@@ -414,7 +402,7 @@ STATIC bool canCheckCode(OtpUserS *user, OtpType otpType, int16_t timeFactorSec,
 
   *canCheck = false;
   if (user == NULL) {
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (otpType == HOTP_TYPE)
@@ -445,7 +433,7 @@ STATIC bool verifyUserCodeHelper(OtpUserS *u, const char *code, OtpType otpType,
 
   if (u == NULL) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
-    assert(LIB_NAME "OTP user structure must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
   if (code == NULL) return false;
@@ -504,8 +492,8 @@ bool OtpUserTest_IsEqual(const void *u1, const void *u2) {
   user2 = (const OtpUserS *)u2;
   debug_print1("OTPUser: is equal: %d %d %d %d\n", user1->Blocked == user2->Blocked, Otp_IsEqualTotp(user1->BaseTotp, user2->BaseTotp),
                Otp_IsEqualHotp(user1->BaseHotp, user2->BaseHotp), OtpUserTest_IsEqualThrottling(user1->Throttle, user2->Throttle));
-  return (user1->Blocked == user2->Blocked && Otp_IsEqualTotp(user1->BaseTotp, user2->BaseTotp) == true &&
-          Otp_IsEqualHotp(user1->BaseHotp, user2->BaseHotp) == true && OtpUserTest_IsEqualThrottling(user1->Throttle, user2->Throttle) == true);
+  return (user1->Blocked == user2->Blocked && Otp_IsEqualTotp(user1->BaseTotp, user2->BaseTotp) &&
+          Otp_IsEqualHotp(user1->BaseHotp, user2->BaseHotp) && OtpUserTest_IsEqualThrottling(user1->Throttle, user2->Throttle) == true);
 }
 
 bool OtpUser_Store(const void *u, const SecureStorageS *storage, const char *prefix) {
@@ -558,7 +546,7 @@ STATIC bool updateThrottleFromStorage(void **user, char *val) {
   char lastTotpCode[MAX_OTP_USER_STR_LEN];
 
   if (val == NULL) {
-    assert(LIB_NAME "val string must not be NULL" && (false || OtpUser_TestMode));
+    assert(LIB_NAME "val string must not be NULL" && false);
     return false;
   }
   sscanf(val, THROTTLING_STRUCT_SCAN_FMT, &cliffLen, &durationSec, &throttlingTimerHotp0, &throttlingTimerHotp1, 

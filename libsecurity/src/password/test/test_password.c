@@ -44,7 +44,7 @@ STATIC bool testCheckValidPasswordLen() {
              caPwd, pwdLen, errStr);
       pass = false;
       break;
-    } else if (ret == true && (pwdLen < MIN_PASSWORD_LENGTH || pwdLen > MAX_PASSWORD_LENGTH)) {
+    } else if (ret && (pwdLen < MIN_PASSWORD_LENGTH || pwdLen > MAX_PASSWORD_LENGTH)) {
       printf("testCheckValidPasswordLen fail: ilegal password length %d, '%s' was accepted\n", pwdLen, caPwd);
       pass = false;
       break;
@@ -77,7 +77,7 @@ STATIC bool testCheckUnusabledOldPasswords() {
     idx = i % DEFAULT_NUMBER_OF_OLD_PASSWORDS;
     snprintf((char *)sPwd, sizeof(sPwd), fmt, DEFAULT_PASSWORD, idx);
     ret = Pwd_IsPwdValid(p, sPwd);
-    if (ret == true && idx < DEFAULT_NUMBER_OF_OLD_PASSWORDS - unused) {
+    if (ret && idx < DEFAULT_NUMBER_OF_OLD_PASSWORDS - unused) {
       printf("testCheckUnusabledOldPasswords fail: password '%s' was already "
              "used, but it was accepted\n",
              sPwd);
@@ -220,7 +220,7 @@ STATIC bool testVerifyPwd() {
     p->Expiration = (MicroSecTimeStamp) Utils_GetFutureTimeuSec(i);
     ret = Pwd_VerifyPassword(p, DEFAULT_PASSWORD);
     // i=0 is a race conditioon
-    if (ret == true && i < 0) {
+    if (ret && i < 0) {
       printf("testVerifyPwd failed: password '%s' was approved but it is not valid (expired %" PRId64 ", time now %" PRId64 ")\n",
              DEFAULT_PASSWORD, (MicroSecTimeStamp)p->Expiration, (MicroSecTimeStamp)Utils_GetTimeNowInuSec());
       pass = false;
@@ -282,7 +282,7 @@ STATIC bool testVerifyPwdBlocked() {
       printf("testVerifyPwdBlocked failed: password was blocked after %d attempts, it should be blocked only after %d wrong attempts\n",
              i, MAX_PWD_ATEMPTS);
       pass = false;
-    } else if (ret == true && i > MAX_PWD_ATEMPTS) {
+    } else if (ret && i > MAX_PWD_ATEMPTS) {
       printf("testVerifyPwdBlocked failed: password was not blocked after %d wrong attempts, it should be blocked after %d wrong attempts\n",
              i, MAX_PWD_ATEMPTS);
       pass = false;
@@ -423,8 +423,8 @@ STATIC bool testPwdCorners() {
   char *tmp;
   unsigned char *tmpP = NULL;
 
-  if (Pwd_IsPwdValid(p, NULL) == true || Utils_GenerateNewValidPassword(NULL, 0) == true ||
-      Utils_GenerateNewValidPassword(NULL, 0) == true || Pwd_Load(NULL, NULL, "A", &tmp) == true) {
+  if (Pwd_IsPwdValid(p, NULL) || Utils_GenerateNewValidPassword(NULL, 0) ||
+      Utils_GenerateNewValidPassword(NULL, 0) || Pwd_Load(NULL, NULL, "A", &tmp) == true) {
     printf("testPwdCorners failed: Call to function with NULL returned true\n");
     pass = false;
   }
@@ -432,16 +432,16 @@ STATIC bool testPwdCorners() {
   Utils_Free(p->caSalt);
   Utils_CreateAndCopyString(&tmp, "1", 1);
   p->caSalt = (unsigned char *)tmp;
-  if (isPwdValidHandler(p, DEFAULT_PASSWORD, false) == true || updatePasswordHandler(p, NULL, DEFAULT_PASSWORD, 1, true, STRENGTH_POOR, false) == true) {
+  if (isPwdValidHandler(p, DEFAULT_PASSWORD, false) || updatePasswordHandler(p, NULL, DEFAULT_PASSWORD, 1, true, STRENGTH_POOR, false) == true) {
     printf("testPwdCorners failed: Call to function with wrong parameters returned true\n");
     pass = false;
   }
   Pwd_FreeUserPwd(p);
   Pwd_NewUserPwd(&p, DEFAULT_PASSWORD, DEFAULT_SALT, STRENGTH_SUFFICIENT);
-  if (generateSaltedHashPwd(NULL, 8, DEFAULT_SALT, 10, &tmpP) == true || newUserPwdHandler(&p, NULL, 1, DEFAULT_SALT, 8, STRENGTH_NIL, false) == true ||
-      newUserPwdHandler(&p, DEFAULT_PASSWORD, 10, DEFAULT_SALT, 8, STRENGTH_NIL, true) == true ||
-      newUserPwdHandler(&p, p->hashPassword, 8, DEFAULT_SALT, 8, STRENGTH_NIL, true) == true ||
-      updatePasswordHandler(p, DEFAULT_PASSWORD, DEFAULT_SALT, 1, true, STRENGTH_POOR, true) == true ||
+  if (generateSaltedHashPwd(NULL, 8, DEFAULT_SALT, 10, &tmpP) || newUserPwdHandler(&p, NULL, 1, DEFAULT_SALT, 8, STRENGTH_NIL, false) ||
+      newUserPwdHandler(&p, DEFAULT_PASSWORD, 10, DEFAULT_SALT, 8, STRENGTH_NIL, true) ||
+      newUserPwdHandler(&p, p->hashPassword, 8, DEFAULT_SALT, 8, STRENGTH_NIL, true) ||
+      updatePasswordHandler(p, DEFAULT_PASSWORD, DEFAULT_SALT, 1, true, STRENGTH_POOR, true) ||
       updatePasswordHandler(p, DEFAULT_SALT, DEFAULT_PASSWORD, 1, true, STRENGTH_POOR, false) == true) {
     printf("testPwdCorners failed: Call to function with wrong parameters returned true\n");
     pass = false;
@@ -457,11 +457,9 @@ int main()
 #endif
 {
   bool pass = true;
-  Pwd_TestMode = true;
   int16_t i = 0, len = 0;
   char *res = NULL;
 
-  Pwd_TestMode = true;
   Utils_TestFuncS callFunc[] = { 
                                  { "testCheckValidPasswordLen", testCheckValidPasswordLen },
                                  { "testCheckUnusabledOldPasswords", testCheckUnusabledOldPasswords },

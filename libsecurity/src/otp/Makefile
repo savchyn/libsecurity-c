@@ -1,4 +1,4 @@
-include ../build/common.mk
+include ../../build/common.mk
 
 all: $(LIBDIR)/libotp.a
 

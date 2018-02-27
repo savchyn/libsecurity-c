@@ -1,3 +1,5 @@
+#ifndef SECC_LIB_DTLS_CLIENT_INT_H
+#define SECC_LIB_DTLS_CLIENT_INT_H
 #pragma once
 
 #include "libsecurity/utils/dtlsClient.h"
@@ -14,3 +16,4 @@ const uint8_t SERVER_CERT[] = "-----BEGIN CERTIFICATE-----\r\n"
                               "AwIDSAAwRQIhAPAonEAkwixlJiyYRQQWpXtkMZax+VlEiS201BG0PpAzAiBh2RsD\r\n"
                               "NxLKWwf4O7D6JasGBYf9+ZLwl0iaRjTjytO+Kw==\r\n"
                               "-----END CERTIFICATE-----\r\n";
+#endif // SECC_LIB_DTLS_CLIENT_INT_H

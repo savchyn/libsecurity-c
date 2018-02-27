@@ -48,8 +48,6 @@
 
 #include "libsecurity/acl/acl_int.h"
 
-bool Acl_TestMode = false;
-
 void Acl_Print(FILE *ofp, const char *prefix, const void *a) {
   const AclS *acl = NULL;
   AclPermissionsS *aclEntry = NULL;
@@ -173,7 +171,7 @@ bool Acl_RemoveEntry(void *a, const char *entryName) {
 
 STATIC bool isItAllEntry(const char *name) {
   if (name == NULL) {
-    assert(LIB_NAME "Name string must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "Name string must not be NULL" && false);
     return false;
   }
   return (name != NULL && strcmp(name, ALL_ACL_NAME) == 0);
@@ -184,7 +182,7 @@ STATIC bool getEntry(const AclS *acl, const char *name, AclPermissionsS **aclEnt
   htab *t = NULL;
 
   if (acl == NULL || name == NULL) {
-    assert(LIB_NAME "Acl structure and name string must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "Acl structure and name string must not be NULL" && false);
     return false;
   }
   t = acl->Entries;
@@ -199,12 +197,12 @@ STATIC bool addEntry(AclS *acl, const char *entityName, AclPermissionsS **aclEnt
   char *nameStr = NULL;
 
   if (acl == NULL) {
-    assert(LIB_NAME "Acl structure must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "Acl structure must not be NULL" && false);
     return false;
   }
   if (entityName == NULL) {
     snprintf(errStr, sizeof(errStr), "can't add NULL entity name to ACL");
-    assert(LIB_NAME "Entity name string must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "Entity name string must not be NULL" && false);
     return false;
   }
   if (Acl_NewPermissionsList(entityName, aclEntry) == false) {
@@ -224,7 +222,7 @@ STATIC bool addPermissionToResource(AclS *acl, const char *entityName, const cha
 
   if (acl == NULL || entityName == NULL || permission == NULL) {
     snprintf(errStr, sizeof(errStr), "Acl, entity name, Acl and permission must not be NULL");
-    assert(LIB_NAME "Acl structure, entityName string and permission string must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "Acl structure, entityName string and permission string must not be NULL" && false);
     return false;
   }
   if (getEntry(acl, entityName, &aclEntry) == false) {
@@ -244,7 +242,7 @@ STATIC bool addPermissionToResourceHandler(const EntityManager *entityManager, c
 
   if (resourceName == NULL || entityName == NULL || permission == NULL || entityManager == NULL) {
     snprintf(errStr, sizeof(errStr), "Acl, entity name, entityManager and permission must not be NULL");
-    assert(LIB_NAME "EntityManager structure, resourceName, entityName and permission strings must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "EntityManager structure, resourceName, entityName and permission strings must not be NULL" && false);
     return false;
   }
   if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl)) == false) {
@@ -404,7 +402,7 @@ STATIC bool storeEntry(const void *a, const SecureStorageS *storage, const char 
   const AclPermissionsS *aclEntry = NULL;
 
   if (a == NULL || storage == NULL || modulePrefix == NULL) {
-    assert(LIB_NAME "Acl permission and storage structures as well as module prefix strings must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "Acl permission and storage structures as well as module prefix strings must not be NULL" && false);
     return false;
   }
   if (Utils_IsPrefixValid("storeEntry", modulePrefix) == false) return false;
@@ -476,11 +474,11 @@ STATIC bool loadEntry(AclS *acl, const SecureStorageS *storage, const char *modu
 
   if (storage == NULL) {
     snprintf(errStr, sizeof(errStr), "Storage must be intiated first");
-    assert(LIB_NAME "Storage structure must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "Storage structure must not be NULL" && false);
     return false;
   }
   if (Utils_IsPrefixValid("loadEntry", modulePrefix) == false) {
-    assert(LIB_NAME "Module prefix strings must be valid" && (false || Acl_TestMode));
+    assert(LIB_NAME "Module prefix strings must be valid" && false);
     return false;
   }
 
@@ -597,7 +595,7 @@ STATIC bool isEqualEntry(const void *e1, const void *e2) {
   htab *p1 = NULL;
 
   if (e1 == NULL || e2 == NULL) {
-    assert(LIB_NAME "AclPermission structures must not be NULL" && (false || Acl_TestMode));
+    assert(LIB_NAME "AclPermission structures must not be NULL" && false);
     return false;
   }
   aclEntry1 = (const AclPermissionsS *)e1;

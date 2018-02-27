@@ -60,15 +60,11 @@
     if (OTP_USER_DEBUG) DEBUG(fmt, __VA_ARGS__);                                                                                           \
   }
 
-extern bool OtpUser_TestMode;
 
 STATIC void printThrottlingParameters(FILE *ofp, const throttelingS *t);
 STATIC void otpUserStructToStr(const OtpUserS *user, char *str, int16_t maxStrLen);
 STATIC void throttlingStructToStr(const throttelingS *thr, char *str, int16_t maxStrLen);
 STATIC bool verifyUserCodeHelper(OtpUserS *u, const char *code, OtpType otpType, int16_t timeFactorSec);
-#ifdef STATIC_F // for testing
-STATIC MicroSecTimeStamp getAutoUnBlockedTimer(OtpUserS *u);
-#endif
 STATIC void newThrottle(throttelingS **thr, int16_t cliffLen, int16_t durationSec, int16_t autoUnblockSec, int16_t hotpWindowSize, int16_t totpWindowSize);
 STATIC void freeThrottle(throttelingS *thr);
 STATIC bool initAutoUnblockTimer(OtpUserS *u);

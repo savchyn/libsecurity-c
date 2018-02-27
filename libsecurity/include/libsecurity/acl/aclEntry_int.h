@@ -1,3 +1,6 @@
+#ifndef SECC_LIB_ACIENTRY_INT_H
+#define SECC_LIB_ACIENTRY_INT_H
+
 #pragma once
 
 #include <stdio.h>
@@ -21,8 +24,6 @@
 
 #define MAX_STORE_LOAD_LEN 50
 
-extern bool AclEntry_TestMode;
-
 #define PERMISSION_VAL "set"
 
 #define PERMISSION_PREFIX "p-"
@@ -39,3 +40,4 @@ bool checkPermissionValidity(const char *permission);
 bool removePermissionFromEntry(const AclPermissionsS *aclEntry, const char *key);
 bool checkPermissionOfEntry(const AclPermissionsS *aclEntry, const char *permission);
 bool updateEntryPermissions(const AclPermissionsS *srcEntry, AclPermissionsS **destEntry);
+#endif //SECC_LIB_ACIENTRY_INT_H

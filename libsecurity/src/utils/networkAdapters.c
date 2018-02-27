@@ -1,4 +1,16 @@
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <net/if_arp.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+
+//#include<hw/nicinfo.h>
+//#include<sys/dcmd_io-net.h>
+//#include <sys/socket.h>
+
 #include "libsecurity/utils/networkAdapters_int.h"
+
 #include "libsecurity/utils/UDPSyslog.h"
 #include "libsecurity/utils/dtlsClient.h"
 
@@ -6,7 +18,6 @@
 UDPSyslog *UDPSyslog::_pInstance = NULL;
 #endif
 
-extern "C" {
 
 #include "libsecurity/utils/utils.h"
 #include "libsecurity/utils/dtlsClient.h"
@@ -53,11 +64,22 @@ bool NetworkAdapters_SetIpToHostName(char hostName[MAX_HOST_NAME]) {
   return found;
 }
 
+
 // Get the MAC address: it's a unique id for the IoT
 bool NetworkAdapters_GetMacAddress(unsigned char mac[MAC_ADDRESS_LEN]) {
-  int16_t i = 0;
-  struct ifreq s;
-  int16_t fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+/* QNX
+    struct ifreq s;
+    int16_t fd;
+    fd=open("/dev/io-net/en0",O_RDONLY);
+    devctl(fd, DCMD_IO_NET_GET_CONFIG, &s,sizeof(s), NULL);
+    for (i = 0; i < MAC_ADDRESS_LEN; ++i) {
+        mac[i] = (unsigned char)s.ifr_addr.sa_data[i];
+    }
+    
+ */
+    /*
+    int16_t i = 0;
+    fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
 
   strcpy(s.ifr_name, "eth0");
   if (ioctl(fd, SIOCGIFHWADDR, &s) == 0) {
@@ -66,6 +88,7 @@ bool NetworkAdapters_GetMacAddress(unsigned char mac[MAC_ADDRESS_LEN]) {
     }
     return true;
   }
+     */
   return false;
 }
 
@@ -263,4 +286,3 @@ bool NetworkAdapters_CloseLog(int16_t serverId) {
 }
 
 #endif
-}

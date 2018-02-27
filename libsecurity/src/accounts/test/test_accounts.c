@@ -27,7 +27,7 @@ STATIC bool testNewUser() {
       strcpy(salt, "");
       for (saltLen = 0; saltLen < MAX_SALT_LEN + 10; saltLen += 4) {
         ret = Accounts_NewUser(&user, privilege[j], (unsigned char *)pwd, (unsigned char *)salt, STRENGTH_SUFFICIENT);
-        if (ret == true && (j == 0 || pwdLen < MIN_PASSWORD_LENGTH || pwdLen > MAX_PASSWORD_LENGTH || saltLen < MIN_SALT_LEN || saltLen > MAX_SALT_LEN)) {
+        if (ret && (j == 0 || pwdLen < MIN_PASSWORD_LENGTH || pwdLen > MAX_PASSWORD_LENGTH || saltLen < MIN_SALT_LEN || saltLen > MAX_SALT_LEN)) {
           printf("testNewUser fail: AM was created but the parameters are not "
                  "legal: privilege '%s' pwdLen %d, saltLen %d\n", privilege[j], pwdLen, saltLen);
           pass = false;
@@ -59,7 +59,7 @@ STATIC bool testSetUserPrivilege() {
   Accounts_NewUser(&user, SUPER_USER_PERMISSION_STR, DEFAULT_PASSWORD, (unsigned char *)"", STRENGTH_SUFFICIENT);
   for (i = 0; i < privelegeLen; i++) {
     ret = Accounts_SetUserPrivilege(user, privilege[i]);
-    if (ret == true && (i == 0 || i == privelegeLen - 1)) {
+    if (ret && (i == 0 || i == privelegeLen - 1)) {
       printf("testSetUserPrivilege fail: ilegal user privilege '%s' was setted\n", privilege[i]);
       pass = false;
     } else if (ret == false && i > 0 && i < privelegeLen - 1) {
@@ -200,11 +200,9 @@ int main()
 #endif
 {
   bool pass = true;
-  Accounts_TestMode = true;
   int16_t i = 0, len = 0;
   char *res = NULL;
 
-  Accounts_TestMode = true;
   Utils_TestFuncS callFunc[] = { { "testNewUser", testNewUser },
                                  { "testSetUserPrivilege", testSetUserPrivilege },
                                  { "testUpdateLoginPwd", testUpdateLoginPwd },

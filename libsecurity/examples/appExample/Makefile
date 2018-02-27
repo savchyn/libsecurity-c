@@ -18,4 +18,4 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(TARGET) $(LDFLAGS) $(OBJECTS) $(RANDOM_BYTES) -o $@ $(LIB) -lm -lutils -lmyhash $(LIB_SEC) $(MBEDTLS_LIB)
 
 .c.o:
-	$(CC) $(INTERNAL_LOG) $(TARGET) $(CRYPTO_TYPE) $(CFLAGS) $(STATIC_F) $(INC) $< -o $@
+	$(CC) $(INTERNAL_LOG) $(TARGET) $(CRYPTO_TYPE) $(CFLAGS)  $(INC) $< -o $@

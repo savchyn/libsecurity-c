@@ -1,3 +1,5 @@
+#ifndef SECC_LIB_ACI_INT_H
+#define SECC_LIB_ACI_INT_H
 #pragma once
 
 #include <stdio.h>
@@ -20,7 +22,6 @@
 
 #define MAX_NUMBER_OF_USERS_IN_ACL 50
 
-extern bool Acl_TestMode;
 
 STATIC bool addPermissionToResource(AclS *acl, const char *entityName, const char *permission);
 STATIC bool addPermissionToResourceHandler(const EntityManager *entityManager, const char *resourceName, const char *entityName, const char *permission);
@@ -32,3 +33,4 @@ STATIC bool storeEntry(const void *a, const SecureStorageS *storage, const char 
 STATIC bool loadEntry(AclS *a, const SecureStorageS *storage, const char *prefix);
 
 STATIC bool isEqualEntry(const void *e1, const void *e2);
+#endif //SECC_LIB_ACI_INT_H

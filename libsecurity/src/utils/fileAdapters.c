@@ -9,7 +9,7 @@
 #include "mbed-drivers/mbed.h"
 #include "fileSystem/SDFileSystem/SDFileSystem.h"
 
-extern "C" {
+//extern "C" {
 
 SDFileSystem sd(PTE3, PTE1, PTE2, PTE4, DRIVE_PREFIX); // MOSI, MISO, SCK, CS
 
@@ -31,11 +31,10 @@ int16_t FileAdapters_Remove(const char *fileName) {
   remove(filePath);
   return 0;
 }
-}
 
 #else
 
-extern "C" {
+//extern "C" {
 
 
 #include <stdio.h>
@@ -59,6 +58,6 @@ int16_t FileAdapters_Remove(const char *fileName) {
   snprintf(str, sizeof(str), "./%s", fileName);
   return (int16_t)Utils_RemoveFile(str);
 }
-}
+
 
 #endif

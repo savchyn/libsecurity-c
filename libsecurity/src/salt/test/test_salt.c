@@ -57,14 +57,14 @@ STATIC bool testInitRefSalt() {
           saltOk = isValidSalt(nSalt);
           Utils_Free(nSalt);
           ret = Salt_NewSalt(&s, (unsigned char *)sPtr, (unsigned char *)saltPtr);
-          if (ret == true && (secretOk == false || saltOk == false)) {
+          if (ret && (secretOk == false || saltOk == false)) {
             printf("testInitRefSalt fail: Initialize failed: initialize was "
                    "done successfully but "
                    "the input is invalid\n");
             Salt_Print(stdout, "testInitRefSalt", s);
             pass = false;
           }
-          if (ret == false && secretOk == true && saltOk == true) {
+          if (ret == false && secretOk && saltOk == true) {
             printf("testInitRefSalt fail: Initialize salt failed but secret "
                    "'%s' and salt '%s' are "
                    "valid, error %s\n",
@@ -80,13 +80,13 @@ STATIC bool testInitRefSalt() {
             }
             olOk = isValidOutputLen(ol);
             iterOk = isValidNumOfIterations(iter);
-            if (ret == false && olOk == true && iterOk == true) {
+            if (ret == false && olOk && iterOk == true) {
               printf("testInitRefSalt fail: Initialize salt faild but output "
                      "length %d and "
                      "iterations %d are valid\n",
                      ol, iter);
               pass = false;
-            } else if (ret == true && (olOk == false || iterOk == false)) {
+            } else if (ret && (olOk == false || iterOk == false)) {
               printf("testInitRefSalt fail: Initialize failed: initialize was "
                      "done successfully "
                      "but the input is invalid\n");
@@ -247,7 +247,7 @@ STATIC bool testRandomSalt() {
 
   for (i = -10; i < MAX_SALT_LEN + 30; i += 10) {
     ret = getRandomSalt(i, &newSalt);
-    if (ret == true && (i < MIN_SALT_LEN || i > MAX_SALT_LEN)) {
+    if (ret && (i < MIN_SALT_LEN || i > MAX_SALT_LEN)) {
       printf("testRandomSalt failed: get random salt: '%s' for ilegal size of: "
              "%d\n",
              newSalt, i);
@@ -285,11 +285,11 @@ STATIC bool testPwdGeneration() {
     printf("testPwdGeneration failed: pwd1 and pwd2 must be the same\n");
     pass = false;
   }
-  if (Utils_CharArrayCmp(resPwd[0], resPwd[2]) == true || Utils_CharArrayCmp(resPwd[0], resPwd[3]) == true) {
+  if (Utils_CharArrayCmp(resPwd[0], resPwd[2]) || Utils_CharArrayCmp(resPwd[0], resPwd[3]) == true) {
     printf("testPwdGeneration failed: pwd1 and pwd3, pwd4 must not be the same\n");
     pass = false;
   }
-  if (Salt_GenerateCharArraySaltedPassword(NULL, salt[0], &pwd[0]) == true || Salt_GenerateSaltedPassword(NULL, salt[0], false, 1, &(pwd[0])) == true ||
+  if (Salt_GenerateCharArraySaltedPassword(NULL, salt[0], &pwd[0]) || Salt_GenerateSaltedPassword(NULL, salt[0], false, 1, &(pwd[0])) ||
       Salt_GenerateSaltedPassword(pwd[0], NULL, false, 1, &(pwd[0])) == true) {
     printf("testPwdGeneration failed: fanction with NULL parameters return true\n");
     pass = false;
@@ -322,7 +322,6 @@ int main()
   bool pass = true;
   int16_t i = 0, len = 0;
   char *res = NULL;
-  Salt_TestMode = true;
 
   Utils_TestFuncS callFunc[] = { { "testInitRefSalt", testInitRefSalt },
                                  { "testSaltParamesChanged", testSaltParamesChanged },

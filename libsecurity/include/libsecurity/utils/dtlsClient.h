@@ -1,11 +1,14 @@
+#ifndef SECC_LIB_DTLS_CLIENT_H
+#define SECC_LIB_DTLS_CLIENT_H
+
 #pragma once
 
-#include <stdint.h>
 #include <string.h>
 
 #include "libsecurity/utils/utils.h"
-
-#ifndef OPENSSL_CRYPTO // ravid fix it
+//#ifdef MBEDTLS_CRYPTO
+ 
+//#ifndef OPENSSL_CRYPTO // ravid fix it
 
 #include "mbedtls/config.h"
 #include "mbedtls/platform.h"
@@ -17,7 +20,7 @@
 #include "mbedtls/error.h"
 #include "mbedtls/timing.h"
 
-#endif
+//#endif
 
 
 #define SERVER_PORT_LEN 10
@@ -47,3 +50,5 @@ bool DTLS_GetRandom(unsigned char *random, int16_t len);
 #ifdef __cplusplus
 }
 #endif
+
+#endif //SECC_LIB_DTLS_CLIENT_H

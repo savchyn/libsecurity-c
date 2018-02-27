@@ -1,3 +1,5 @@
+#ifndef SECC_LIB_ACI_H
+#define SECC_LIB_ACI_H
 #pragma once
 
 #include "libsecurity/entity/entity.h"
@@ -28,3 +30,4 @@ bool Acl_WhoUseAPermission(const EntityManager *entityManager, const char *permi
 bool Acl_Store(const void *u, const SecureStorageS *storage, const char *prefix);
 bool Acl_Load(void **u, const SecureStorageS *storage, const char *prefix, char **retName);
 bool Acl_IsEqual(const void *entity1, const void *entity2);
+#endif //SECC_LIB_ACI_H

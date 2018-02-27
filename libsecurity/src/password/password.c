@@ -18,7 +18,6 @@
 
 #include "libsecurity/password/password_int.h"
 
-bool Pwd_TestMode = false;
 
 void Pwd_Print(FILE *ofp, const char *header, const void *pwd) {
   int16_t cnt = 0;
@@ -68,7 +67,7 @@ STATIC bool isPwdValidHandler(const PwdS *pwd, const unsigned char *sPwd, bool i
 
   if (pwd == NULL || sPwd == NULL) {
     snprintf(errStr, sizeof(errStr), "Password structure and new password must not be null");
-    assert(LIB_NAME "Password structure and new password must not be NULL" && (false || Pwd_TestMode));
+    assert(LIB_NAME "Password structure and new password must not be NULL" && false);
     return false;
   }
   if (Utils_GetCharArrayLen(pwd->caSalt, &saltLen, MIN_SALT_LEN, MAX_SALT_LEN) == false) {
@@ -117,7 +116,7 @@ STATIC bool generateSaltedHashPwd(const unsigned char *sPwd, int16_t pwdLen, con
                                      "pwd len %d, salt ('%s', salt len %d must "
                                      "be legal",
              sPwd, pwdLen, sSalt, saltLen);
-    assert(LIB_NAME "Password (and pwd length), salt (and salt lebgth) must be valid" && (false || Pwd_TestMode));
+    assert(LIB_NAME "Password (and pwd length), salt (and salt lebgth) must be valid" && false);
     return false;
   }
   if (Utils_GenerateCharArray(sPwd, pwdLen, &caPwd) == false) {
@@ -152,7 +151,7 @@ STATIC bool newUserPwdHandler(PwdS **newPwd, const unsigned char *sPwd, int16_t 
   if (sPwd == NULL || sSalt == NULL || pwdLen < 0 || saltLen < 0) {
     snprintf(errStr, sizeof(errStr), "newUserPwdHandler: password ('%s'), pwd len %d, salt ('%s'), salt len %d must be legal", sPwd, pwdLen,
              sSalt, saltLen);
-    assert(LIB_NAME "Password (and pwd length), salt (and salt lebgth) must be valid" && (false || Pwd_TestMode));
+    assert(LIB_NAME "Password (and pwd length), salt (and salt lebgth) must be valid" && false);
     return false;
   }
   if (isPwdHashed) {
@@ -337,7 +336,7 @@ STATIC void structToStr(const PwdS *pwd, int16_t idx, char **str, int16_t *len) 
   unsigned char *ptr = NULL;
 
   if (pwd == NULL) {
-    assert(LIB_NAME "Password structure must not be NULL" && (false || Pwd_TestMode));
+    assert(LIB_NAME "Password structure must not be NULL" && false);
     return;
   }
   *len = 0;
@@ -371,7 +370,7 @@ STATIC int16_t countOldHashedPassword(const PwdS *pwd) {
   int16_t i = 0, len = 0;
 
   if (pwd == NULL) {
-    assert(LIB_NAME "Password structure must not be NULL" && (false || Pwd_TestMode));
+    assert(LIB_NAME "Password structure must not be NULL" && false);
     return 0;
   }
   for (i = 0; i < DEFAULT_NUMBER_OF_OLD_PASSWORDS && pwd->OldHashedPasswords[i] != NULL; i++) {
@@ -385,7 +384,7 @@ STATIC bool storeOldPasswords(const PwdS *pwd, const SecureStorageS *storage, co
   char *key = NULL, val[10];
 
   if (pwd == NULL || storage == NULL) {
-    assert(LIB_NAME "Password structure and storage structure must not be NULL" && (false || Pwd_TestMode));
+    assert(LIB_NAME "Password structure and storage structure must not be NULL" && false);
     return false;
   }
   if (Utils_IsPrefixValid("Pwd:storeOldPasswords", prefix) == false) return false;
@@ -463,7 +462,7 @@ STATIC bool loadOldPasswords(PwdS *pwd, const SecureStorageS *storage, const cha
   unsigned char *val = NULL;
 
   if (pwd == NULL || storage == NULL) {
-    assert(LIB_NAME "Password structure and storage structure must not be NULL" && (false || Pwd_TestMode));
+    assert(LIB_NAME "Password structure and storage structure must not be NULL" && false);
     return false;
   }
   if (Utils_IsPrefixValid("Pwd:loadOldPasswords", prefix) == false) return false;
@@ -600,5 +599,5 @@ bool Pwd_IsEqual(const void *pwdS1, const void *pwdS2) {
     }
   }
   return (ret && pwd1->TemporaryPwd == pwd2->TemporaryPwd && pwd1->Expiration == pwd2->Expiration && pwd1->ErrorsCounter == pwd2->ErrorsCounter &&
-          Utils_CharArrayCmp(pwd1->hashPassword, pwd2->hashPassword) == true && Utils_CharArrayCmp(pwd1->caSalt, pwd2->caSalt) == true);
+          Utils_CharArrayCmp(pwd1->hashPassword, pwd2->hashPassword) && Utils_CharArrayCmp(pwd1->caSalt, pwd2->caSalt) == true);
 }
