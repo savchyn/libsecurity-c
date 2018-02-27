@@ -1,53 +1,59 @@
-# libsecurity-c
+# sec-c
+(based on IBM's libsecurity-c)
+sec-c lib (below 'the library') is intended to be used for security relevant operations on MC and SOC with low/moderate power consumption. 
+
+## Dependencies & 3rd Party
+[NaCl](https://nacl.cr.yp.to/) is used for encryption when compiled for Linux.
+[mbedTLS](https://tls.mbed.org/) is used for encryption when compiled for mbedOS.
+[hashtab](http://burtleburtle.net/bob/hash/hashtab.html) is used.
+
+### Language
+- Implemented in c
+
+## Build
+- make deps
+- make
 
 ## Overview:
 
-### The goals of libsecurity are:
+### The goals of the library is:
 Secure "things" that connect to the internet by providing a set of security libraries/services that fulfill the following requirements:
   1.  Complete (from a security point of view)
   2.  Can be easily integrated with existing IoTs' software.
   3.  Optimized for the IoTs' run time environment
 
-### Language
-- Implemented in c/c++
 
-## Provided Libraries:
+## Provided:
   - Account Management services:  User privileges and password management
   - Secure storage services: Persistency mechanism that uses Encryption (AES) of key-value pairs within a signed file
   - Entity management services to handle 3 types of entities: User, Group and Resource.
-  - Password services:  encryption, salting, reset, time expiration, Throttling mechanism
+  - Password services:  encryption, salting, reset, time expiration, Throttling mechanism,  One Time Password (OTP) services as defined by RFCs 4226 (HOTP), 6238 (TOTP)
   - Access Control List (ACL) services when access rights may be defined for resource entity. The  implementation should allow flexible types of access to resources (not limited to READ/WRITE/EXECUTE).
-  - One Time Password (OTP) services as defined by RFCs 4226 (HOTP), 6238 (TOTP)
+ 
 
-## Installation
 
-### Prerequisites
+### Before you start
 - For MBED-OS devices (K64F) you will need to install yotta, see http://yottadocs.mbed.com/#installing-on-linux
 - g++ compiler: you need at least version 4.8 (the other option is to remove the -std=c++11 flag from CPPFLAGS in 
-libsecurity-c/libsecurity/src/build/common.mk)
+./src/build/common.mk)
 - Valgrind: The package testing runs by default using valgrind. In order to override the default and run it without valgrind, enter to the Linux prompt: export PURE=1
 
-### Quick Start
-- Get libsecurity-c and its dependencies: `git clone github.com/ibm-security-innovation/libsecurity-c/...`
-- make deps
-- make
 
 #### MBED-OS Quick Start
-- Get libsecurity-c and its dependencies: `git clone github.com/ibm-security-innovation/libsecurity-c/...`
+- Clone this repository `git clone ...`
 - cd mbed/K64F/libsecurity
 - yotta target frdm-k64f-gcc
 - build.sh
 - yotta build
 - copy build/frdm-k64f-gcc/source/libsecurity.bin to your K64F device
 
-### Setup
 
 #### Compilation flags
 There are two compilation flags that must be set based on the platform for which the library is compiled for. These are:
 - TARGET - may be LINUX_OS or MBED_OS based on the OS. 
 - CRYPTO_TYPE - may be NaCl_CRYPTO or MBEDTLS_CRYPTO.
 
-These flags are set in  libsecurity-c/libsecurity/src/build/common.mk in the following way:
+These flags are set in  .../build/common.mk in the following way:
 - For Linux with NaCl cryptographic library: 
     - TARGET=-DLINUX_OS
     - CRYPTO_TYPE=-NaCl_CRYPTO
@@ -59,17 +65,18 @@ These flags are set in  libsecurity-c/libsecurity/src/build/common.mk in the fol
     - CRYPTO_TYPE=-MBEDTLS_CRYPTO
 
 #### Optional flags for different purposes:
-To run a full test, in the libsecurity-c/libsecurity/src/build directory:
+To run a full test, in the `.../build` directory:
 - Execute: run_all.sh to will run all the tests of all the packages
-- Execute: run_all.sh CHECK to run a test of all the libsecurity followed by a check of the code formating and cleanleaness. Note that in order to perform the formatting check clang must be installed and the cleanness check uses scan-build
-- The results of the tests will be stored in the libsecurity-c/libsecurity/src/build/res directory when the res file will hold the summary of the tests and the full_res file will hold all the details
+- Execute: run_all.sh CHECK to run a test of all the library followed by a check of the code formating and cleanleaness. Note that in order to perform the formatting check clang must be installed and the cleanness check uses scan-build
+- The results of the tests will be stored in the `/build/res` directory when the res file will hold the summary of the tests and the full_res file will hold all the details
 - Each library package has its own set of tests stored in a subdirectory named after the package under the test directory. The package testing runs by default using valgrind. In order to override the default and run it without valgrind, enter to the Linux prompt: export PURE=1
 - To check the overall testing coverage and the coverage per package set the environment variable by enter to the Linux prompt: export COV=1
 - Compilations can be done using GCC, GCC with optimization or CLANG. To switch between those options, set in the Linux prompt the COMPILER variable either to "GCC_C" (gcc with debug), "GCC_O" (gcc with optimization) or "CLANG" (the clang compiler). The default is "GCC_C" GCC with debug. e.g. export COMPILER="CLANG"
 
 ### Usage examples:
-In order to exemplify how to use the libsecurity-c library, the library includes the following usage examples under the libsecurity-c/libsecurity/src/examples directory:
+To save your time see "examples" folder wich contains collection of this library usages
 
+They are 
 ##### Acl example:
 This example shows how to set ACL permissions of a resource, in this case a smart TV, for users and groups of users. The example shows all the options to set users' and groups' permissions, including permissions for:
   - A specific user
@@ -94,7 +101,7 @@ This example shows how to store a wifi password to a secure storage. The rationa
   - Before storing the secure storage to a file, it is signed to ensure that it won't be compromised
 
 ##### Full example:
-This example shows how to use each and every package of the libsecurity-c library.
+Most complex one - shows how to use each and every package of the library.
 ##### App example:
 This example shows a demo application that sends MULE or log messages to server.
 - The messages can be sent in one of two forms:
@@ -102,36 +109,14 @@ This example shows a demo application that sends MULE or log messages to server.
   - Encrypted message using DTLS (over UDP) to the goldy server (in this case you will need to download and run goldy application on a Linux machine, see https://github.com/ibm-security-innovation/goldy)
 - Note: The IoTClient application can be executed on a machine that is different than the one of the goldy client. If this is the case, the relevant ports on the iptables must be opened.
 
-# License
-(c) Copyright IBM Corp. 2010, 2015
-This project is licensed under the Apache License 2.0. See the LICENSE file for more info.
-Authors: Ravid Sagy, Dov Murik, Shmulik Regev
-
-## Contribution
-
-Contributions to the project are welcomed.  It is required however to provide
-alongside the pull request one of the contribution forms (CLA) that are a part
-of the project.  If the contributor is operating in his individual or personal
-capacity, then he/she is to use the [individual CLA](./CLA-Individual.txt); if
-operating in his/her role at a company or entity, then he/she must use the
-[corporate CLA](CLA-Corporate.txt).
-
-## Dependencies & 3rd Party
-[NaCl](https://nacl.cr.yp.to/) is used for encryption when compiled for Linux.
-
-[mbedTLS](https://tls.mbed.org/) is used for encryption when compiled for mbedOS.
-
-[hashtab](http://burtleburtle.net/bob/hash/hashtab.html) is used.
-
-
-# libsecurity-c architecture and high level design document
+#  architecture and high level design document
 ## Overview:
-The purpose of libsecurity-c is to provide an efficient solution for securing Internet Of Things end devices and gateways. This solution does not require any deep understanding of security and thus relieves IoT developers from the need to learn and understand the different aspects of security (e.g. how to create and maintain secure-storage, when to use One Time Password etc.).
+The purpose of the library is to provide an efficient solution for securing Internet Of Things end devices and gateways. This solution does not require any deep understanding of security and thus relieves IoT developers from the need to learn and understand the different aspects of security (e.g. how to create and maintain secure-storage, when to use One Time Password etc.).
 
-Libsecurity-c implementations targeted to small capable IoT platforms with limited resources (e.g. ARM Cortex M). 
+library implementations targeted to small capable IoT platforms with limited resources (e.g. ARM Cortex M). 
 
 ## Architecture and High level design:
-The following diagram details the layers of libsecurity :
+The following diagram details the layers of the library :
 
 - The encryption layer is the lowest one (where either NaCl encryption or MBEDTLS encryption library are used).
 - The second layer, Secure Storage, implements secure storage for persistency. The secure storage is based on encrypted key value pairs stored in signed files to guarantee that the data is not altered or corrupted (more details will be presented later)
@@ -187,7 +172,7 @@ In order to make it difficult for a third party to decipher or use the stored da
 
     - The OTP property:
         - According to Wikipedia: A One Time Password (OTP) is a password that is valid for only one login session or transaction (and may be limited for a specific time period). The most important advantage that is addressed by OTPs is that, in contrast to static passwords, they are not vulnerable to replay attacks. A second major advantage is that a user who uses the same (or similar) password for multiple systems, is not made vulnerable on all of them, if the password for one of these is gained by an attacker.
-Libsecurity implements the 2 possible OTP implementations: A time based one time password algorithm (TOTP) and HMAC-based one time password algorithm (HOTP). Our OTP implementation is based on RFC 2289 for OTP in general, RFC 4226 for HOTP, and RFC 6238 for TOTP.
+The library implements the 2 possible OTP implementations: A time based one time password algorithm (TOTP) and HMAC-based one time password algorithm (HOTP). Our OTP implementation is based on RFC 2289 for OTP in general, RFC 4226 for HOTP, and RFC 6238 for TOTP.
         - The OTP implementation has three layers:
             - The base layer includes the secret, the digest (e.g. SHA256, SHA1) and the number of digits in the result.
             - The second layer is the counting mechanism which is time based for TOTP and counter based for HOTP.
