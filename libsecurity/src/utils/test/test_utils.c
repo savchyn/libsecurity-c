@@ -111,7 +111,7 @@ STATIC bool testPwdStrength() {
     }
   }
   for (i=0 ; i<MAX_PASSWORD_LENGTH+5 ; i++) {
-    if (Utils_GenerateNewValidPassword(&newPwd, i) == true) {
+    if (Utils_GenerateNewValidPassword(&newPwd, i)) {
       val = Utils_CalculatePasswordStrength(newPwd, NULL);
       if ((i>=10 && val < STRENGTH_EXCELLENT) || (i>=MIN_PASSWORD_LENGTH && i < 10 && val < STRENGTH_GOOD)) {
         expected = STRENGTH_EXCELLENT;
@@ -122,7 +122,7 @@ STATIC bool testPwdStrength() {
       }
       Utils_Free(newPwd);
     }
-    if (pass == false)
+    if (!pass)
       break;
   }
   return pass;
@@ -138,14 +138,14 @@ STATIC bool testIpStr() {
 
   len = sizeof(notValidIp) / sizeof(char *);
   for (i = 0; i < len; i++) {
-    if (Utils_IsIpStrValid(notValidIp[i]) == true) {
+    if (Utils_IsIpStrValid(notValidIp[i])) {
       printf("Error: test fail, invalid IP '%s' pass\n", notValidIp[i]);
       pass = false;
     }
   }
   len = sizeof(validIp) / sizeof(char *);
   for (i = 0; i < len; i++) {
-    if (Utils_GetIpV4Address(validIp[i], address, &tmp) == false) {
+    if (!Utils_GetIpV4Address(validIp[i], address, &tmp) ) {
       printf("Error: test fail, valid IP '%s' fail\n", validIp[i]);
       pass = false;
     }
@@ -169,7 +169,7 @@ STATIC bool testSyslogLogMessage() {
 
   printf("syslog server ip is %s, cacert file name '%s'\n", syslogServerIpStr, cacertFile);
   Syslog_SetDtls(false);
-  if (Syslog_OpenLog(syslogServerIpStr, syslogServerPort, cacertFile, syslogServerIpStr) == false) {
+  if (!Syslog_OpenLog(syslogServerIpStr, syslogServerPort, cacertFile, syslogServerIpStr) ) {
     printf("Error: %s\n", errStr);
     return false;
   }
@@ -181,12 +181,12 @@ STATIC bool testSyslogLogMessage() {
       snprintf(testStr, ERR_STR_LEN, testStrFmt, i, strParam);
       snprintf(expStr, ERR_STR_LEN, "%s %s %s %s %s %s %s", SYSLOG_NIL_STR, hostName, appName, SYSLOG_NIL_STR, SYSLOG_LOG_STR, SYSLOG_NIL_STR, testStr);
       ret = Syslog_Log(i % (SevirityDebug + 1), "Test %d with %s\n", i, "lalala");
-      if (ret == false) printf("testSyslogLogMessage Error: %s\n", errStr);
+      if (!ret) printf("testSyslogLogMessage Error: %s\n", errStr);
       pass |= ret;
       HwAdapters_Sleep(1, 0);
 #ifdef INTERNAL_LOG
       char line[ERR_STR_LEN];
-      if (getLastLineOfFile(logFilePath, line, ERR_STR_LEN) == false) {
+      if (!getLastLineOfFile(logFilePath, line, ERR_STR_LEN) ) {
         printf("Error: can't read the last line of the log file '%s'\n", logFilePath);
         pass = false;
         break;
@@ -199,7 +199,7 @@ STATIC bool testSyslogLogMessage() {
 #endif
       // printf("Line: '%s'\nExp str '%s'\n", line, expStr);
     }
-    if (pass == false) break;
+    if (!pass ) break;
   }
   Syslog_CloseLog();
   return pass;
@@ -219,7 +219,7 @@ STATIC bool testSyslogMuleMatrics() {
 
   printf("Mule syslog server ip is %s\n", syslogServerIpStr);
   Syslog_SetDtls(false);
-  if (Syslog_OpenLog(syslogServerIpStr, syslogServerPort, cacertFile, syslogServerIpStr) == false) {
+  if (!Syslog_OpenLog(syslogServerIpStr, syslogServerPort, cacertFile, syslogServerIpStr) ) {
     printf("Error: %s\n", errStr);
     return false;
   }
@@ -231,12 +231,12 @@ STATIC bool testSyslogMuleMatrics() {
     snprintf(testStr, ERR_STR_LEN, testStrFmt, SYSLOG_MULE_STR, i + 1, mulePath, idx);
     snprintf(expStr, ERR_STR_LEN, "%s %s %s %s %s %s", SYSLOG_NIL_STR, hostName, appName, SYSLOG_NIL_STR, SYSLOG_MULE_STR, testStr);
     ret = Syslog_Mule(i % MuleMax + 1, mulePath, idx);
-    if (ret == false) printf("testSyslogMuleMatrics Error: %s\n", errStr);
+    if (!ret) printf("testSyslogMuleMatrics Error: %s\n", errStr);
     pass |= ret;
     HwAdapters_Sleep(1, 0);
 #ifdef INTERNAL_LOG
     char line[ERR_STR_LEN];
-    if (getLastLineOfFile(logFilePath, line, ERR_STR_LEN) == false) {
+    if (!getLastLineOfFile(logFilePath, line, ERR_STR_LEN) ) {
       printf("Error: can't read the last line of the log file '%s'\n", logFilePath);
       pass = false;
       break;
@@ -266,7 +266,7 @@ STATIC bool testSetAppName() {
     ret = Syslog_UpdateAppName(str);
     expect = ((i >= 65 && i <= 90) || (i >= 97 && i <= 122) || (i >= 48 && i <= 57));
     expStr = "legal";
-    if (expect == false) expStr = "illegal";
+    if (!expect ) expStr = "illegal";
     if (ret != expect) {
       printf("Test fail: error: character '%c' (%d) is %s but the ret is %d\n", i, i, expStr, ret);
       pass = false;
@@ -431,7 +431,7 @@ int main()
   len = sizeof(callFunc) / sizeof(Utils_TestFuncS);
 
   for (i = 0; i < len; i++) {
-    if ((callFunc[i]).testFunc() == false) {
+    if (!(callFunc[i]).testFunc() ) {
       res = "fail";
       pass = false;
     } else

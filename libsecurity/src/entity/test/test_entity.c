@@ -30,14 +30,14 @@ STATIC bool addMembers(EntityManager *entityManager, const char *groupName, int1
     snprintf(userName, sizeof(userName), userNameFmt, i);
     EntityManager_AddUser(entityManager, userName);
     ret = EntityManager_AddUserToGroup(entityManager, groupName, userName);
-    if (expected && ret == false) {
+    if (expected && !ret) {
       snprintf(errStr, sizeof(errStr), "can't add the valid user '%s' to group '%s'", userName, groupName);
       return false;
-    } else if (expected == false && ret == true) {
+    } else if (!expected && ret) {
       snprintf(errStr, sizeof(errStr), "attempting to add an existing user '%s' to group '%s'", userName, groupName);
       return false;
     }
-    if (EntityManager_IsUserPartOfAGroup(entityManager, groupName, userName) == false) {
+    if (!EntityManager_IsUserPartOfAGroup(entityManager, groupName, userName) ) {
       snprintf(errStr, sizeof(errStr), "user '%s' was added to group but was not "
                                        "found in group '%s' members",
                userName, groupName);
@@ -55,14 +55,14 @@ STATIC bool removeMembers(EntityManager *entityManager, const char *groupName, i
   for (i = 0; i < len; i++) {
     snprintf(userName, sizeof(userName), userNameFmt, i);
     ret = EntityManager_RemoveUserFromGroup(entityManager, groupName, userName);
-    if (expected && ret == false) {
+    if (expected && !ret) {
       snprintf(errStr, sizeof(errStr), "Error: Can't remove the valid user '%s' from group '%s'", userName, groupName);
       return false;
-    } else if (expected == false && ret == true) {
+    } else if (!expected  && ret) {
       snprintf(errStr, sizeof(errStr), "Error: Removed an already removed member '%s' from group '%s'", userName, groupName);
       return false;
     }
-    if (EntityManager_IsUserPartOfAGroup(entityManager, groupName, userName) == true) {
+    if (EntityManager_IsUserPartOfAGroup(entityManager, groupName, userName)) {
       snprintf(errStr, sizeof(errStr), "Error: User '%s' was found in group '%s' after it was removed", userName, groupName);
       return false;
     }
@@ -86,24 +86,24 @@ STATIC bool testAddRemoveMember() {
   entityManager = &e1;
   len = sizeof(expected) / sizeof(bool);
   if (EntityManager_AddUser(NULL, "a") || EntityManager_AddUser(entityManager, NULL) ||
-      EntityManager_AddGroup(entityManager, NULL) || EntityManager_AddResource(entityManager, NULL) == true) {
+      EntityManager_AddGroup(entityManager, NULL) || EntityManager_AddResource(entityManager, NULL)) {
     printf("testAddRemoveMember failed, add NULL entity to entityManager\n");
     pass = false;
   }
   EntityManager_AddGroup(entityManager, groupName);
   for (i = 0; i < len; i++) {
-    if (addMembers(entityManager, groupName, NUM_OF_USERS, expected[i]) == false) {
+    if (!addMembers(entityManager, groupName, NUM_OF_USERS, expected[i]) ) {
       printf("testAddRemoveMember failed in add, %s\n", errStr);
       pass = false;
     }
   }
   for (i = 0; i < len; i++) {
-    if (removeMembers(entityManager, groupName, NUM_OF_USERS, expected[i]) == false) {
+    if (!removeMembers(entityManager, groupName, NUM_OF_USERS, expected[i]) ) {
       printf("testAddRemoveMember failed in remove, error: %s\n", errStr);
       pass = false;
     }
   }
-  if (getGroup(entityManager, groupName, (void **)(&gEntity)) == false) {
+  if (!getGroup(entityManager, groupName, (void **)(&gEntity)) ) {
     pass = false;
   }
   if (hcount(gEntity->Members) != 0) {
@@ -134,7 +134,7 @@ STATIC bool testEntityListAreEqual() {
     EntityManager_AddGroup(entityManager2, groupName[i]);
     addMembers(entityManager1, groupName[i], NUM_OF_USERS, true);
     addMembers(entityManager2, groupName[i], NUM_OF_USERS, true);
-    if (EntityManager_IsEqual(entityManager1, entityManager2) == false) {
+    if (!EntityManager_IsEqual(entityManager1, entityManager2) ) {
       printf("Test fail: the same entity managers are not equal\n");
       EntityManager_Print(stdout, "EntityManager1:\n", entityManager1);
       EntityManager_Print(stdout, "EntityManager2:\n", entityManager2);
@@ -150,7 +150,7 @@ STATIC bool testEntityListAreEqual() {
     for (j = 0; j < len; j++) {
       getGroup(entityManager2, groupName[j], (void **)(&g2));
       ret = isEqualGroups((void *)g1, (void *)g2);
-      if (i != j && ret == true) {
+      if (i != j && ret) {
         printf("Test fail: 2 different groups received equal true:\n");
         printGroup(stdout, "Group1:\n", g1);
         printGroup(stdout, "Group2:\n", g2);
@@ -158,7 +158,7 @@ STATIC bool testEntityListAreEqual() {
       }
     }
   }
-  if (EntityManager_IsEqual(entityManager1, entityManager2) == true) {
+  if (EntityManager_IsEqual(entityManager1, entityManager2)) {
     printf("Test fail: different entity managers are equal\n");
     EntityManager_PrintFull(stdout, "EntityManager1:\n", entityManager1);
     EntityManager_PrintFull(stdout, "EntityManager2:\n", entityManager2);
@@ -182,7 +182,7 @@ STATIC bool addRemoveProperty(EntityManager *entityManager, char *name) {
   Accounts_NewUser(&amUser, USER_PERMISSION_STR, SECRET, SALT, STRENGTH_GOOD);
   EntityManager_RegisterProperty(entityManager, name, AM_PROPERTY_NAME, (void *)amUser);
   ret = EntityManager_GetProperty(entityManager, name, AM_PROPERTY_NAME, &tmp);
-  if (ret == false) {
+  if (!ret) {
     printf("Error: Property '%s' added to property list but was not found in "
            "property list of "
            "entity, %s\n",
@@ -196,7 +196,7 @@ STATIC bool addRemoveProperty(EntityManager *entityManager, char *name) {
       pass = false;
     }
   }
-  if (EntityManager_IsEntityInUsersList(entityManager, name) == true) {
+  if (EntityManager_IsEntityInUsersList(entityManager, name)) {
     getUser(entityManager, name, (void **)(&user));
     count = hcount(user->PropertiesData->Items);
     expectedCount = 0;
@@ -277,7 +277,7 @@ STATIC bool generateAndAddEntities(EntityManager *entityManager, int16_t numOfUs
     snprintf(groupName, sizeof(groupName), groupNameFmt, i);
     EntityManager_AddGroup(entityManager, groupName);
     if (i < numOfUsers) min = i;
-    if (addMembers(entityManager, groupName, min, true) == false) {
+    if (!addMembers(entityManager, groupName, min, true) ) {
       printf("Error while generating groups: '%s'\n", errStr);
       return false;
     }
@@ -297,20 +297,20 @@ STATIC bool generateAndAddProperties(EntityManager *entityManager, int16_t numOf
   PwdS *pwdUser = NULL;
 
   for (i = 0; i < numOfUsers; i++) {
-    if (Accounts_NewUser(&amUser, SUPER_USER_PERMISSION_STR, SECRET, SALT, STRENGTH_GOOD) == false) {
+    if (!Accounts_NewUser(&amUser, SUPER_USER_PERMISSION_STR, SECRET, SALT, STRENGTH_GOOD) ) {
       printf("Error while generating Accouns user: %s\n", errStr);
       return false;
     }
     snprintf(name, sizeof(name), userNameFmt, i);
     EntityManager_RegisterProperty(entityManager, name, AM_PROPERTY_NAME, (void *)amUser);
-    if (Pwd_NewUserPwd(&pwdUser, SECRET, SALT, STRENGTH_GOOD) == false) {
+    if (!Pwd_NewUserPwd(&pwdUser, SECRET, SALT, STRENGTH_GOOD) ) {
       printf("Error while generating Password for user: %s\n", errStr);
       return false;
     }
     EntityManager_RegisterProperty(entityManager, name, PWD_PROPERTY_NAME, (void *)pwdUser);
 
     if (i < numOfGroups) {
-      if (OtpUser_NewSimpleUser(&otpUser, SECRET) == false) {
+      if (!OtpUser_NewSimpleUser(&otpUser, SECRET) ) {
         printf("Error while generating Otp user: %s\n", errStr);
         return false;
       }
@@ -319,7 +319,7 @@ STATIC bool generateAndAddProperties(EntityManager *entityManager, int16_t numOf
     }
 
     if (i < numOfResources) {
-      if (Pwd_NewUserPwd(&pwdUser, SECRET, SALT, STRENGTH_GOOD) == false) {
+      if (!Pwd_NewUserPwd(&pwdUser, SECRET, SALT, STRENGTH_GOOD) ) {
         printf("Error while generating Password for user: %s\n", errStr);
         return false;
       }
@@ -336,7 +336,7 @@ STATIC bool generateAndAddProperties(EntityManager *entityManager, int16_t numOf
 // Add Accounts, Otp and Password properties to the first user,
 // Add password property to the last group and OTP property to the last resource
 STATIC bool generateData(EntityManager *entityManager, int16_t numOfUsers, int16_t numOfGroups, int16_t numOfResources) {
-  if (generateAndAddEntities(entityManager, numOfUsers, numOfGroups, numOfResources) == false) return false;
+  if (!generateAndAddEntities(entityManager, numOfUsers, numOfGroups, numOfResources) ) return false;
   return generateAndAddProperties(entityManager, numOfUsers, numOfGroups, numOfResources);
 }
 
@@ -350,19 +350,19 @@ STATIC bool testStoreLoad() {
     EntityManager_New(&(e[i]));
     entityManager[i] = &(e[i]);
   }
-  if (generateData(entityManager[0], numOfUsers, numOfGroups, numOfResources) == false) return false;
+  if (!generateData(entityManager[0], numOfUsers, numOfGroups, numOfResources) ) return false;
 
   pass = EntityManager_Store(entityManager[0], fileName, SECRET, SALT);
-  if (pass == false) {
+  if (!pass ) {
     printf("Error while storing data to file '%s', error %s\n", fileName, errStr);
   }
-  if (pass == true) {
+  if (pass) {
     pass = EntityManager_Load(&(entityManager[1]), fileName, SECRET, SALT);
-    if (pass == false) {
+    if (!pass ) {
       printf("Error while loading data to file '%s', error %s\n", fileName, errStr);
     }
-    if (pass == true) pass = EntityManager_IsEqual(entityManager[0], entityManager[1]);
-    if (pass == false) {
+    if (pass) pass = EntityManager_IsEqual(entityManager[0], entityManager[1]);
+    if (!pass ) {
       printf("Test fail, Stored entity data != loaded one\n");
       EntityManager_PrintFull(stdout, "Stored entityManager:", entityManager[0]);
       EntityManager_PrintFull(stdout, "Loaded entityManager:", entityManager[1]);
@@ -397,13 +397,13 @@ STATIC bool testRemoveUserFromGroupAndAcl() {
   snprintf(userName, sizeof(userName), userNameFmt, 0);
   snprintf(groupName, sizeof(groupName), groupNameFmt, numOfGroups - 1);
   snprintf(resourceName, sizeof(resourceName), resourceNameFmt, 0);
-  if (generateData(entityManager, numOfUsers, numOfGroups, numOfResources) == false) return false;
+  if (!generateData(entityManager, numOfUsers, numOfGroups, numOfResources) ) return false;
   for (i = 0; i < 3; i++) {
     ret = EntityManager_IsUserPartOfAGroup(entityManager, groupName, userName);
     Acl_NewPermissionsList("TestPermissions", &perVec);
     Acl_GetUserPermissions(entityManager, resourceName, userName, &perVec);
     len = hcount(perVec->Permissions);
-    if (i == 0 && (ret == false || len == 0)) {
+    if (i == 0 && (!ret || len == 0)) {
       printf("testRemoveUserFromGroupAndAcl fail, user '%s' must be in group "
              "'%s' and have "
              "permissions for resource '%s'\n",
@@ -452,14 +452,14 @@ STATIC bool testEntityCorners() {
 
   len = sizeof(func) / sizeof(testFunc);
   for (i = 0; i < len; i++) {
-    if (func[i](NULL, "A") == true) {
+    if (func[i](NULL, "A")) {
       printf("testEntityCorners fail, func idx %d with NULL entityManager returned true\n", i);
       pass = false;
     }
   }
   len = sizeof(func1) / sizeof(testFunc1);
   for (i = 0; i < len; i++) {
-    if (func1[i](NULL, "A") == true) {
+    if (func1[i](NULL, "A")) {
       printf("testEntityCorners fail, func1 idx %d with NULL entityManager returned true\n", i);
       pass = false;
     }
@@ -473,7 +473,7 @@ STATIC bool testEntityCorners() {
       EntityManager_GetProperty(NULL, NULL, NULL, NULL) ||
       EntityManager_RegisterPropertyHandleFunc(NULL, NULL, NULL, NULL, NULL, NULL) || addUserToGroup(NULL, NULL) ||
       loadMembers(NULL, NULL, NULL) || load(NULL, NULL, NULL, NULL) || isEqualProperties(NULL, NULL) ||
-      registerProperty(NULL, NULL, NULL) || removeProperty(NULL, NULL, true) || getProperty(NULL, NULL, NULL) == true) {
+      registerProperty(NULL, NULL, NULL) || removeProperty(NULL, NULL, true) || getProperty(NULL, NULL, NULL)) {
     printf("testEntityCorners fail, call func with NULL entityManager returned true\n");
     pass = false;
   }
@@ -481,7 +481,7 @@ STATIC bool testEntityCorners() {
 
   EntityManager_New(&e);
   entityManager = &e;
-  if (EntityManager_RegisterProperty(entityManager, "a", "undef", (void *)"undef") == true) {
+  if (EntityManager_RegisterProperty(entityManager, "a", "undef", (void *)"undef")) {
     printf("testEntityCorners fail, call EntityManager_RegisterProperty with undefined module returned true\n");
     pass = false;
   }
@@ -489,7 +489,7 @@ STATIC bool testEntityCorners() {
   EntityManager_AddResource(entityManager, r2);
   getResource(entityManager, r1, (void **)&resource1);
   getResource(entityManager, r2, (void **)&resource2);
-  if (isEqualResources(resource1, resource2) || isEqualResources(resource1, resource2) == true) {
+  if (isEqualResources(resource1, resource2) || isEqualResources(resource1, resource2)) {
     printf("testEntityCorners fail, call isEqualResources with different resources returned true\n");
     pass = false;
   }
@@ -519,7 +519,7 @@ int main()
 
   len = sizeof(callFunc) / sizeof(Utils_TestFuncS);
   for (i = 0; i < len; i++) {
-    if ((callFunc[i]).testFunc() == false) {
+    if (!(callFunc[i]).testFunc() ) {
       res = "fail";
       pass = false;
     } else

@@ -48,7 +48,7 @@ bool Accounts_SetUserPrivilege(AmUserInfoS *user, const char *privilege) {
   PrivilegeType privilegeType = USER_PERMISSION;
 
   if (user == NULL || privilege == NULL) return false;
-  if (checkPrivilegeValidity(privilege, &privilegeType) == false) return false;
+  if (!checkPrivilegeValidity(privilege, &privilegeType)) return false;
   user->Privilege = privilegeType;
   return true;
 }
@@ -91,10 +91,10 @@ bool Accounts_NewUser(AmUserInfoS **user, const char *privilege, const unsigned 
         return false;
     }
     
-    if (checkPrivilegeValidity(privilege, &privilegeType) == false) {
+    if (!checkPrivilegeValidity(privilege, &privilegeType)) {
         return false;
     }
-    if (Pwd_NewUserPwd(&p, sPwd, sSalt, minPwdStrength) == false) {
+    if (!Pwd_NewUserPwd(&p, sPwd, sSalt, minPwdStrength)) {
         Utils_AddPrefixToErrorStr("AccountManagement: AddNewUser failed, error: ");
     return false;
   }
@@ -116,14 +116,14 @@ void Accounts_FreeUser(void *u) {
 
 bool Accounts_UpdateUserPwd(AmUserInfoS *user, const char *userName, const unsigned char *cPwd, const unsigned char *newPwd, PasswordStreangthType minPwdStrength) {
   if (user == NULL || userName == NULL || cPwd == NULL || newPwd == NULL) return false;
-  if (Pwd_UpdatePassword(user->Pwd, cPwd, newPwd, minPwdStrength) == false) return false;
+  if (!Pwd_UpdatePassword(user->Pwd, cPwd, newPwd, minPwdStrength)) return false;
   user->Pwd->Expiration = getPwdExpiration(user, userName);
   return true;
 }
 
 bool Accounts_VerifyPassword(AmUserInfoS *user, const unsigned char *sPwd) {
   if (user == NULL || sPwd == NULL) return false;
-  if (Pwd_VerifyPassword(user->Pwd, sPwd) == false) {
+  if (!Pwd_VerifyPassword(user->Pwd, sPwd)) {
     user->Pwd->ErrorsCounter = 0; // the throttling is enougth
     return false;
   }
@@ -148,9 +148,9 @@ bool Accounts_Store(const void *u, const SecureStorageS *storage, const char *pr
   const AmUserInfoS *user = NULL;
 
   if (u == NULL || storage == NULL) return false;
-  if (Utils_IsPrefixValid("Accounts_Store", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Accounts_Store", prefix)) return false;
   user = (const AmUserInfoS *)u;
-  if (amStructToStr(user, str, MAX_AM_STR_LEN) == false) {
+  if (!amStructToStr(user, str, MAX_AM_STR_LEN)) {
     snprintf(errStr, sizeof(errStr), "Accounts_Store: user parameter must not be NULL");
     return false;
   }
@@ -160,7 +160,7 @@ bool Accounts_Store(const void *u, const SecureStorageS *storage, const char *pr
   debug_print("Accounts_Store write key '%s' val '%s'\n", key, str);
   ret = SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)str, strlen(str));
   Utils_Free(key);
-  if (ret == false) {
+  if (!ret) {
     Utils_AddPrefixToErrorStr("Accounts_Store: Can't add item to storage, error");
     return false;
   }
@@ -183,11 +183,11 @@ bool Accounts_Load(void **u, const SecureStorageS *storage, const char *prefix, 
     snprintf(errStr, sizeof(errStr), "Accounts_Load: Storage must initiated first");
     return false;
   }
-  if (Utils_IsPrefixValid("Accounts_Load", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Accounts_Load", prefix)) return false;
   prefixLen = strlen(prefix) + strlen(AM_PR_PREFIX) + 1;
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf(key, prefixLen, AM_PREFIX_FMT, AM_PR_PREFIX, prefix);
-  if (SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)&val) == false) {
+  if (!SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)&val)) {
     snprintf(errStr, sizeof(errStr), "Internal Error: Read from secure storage key '%s' not found", key);
     debug_print("Internal Error: Read from secure storage key '%s' not found\n", key);
     Utils_Free(key);
@@ -201,7 +201,7 @@ bool Accounts_Load(void **u, const SecureStorageS *storage, const char *prefix, 
   prefixLen = strlen(prefix) + strlen(AM_PWD_PREFIX) + 1;
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf(key, prefixLen, AM_PREFIX_FMT, AM_PWD_PREFIX, prefix);
-  if (Pwd_Load((void **)&p, storage, key, &tName) == false) {
+  if (!Pwd_Load((void **)&p, storage, key, &tName)) {
     Utils_Free(key);
     return false;
   }
@@ -218,5 +218,5 @@ bool Accounts_IsEqual(const void *u1, const void *u2) {
   if (u1 == NULL || u2 == NULL) return false;
   user1 = (const AmUserInfoS *)u1;
   user2 = (const AmUserInfoS *)u2;
-  return (user1->Privilege == user2->Privilege && Pwd_IsEqual(user1->Pwd, user2->Pwd) == true);
+  return (user1->Privilege == user2->Privilege && Pwd_IsEqual(user1->Pwd, user2->Pwd));
 }

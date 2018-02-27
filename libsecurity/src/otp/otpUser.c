@@ -156,11 +156,11 @@ STATIC void freeThrottle(throttelingS *thr) {
 bool OtpUser_NewUser(OtpUserS **user, const unsigned char *secret, bool lock, int16_t cliffLen, int16_t thrTimeSec, int16_t autoUnblockSec,
                      int16_t hotpWindowSize, int16_t totpWindowSize, int64_t startCount) {
   Utils_Malloc((void **)(user), sizeof(OtpUserS));
-  if (Otp_NewHotp(&((*user)->BaseHotp), secret, startCount) == false) {
+  if (!Otp_NewHotp(&((*user)->BaseHotp), secret, startCount) ) {
     Utils_Free((void *)(*user));
     return false;
   }
-  if (Otp_NewTotp(&((*user)->BaseTotp), secret) == false) {
+  if (!Otp_NewTotp(&((*user)->BaseTotp), secret) ) {
     Otp_FreeHotp((*user)->BaseHotp);
     Utils_Free(user);
     return false;
@@ -219,7 +219,7 @@ bool OtpUser_SetBlockedState(OtpUserS *u, bool val) {
     snprintf(errStr, sizeof(errStr), "Internal error: user stucture wasn't initialized");
     return false;
   }
-  u->Blocked = (val == true);
+  u->Blocked = (val);
   if (val) return initAutoUnblockTimer(u);
   return true;
 }
@@ -261,7 +261,7 @@ STATIC bool findHotpCodeMatch(OtpUserS *u, const char *code, int16_t size, bool 
   for (i = 0; i < size; i++) {
     ret = Otp_GetHotpAtCount(u->BaseHotp, u->BaseHotp->Count + i, &calcCode);
     debug_print1("calc code '%s' compare with '%s', counter %ld\n", calcCode, code, (long int)(u->BaseHotp->Count + i));
-    if (ret == false) {
+    if (!ret ) {
       *found = false;
       return false; // error and not found
     }
@@ -292,7 +292,7 @@ STATIC bool findTotpCodeMatch(OtpUserS *u, const char *code, int16_t timeOffsetS
     return false;
   }
   offset = timeOffsetSec;
-  if (Otp_GetTotpNow(u->BaseTotp, &calcCode) == true) {
+  if (Otp_GetTotpNow(u->BaseTotp, &calcCode)) {
     if (strcmp(code, calcCode) == 0) {
       debug_print1("Code '%s' was found with no offset\n", code);
       Utils_Free(calcCode);
@@ -313,7 +313,7 @@ STATIC bool findTotpCodeMatch(OtpUserS *u, const char *code, int16_t timeOffsetS
     ret = Otp_GetTotpAtTime(u->BaseTotp, Utils_GetFutureTimeSec(i), &calcCode);
     debug_print1("calc code: '%s', compare with: '%s', offset: %ld, window size: %d, time now in sec %ld, calc time %ld\n", calcCode, code,
                  (long int)i, (int16_t)timeOffsetSec, (long int)Utils_GetFutureTimeSec(0), (long int)Utils_GetFutureTimeSec(i));
-    if (ret == false) {
+    if (!ret ) {
       Utils_Free(calcCode);
       *found = false;
       return false;
@@ -371,7 +371,7 @@ STATIC bool handleOkCode(OtpUserS *u, const char *code, OtpType otpType, int16_t
   }
   if (otpType == HOTP_TYPE) {
     u->Throttle->throttlingTimerHotp = Utils_GetBeginningOfTime();
-    if (Otp_GetHotpNext(u->BaseHotp, &val) == true) {
+    if (Otp_GetHotpNext(u->BaseHotp, &val)) {
       Utils_Free(val);
     }
   } else { // you can't try the code till the next Totp period
@@ -391,7 +391,7 @@ STATIC bool isUserBlockedHelper(OtpUserS *user, int16_t offsetTime) {
     assert(LIB_NAME "OTP user structure must not be NULL" && false);
     return false;
   }
-  if (checkAndUpdateUnBlockStateHelper(user, offsetTime) == false) return false;
+  if (!checkAndUpdateUnBlockStateHelper(user, offsetTime) ) return false;
   return OtpUser_GetBlockState(user);
 }
 
@@ -438,10 +438,10 @@ STATIC bool verifyUserCodeHelper(OtpUserS *u, const char *code, OtpType otpType,
   }
   if (code == NULL) return false;
   ok = canCheckCode(u, otpType, timeFactorSec, &canCheck);
-  if (ok == false || canCheck == false) {
+  if (!ok  || !canCheck ) {
     return false;
   }
-  if (OtpUser_IsValid(u) == false) {
+  if (!OtpUser_IsValid(u) ) {
     return false;
   }
   debug_print1("otpType %d, last code '%s', code '%s'\n", otpType, u->Throttle->lastTotpCode, code);
@@ -454,7 +454,7 @@ STATIC bool verifyUserCodeHelper(OtpUserS *u, const char *code, OtpType otpType,
     }
     ok = findTotpCodeMatch(u, code, u->Throttle->CheckTotpWindowSec, &found);
   }
-  if (ok == false) {
+  if (!ok ) {
     return false; // error must be checked before return value, to be on the
     // safe side the return is
     // false
@@ -493,7 +493,7 @@ bool OtpUserTest_IsEqual(const void *u1, const void *u2) {
   debug_print1("OTPUser: is equal: %d %d %d %d\n", user1->Blocked == user2->Blocked, Otp_IsEqualTotp(user1->BaseTotp, user2->BaseTotp),
                Otp_IsEqualHotp(user1->BaseHotp, user2->BaseHotp), OtpUserTest_IsEqualThrottling(user1->Throttle, user2->Throttle));
   return (user1->Blocked == user2->Blocked && Otp_IsEqualTotp(user1->BaseTotp, user2->BaseTotp) &&
-          Otp_IsEqualHotp(user1->BaseHotp, user2->BaseHotp) && OtpUserTest_IsEqualThrottling(user1->Throttle, user2->Throttle) == true);
+          Otp_IsEqualHotp(user1->BaseHotp, user2->BaseHotp) && OtpUserTest_IsEqualThrottling(user1->Throttle, user2->Throttle));
 }
 
 bool OtpUser_Store(const void *u, const SecureStorageS *storage, const char *prefix) {
@@ -505,14 +505,14 @@ bool OtpUser_Store(const void *u, const SecureStorageS *storage, const char *pre
   if (u == NULL || storage == NULL || prefix == NULL) return false;
   prefixLen = strlen(prefix) + strlen(TROTTLING_PREFIX) + 1;
   mPrefixLen = strlen(prefix) + strlen(OTP_MAIN_PREFIX) + 1;
-  if (Utils_IsPrefixValid("OtpUser_Store", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("OtpUser_Store", prefix) ) return false;
   user1 = (const OtpUserS *)u;
   Utils_Malloc((void **)(&otpUserStr), strLen + 1);
   otpUserStructToStr(user1, otpUserStr, strLen);
   Utils_Malloc((void **)(&key), mPrefixLen);
   snprintf(key, mPrefixLen, OTPUSER_PREFIX_FMT, OTP_MAIN_PREFIX, prefix);
   debug_print1("OtpUser_Store write key '%s' val '%s'\n", key, otpUserStr);
-  if (SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)otpUserStr, strlen(otpUserStr)) == false) {
+  if (!SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)otpUserStr, strlen(otpUserStr)) ) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", prefix, otpUserStr);
     fprintf(stderr, "%s\n", errStr);
     Utils_Free(key);
@@ -524,7 +524,7 @@ bool OtpUser_Store(const void *u, const SecureStorageS *storage, const char *pre
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf(key, prefixLen, OTPUSER_PREFIX_FMT, TROTTLING_PREFIX, prefix);
   debug_print1("OtpUser_Store write throttling key '%s' val '%s'\n", key, otpUserStr);
-  if (SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)otpUserStr, strlen(otpUserStr)) == false) {
+  if (!SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)otpUserStr, strlen(otpUserStr)) ) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", key, otpUserStr);
     fprintf(stderr, "%s\n", errStr);
     Utils_Free(key);
@@ -533,8 +533,8 @@ bool OtpUser_Store(const void *u, const SecureStorageS *storage, const char *pre
   }
   Utils_Free(key);
   Utils_Free(otpUserStr);
-  if (Otp_StoreHotp(user1->BaseHotp, storage, prefix) == false) return false;
-  if (Otp_StoreTotp(user1->BaseTotp, storage, prefix) == false) return false;
+  if (!Otp_StoreHotp(user1->BaseHotp, storage, prefix) ) return false;
+  if (!Otp_StoreTotp(user1->BaseTotp, storage, prefix) ) return false;
   return true;
 }
 
@@ -569,10 +569,11 @@ STATIC bool updateThrottleFromStorage(void **user, char *val) {
   ((OtpUserS *)*user)->Throttle->unblockTimer = unblockTimer;
   ((OtpUserS *)*user)->Throttle->CheckTotpWindowSec = checkTotpWindow;
   if (((OtpUserS *)*user)->Throttle->lastTotpCode != NULL) Utils_Free(((OtpUserS *)*user)->Throttle->lastTotpCode);
-  if (lastTotpCode != NULL) {
+  //if (lastTotpCode != NULL)
+  {
     Utils_CreateAndCopyString(&(((OtpUserS *)*user)->Throttle->lastTotpCode), lastTotpCode, strlen(lastTotpCode));
-  } else
-    ((OtpUserS *)*user)->Throttle->lastTotpCode = NULL;
+  }
+  //else ((OtpUserS *)*user)->Throttle->lastTotpCode = NULL;
   return true;
 }
 
@@ -589,10 +590,10 @@ bool OtpUser_Load(void **user, const SecureStorageS *storage, const char *prefix
   }
   prefixLen = strlen(prefix) + strlen(TROTTLING_PREFIX) + 1;
   mPrefixLen = strlen(prefix) + strlen(OTP_MAIN_PREFIX) + 1;
-  if (Utils_IsPrefixValid("OtpUser_Load", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("OtpUser_Load", prefix) ) return false;
   Utils_Malloc((void **)(&key), mPrefixLen);
   snprintf(key, mPrefixLen, OTPUSER_PREFIX_FMT, OTP_MAIN_PREFIX, prefix);
-  if (SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)(&val)) == false) {
+  if (!SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)(&val)) ) {
     snprintf(errStr, sizeof(errStr), "Read from secure storage key '%s' not found", key);
     Utils_Free(key);
     return false;
@@ -604,13 +605,13 @@ bool OtpUser_Load(void **user, const SecureStorageS *storage, const char *prefix
   block = tmp;
   Utils_Free(val);
   debug_print1("Load data from OtpUser: %d\n", block);
-  if (OtpUser_NewSimpleUser((OtpUserS **)user, secret) == false) {
+  if (!OtpUser_NewSimpleUser((OtpUserS **)user, secret) ) {
     return false;
   }
   ((OtpUserS *)*user)->Blocked = block;
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf(key, prefixLen, OTPUSER_PREFIX_FMT, TROTTLING_PREFIX, prefix);
-  if (SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)(&val)) == false) {
+  if (!SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)(&val)) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: Read from secure storage key '%s' not found", key);
     Utils_Free(key);
     OtpUser_FreeUser((void *)*user);
@@ -620,17 +621,17 @@ bool OtpUser_Load(void **user, const SecureStorageS *storage, const char *prefix
   ret = updateThrottleFromStorage(user, val);
   Utils_Free(key);
   Utils_Free(val);
-  if (ret == false) {
+  if (!ret ) {
     OtpUser_FreeUser((void *)*user);
     return false;
   }
   Otp_FreeHotp(((OtpUserS *)*user)->BaseHotp);
   Otp_FreeTotp(((OtpUserS *)*user)->BaseTotp);
-  if (Otp_LoadHotp((void **)(&((OtpUserS *)*user)->BaseHotp), storage, prefix, retName) == false) {
+  if (!Otp_LoadHotp((void **)(&((OtpUserS *)*user)->BaseHotp), storage, prefix, retName) ) {
     OtpUser_FreeUser((void *)*user);
     return false;
   }
-  if (Otp_LoadTotp((void **)(&((OtpUserS *)*user)->BaseTotp), storage, prefix, retName) == false) {
+  if (!Otp_LoadTotp((void **)(&((OtpUserS *)*user)->BaseTotp), storage, prefix, retName) ) {
     OtpUser_FreeUser((void *)*user);
     return false;
   }

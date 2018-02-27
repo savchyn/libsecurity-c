@@ -22,7 +22,7 @@ bool newUser(userData **entity, const char *name) {
     assert(LIB_NAME "Name string must not be NULL" && false);
     return false;
   }
-  if (Utils_CheckNameValidity("newUser", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) == false) return false;
+  if (!Utils_CheckNameValidity("newUser", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) ) return false;
   Utils_Malloc((void **)entity, sizeof(userData));
   setData(name, &((*entity)->Name), &((*entity)->PropertiesData));
   return true;
@@ -33,7 +33,7 @@ bool newGroup(groupData **entity, const char *name) {
     assert(LIB_NAME "Name string must not be NULL" && false);
     return false;
   }
-  if (Utils_CheckNameValidity("newGroup", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) == false) return false;
+  if (!Utils_CheckNameValidity("newGroup", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) ) return false;
   Utils_Malloc((void **)entity, sizeof(groupData));
   (*entity)->Members = hcreate(H_TAB_SIZE);
   setData(name, &((*entity)->Name), &((*entity)->PropertiesData));
@@ -45,7 +45,7 @@ bool newResource(resourceData **entity, const char *name) {
     assert(LIB_NAME "Name string must not be NULL" && false);
     return false;
   }
-  if (Utils_CheckNameValidity("newResource", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) == false) return false;
+  if (!Utils_CheckNameValidity("newResource", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) ) return false;
   Utils_Malloc((void **)entity, sizeof(resourceData));
   setData(name, &((*entity)->Name), &((*entity)->PropertiesData));
   return true;
@@ -63,7 +63,7 @@ bool removeUserFromGroup(htab *t, const char *name) {
     assert(LIB_NAME "Hash tab structure and name string must not be NULL" && false);
     return false;
   }
-  if (hfind(t, (const ub1 *)name, (ub4)strlen(name)) == true) {
+  if (hfind(t, (const ub1 *)name, (ub4)strlen(name))) {
     Utils_Free(hkey(t));
     return true;
   }
@@ -79,7 +79,7 @@ bool removeAUserFromGroup(const groupData *entity, const char *name) {
     return false;
   }
   t = entity->Members;
-  if (hfind(t, (const ub1 *)name, (ub4)strlen(name)) == true) {
+  if (hfind(t, (const ub1 *)name, (ub4)strlen(name))) {
     Utils_Free(hkey(t));
     hdel(t);
     return true;
@@ -130,7 +130,7 @@ bool addUserToGroup(const groupData *entity, const char *name) {
     assert(LIB_NAME "Group data structure and name string must not be NULL" && false);
     return false;
   }
-  if (hfind(entity->Members, (const ub1 *)name, (ub4)strlen(name)) == true) {
+  if (hfind(entity->Members, (const ub1 *)name, (ub4)strlen(name))) {
     return false;
   }
   if (hadd(entity->Members, (const ub1 *)name, (ub4)strlen(name), "ENTITY")) {
@@ -160,9 +160,9 @@ void printProperties(FILE *ofp, const ItemsHolder *propertiesData) {
   void (*printFunc)(FILE *ofp, const char *header, const void *p);
 
   for (i = 0; i < NUM_OF_LOAD_STORE_PROPERTIES; i++) {
-    if (getProperty(propertiesData, HandledModuleNameList[i], &val) == true) {
+    if (getProperty(propertiesData, HandledModuleNameList[i], &val)) {
       getCallName(HandledModuleNameList[i], PRINT_FUNC_IDX, funcName, MAX_FUNC_NAME);
-      if (ItemsList_GetItem(callModulesList, funcName, &fData) == true) {
+      if (ItemsList_GetItem(callModulesList, funcName, &fData)) {
         printFunc = (void (*)(FILE *ofp, const char *header, const void *p))fData;
         printFunc(ofp, "", val);
       }
@@ -176,13 +176,13 @@ bool storeProperties(const ItemsHolder *propertiesData, const SecureStorageS *st
   void *val = NULL, *fData = NULL;
   int16_t (*storeFunc)(const void *entity, const SecureStorageS *storage, const char *prefix);
 
-  if (Utils_IsPrefixValid("storeProperties", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("storeProperties", prefix) ) return false;
   for (i = 0; i < NUM_OF_LOAD_STORE_PROPERTIES; i++) {
-    if (getProperty(propertiesData, HandledModuleNameList[i], &val) == true) {
+    if (getProperty(propertiesData, HandledModuleNameList[i], &val)) {
       getCallName(HandledModuleNameList[i], STORE_FUNC_IDX, funcName, MAX_FUNC_NAME);
-      if (ItemsList_GetItem(callModulesList, funcName, &fData) == true) {
+      if (ItemsList_GetItem(callModulesList, funcName, &fData)) {
         storeFunc = (int16_t (*)(const void *entity, const SecureStorageS *storage, const char *prefix))fData;
-        if (storeFunc(val, storage, prefix) == false) return false;
+        if (!storeFunc(val, storage, prefix) ) return false;
       }
     }
   }
@@ -196,13 +196,13 @@ bool loadProperties(ItemsHolder **propertiesData, const SecureStorageS *storage,
   void *val = NULL, *fData = NULL;
   int16_t (*loadFunc)(void **entity, const SecureStorageS *storage, const char *prefix, char **retName);
 
-  if (Utils_IsPrefixValid("loadProperties", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("loadProperties", prefix) ) return false;
   for (i = 0; i < NUM_OF_LOAD_STORE_PROPERTIES; i++) {
     getCallName(HandledModuleNameList[i], LOAD_FUNC_IDX, funcName, MAX_FUNC_NAME);
-    if (ItemsList_GetItem(callModulesList, funcName, &fData) == true) {
+    if (ItemsList_GetItem(callModulesList, funcName, &fData)) {
       loadFunc = (int16_t (*)(void **entity, const SecureStorageS *storage, const char *prefix, char **retName))fData;
-      if (loadFunc(&val, storage, prefix, &tName) == true) {
-        if (registerProperty(*propertiesData, HandledModuleNameList[i], val) == false) {
+      if (loadFunc(&val, storage, prefix, &tName)) {
+        if (!registerProperty(*propertiesData, HandledModuleNameList[i], val) ) {
           fprintf(stdout, "entityData: loadProperties, Internal error: can't "
                           "add property to "
                           "module '%s', error: %s\n",
@@ -230,11 +230,11 @@ bool storeMembers(const groupData *entity, const SecureStorageS *storage, const 
     assert(LIB_NAME "Group data and storage structures as well as prefix must not be NULL" && false);
     return false;
   }
-  if (Utils_IsPrefixValid("storeMembers", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("storeMembers", prefix) ) return false;
   t = entity->Members;
   generateMembersPrefix(prefix, &key);
   snprintf(data, MAX_PREFIX_LEN, "%d", (int16_t)hcount(t));
-  if (SecureStorage_AddItem(storage, (const unsigned char *)key, strlen(key), (unsigned char *)data, strlen(data)) == false) {
+  if (!SecureStorage_AddItem(storage, (const unsigned char *)key, strlen(key), (unsigned char *)data, strlen(data)) ) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", key, data);
     return false;
   }
@@ -242,7 +242,7 @@ bool storeMembers(const groupData *entity, const SecureStorageS *storage, const 
   if (hfirst(t)) {
     do {
       snprintf(data, sizeof(data), MEMBER_LIST_FMT, key, MEMBER_NAME_PREFIX, cnt++);
-      if (SecureStorage_AddItem(storage, (unsigned char *)data, strlen(data), (unsigned char *)hkey(t), strlen((char *)hkey(t))) == false) {
+      if (!SecureStorage_AddItem(storage, (unsigned char *)data, strlen(data), (unsigned char *)hkey(t), strlen((char *)hkey(t))) ) {
         snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", data, (char *)hkey(t));
         Utils_Free((void *)key);
         return false;
@@ -265,9 +265,9 @@ bool loadMembers(groupData **entity, const SecureStorageS *storage, const char *
     assert(LIB_NAME "Storage structure must not be NULL" && false);
     return false;
   }
-  if (Utils_IsPrefixValid("loadMembers", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("loadMembers", prefix) ) return false;
   generateMembersPrefix(prefix, &key);
-  if (SecureStorage_GetItem(storage, (const unsigned char *)key, strlen(key), (unsigned char **)&val) == false) {
+  if (!SecureStorage_GetItem(storage, (const unsigned char *)key, strlen(key), (unsigned char **)&val) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: loadMembers, Read from "
                                      "secure storage key '%s' not found",
              key);
@@ -283,7 +283,7 @@ bool loadMembers(groupData **entity, const SecureStorageS *storage, const char *
   Utils_Free(val);
   for (i = 0; i < len; i++) {
     snprintf(mKey, sizeof(mKey), MEMBER_LIST_FMT, key, MEMBER_NAME_PREFIX, i + 1);
-    if (SecureStorage_GetItem(storage, (unsigned char *)mKey, strlen(mKey), (unsigned char **)&val) == false) {
+    if (!SecureStorage_GetItem(storage, (unsigned char *)mKey, strlen(mKey), (unsigned char **)&val) ) {
       snprintf(errStr, sizeof(errStr), "Internal Error: loadMembers, Read from "
                                        "secure storage key '%s' not found",
                mKey);
@@ -293,9 +293,8 @@ bool loadMembers(groupData **entity, const SecureStorageS *storage, const char *
     debug_print("Read from storage: key: '%s' user name '%s'\n", mKey, val);
     ret = addUserToGroup(*entity, (char *)val);
     Utils_Free(val);
-    if (ret == false) {
-      char *name = NULL;
-      if (*entity != NULL) name = (*entity)->Name;
+    if (!ret) {
+      char *name = (*entity)->Name;
       printf("Internal error when reading from secure storage: can't add "
              "entity member '%s' to entity '%s', error: %s\n",
              val, name, errStr);
@@ -315,8 +314,8 @@ bool store(const void *entity, const SecureStorageS *storage, const char *module
     assert(LIB_NAME "Storage and entity structures must not be NULL" && false);
     return false;
   }
-  if (Utils_IsPrefixValid("Store", modulePrefix) == false) return false;
-  if (EntityManager_StoreName(storage, modulePrefix, name, &prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Store", modulePrefix) ) return false;
+  if (!EntityManager_StoreName(storage, modulePrefix, name, &prefix) ) return false;
   if (groupFlag) ret = storeMembers((const groupData *)entity, storage, prefix);
   ret = ret && storeProperties(propertyData, storage, prefix);
   Utils_Free((void *)prefix);
@@ -357,8 +356,8 @@ bool load(void **entity, const SecureStorageS *storage, const char *modulePrefix
     snprintf(errStr, sizeof(errStr), "Storage must initiated first");
     return false;
   }
-  if (Utils_IsPrefixValid("Load", modulePrefix) == false) return false;
-  if (EntityManager_LoadName(storage, modulePrefix, &val, &prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Load", modulePrefix) ) return false;
+  if (!EntityManager_LoadName(storage, modulePrefix, &val, &prefix) ) return false;
   if (strncmp(modulePrefix, USER_PREFIX, strlen(USER_PREFIX)) == 0) {
     newUser((userData **)entity, val);
     propertyData = ((userData *)(*entity))->PropertiesData;
@@ -389,12 +388,12 @@ bool isEqualProperties(const ItemsHolder *propertiesData1, const ItemsHolder *pr
     return false;
   }
   for (i = 0; i < NUM_OF_LOAD_STORE_PROPERTIES; i++) {
-    if (getProperty(propertiesData1, HandledModuleNameList[i], &val1) == true) {
+    if (getProperty(propertiesData1, HandledModuleNameList[i], &val1)) {
       getCallName(HandledModuleNameList[i], IS_EQUAL_FUNC_IDX, funcName, MAX_FUNC_NAME);
       getProperty(propertiesData2, HandledModuleNameList[i], &val2);
-      if (ItemsList_GetItem(callModulesList, funcName, &fData) == true) {
+      if (ItemsList_GetItem(callModulesList, funcName, &fData)) {
         isEqualFunc = (int16_t (*)(const void *u1, const void *u2))fData;
-        if (isEqualFunc((void *)val1, (void *)val2) == false) {
+        if (!isEqualFunc((void *)val1, (void *)val2) ) {
           snprintf(errStr, sizeof(errStr), "Is equal for module %s fail", HandledModuleNameList[i]);
           return false;
         }
@@ -416,7 +415,7 @@ bool isContainsMembers(const groupData *entity1, const groupData *entity2) {
   if (hfirst(t1)) {
     do {
       name = (char *)hkey(t1);
-      if (isUserPartOfGroup(entity2, name) == false) {
+      if (!isUserPartOfGroup(entity2, name) ) {
         debug_print("entityData '%s' wasn't found in entity '%s' members\n", name, entity2->Name);
         return false;
       }
@@ -455,7 +454,7 @@ bool isEqualGroups(const void *u1, const void *u2) {
   entity1 = (const groupData *)u1;
   entity2 = (const groupData *)u2;
   if (strcmp(entity1->Name, entity2->Name) != 0) return false;
-  if (isEqualMembers(entity1, entity2) == false) {
+  if (!isEqualMembers(entity1, entity2) ) {
     return false;
   }
   return isEqualProperties(entity1->PropertiesData, entity2->PropertiesData);
@@ -541,9 +540,9 @@ bool removeProperty(ItemsHolder *propertiesData, const char *propertyName, bool 
       return false;
   }
 
-  if (getProperty(propertiesData, propertyName, &data) == true) {
+  if (getProperty(propertiesData, propertyName, &data)) {
     getCallName(propertyName, REMOVE_FUNC_IDX, funcName, MAX_FUNC_NAME);
-    if (ItemsList_GetItem(callModulesList, funcName, &fData) == true) {
+    if (ItemsList_GetItem(callModulesList, funcName, &fData)) {
       removeFunc = (void (*)(void *))fData;
       removeFunc(data);
       if (standAlone) // in loop the entry can't be removed

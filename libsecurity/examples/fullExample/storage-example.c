@@ -7,7 +7,7 @@ static bool storeToFile(EntityManager *entityManager, const char *fileName, cons
   bool pass=false;
 
   pass = EntityManager_Store(entityManager, fileName, secret, salt);
-  if (pass == false) {
+  if (!pass ) {
     printf("Error while storing data to file '%s', error %s\n", fileName, errStr);
   }
   return pass;
@@ -17,7 +17,7 @@ static bool loadFromFile(EntityManager *entityManager, const char *fileName, con
   bool pass=false;
 
     pass = EntityManager_Load(&(entityManager), fileName, secret, salt);
-    if (pass == false) {
+    if (!pass ) {
       printf("Error while loading data from file '%s', error %s\n", fileName, errStr);
     }
   return pass;
@@ -31,9 +31,9 @@ bool StoreData(EntityManager *entityManager) {
 
   EntityManager_New(&e1);
   loadedEntityManager = &e1;
-  if (storeToFile(entityManager, fileName, StorageSecret, StorageSalt) == true) {
-	  if (loadFromFile(loadedEntityManager, fileName, StorageSecret, StorageSalt) == true) {
-	    if (EntityManager_IsEqual(entityManager, loadedEntityManager) == false) {
+  if (storeToFile(entityManager, fileName, StorageSecret, StorageSalt)) {
+	  if (loadFromFile(loadedEntityManager, fileName, StorageSecret, StorageSalt)) {
+	    if (!EntityManager_IsEqual(entityManager, loadedEntityManager) ) {
 	      printf("Stored data != loaded one");
 	      EntityManager_PrintFull(stdout, "Stored data:", entityManager);
 	      EntityManager_PrintFull(stdout, "Loaded data:", loadedEntityManager);

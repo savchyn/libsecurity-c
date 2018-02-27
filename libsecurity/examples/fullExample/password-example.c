@@ -9,7 +9,7 @@ static bool checkPwd(EntityManager *entityManager, const char *userName) {
   const unsigned char *wrongPassword = (const unsigned char *) "wrong password";
   PwdS *pwdUser=NULL;
 
-  if (EntityManager_GetProperty(entityManager, userName, PWD_PROPERTY_NAME, (void **)&pwdUser) == false) {
+  if (!EntityManager_GetProperty(entityManager, userName, PWD_PROPERTY_NAME, (void **)&pwdUser) ) {
     printf("checkPwd failed, can't get the 'Password' property for user '%s', Error: %s\n", userName, errStr);
     return false;
   }
@@ -41,7 +41,7 @@ static bool checkPwd(EntityManager *entityManager, const char *userName) {
     Utils_Free(newPwd);
     return false;
   }
-  if (Pwd_UpdatePassword(pwdUser, newPwd, PwdSecret, STRENGTH_GOOD) == false) {
+  if (!Pwd_UpdatePassword(pwdUser, newPwd, PwdSecret, STRENGTH_GOOD) ) {
       printf("checkPwd, new password '%s' was not updated, the error is %s\n", PwdSecret, errStr);
   }else {
     printf("checkPwd failed, Password '%s' updated successfully to the new password '%s', but this password was already used as one of the last %d passwords\n", 
@@ -61,7 +61,7 @@ static bool checkPwd(EntityManager *entityManager, const char *userName) {
     Utils_Free(tPwd);
     return false;
   }
-  if (Pwd_VerifyPassword(pwdUser, tPwd) == false) {
+  if (!Pwd_VerifyPassword(pwdUser, tPwd) ) {
       printf("checkPwd, second attempt to match the temporray password '%s' was rejected (as expected), error %s\n", tPwd, errStr);
   }else {
     printf("checkPwd failed, Current password '%s' matched but it was set to be a temporary password (turns obsolete after a single use)\n", tPwd);
@@ -81,7 +81,7 @@ static bool checkPwd(EntityManager *entityManager, const char *userName) {
 static bool createAndAddPwd(EntityManager *entityManager, const char *userName) {
   PwdS *pwdUser;
 
-  if (Pwd_NewUserPwd(&pwdUser, PwdSecret, PwdSalt, STRENGTH_GOOD) == false) {
+  if (!Pwd_NewUserPwd(&pwdUser, PwdSecret, PwdSalt, STRENGTH_GOOD) ) {
     printf("createAndAddPwd failed, Can't create OTP user, error: %s\n", errStr);
     return false;
   }

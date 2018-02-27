@@ -147,7 +147,7 @@ STATIC bool checkAddValidParams(EntityManager *entityManager, const char *name) 
     assert(LIB_NAME "EntityManager structure and name string must not be NULL" && false);
     return false;
   }
-  if (EntityManager_IsEntityInList(entityManager, name) == true) {
+  if (EntityManager_IsEntityInList(entityManager, name)) {
     snprintf(errStr, sizeof(errStr), "the name '%s' is already in the EntityManager", name);
     return false;
   }
@@ -162,9 +162,9 @@ bool EntityManager_AddUser(EntityManager *entityManager, const char *name) {
     snprintf(errStr, sizeof(errStr), "EntityManager_AddUser entityManager (isNull %d) and user name '%s' must not be NULL", entityManager == NULL, name);
     return false;
   }
-  if (checkAddValidParams(entityManager, name) == false) return false;
-  if (newUser(&entity, name) == false) return false;
-  if (ItemsList_AddItem(entityManager->Users, name, entity) == false) {
+  if (!checkAddValidParams(entityManager, name) ) return false;
+  if (!newUser(&entity, name) ) return false;
+  if (!ItemsList_AddItem(entityManager->Users, name, entity) ) {
     freeUser(entity);
     return false;
   }
@@ -179,9 +179,9 @@ bool EntityManager_AddGroup(EntityManager *entityManager, const char *name) {
     snprintf(errStr, sizeof(errStr), "EntityManager_AddGroup entityManager (isNull %d) and user name '%s' must not be NULL", entityManager == NULL, name);
     return false;
   }
-  if (checkAddValidParams(entityManager, name) == false) return false;
-  if (newGroup(&entity, name) == false) return false;
-  if (ItemsList_AddItem(entityManager->Groups, name, entity) == false) {
+  if (!checkAddValidParams(entityManager, name) ) return false;
+  if (!newGroup(&entity, name) ) return false;
+  if (!ItemsList_AddItem(entityManager->Groups, name, entity) ) {
     freeGroup(entity);
     return false;
   }
@@ -199,9 +199,9 @@ bool EntityManager_AddResource(EntityManager *entityManager, const char *name) {
              entityManager == NULL, name);
     return false;
   }
-  if (checkAddValidParams(entityManager, name) == false) return false;
-  if (newResource(&entity, name) == false) return false;
-  if (ItemsList_AddItem(entityManager->Resources, name, entity) == false) {
+  if (!checkAddValidParams(entityManager, name) ) return false;
+  if (!newResource(&entity, name) ) return false;
+  if (!ItemsList_AddItem(entityManager->Resources, name, entity) ) {
     freeGroup(entity);
     return false;
   }
@@ -263,7 +263,7 @@ bool EntityManager_IsEntityInList(const EntityManager *entityManager, const char
     snprintf(errStr, sizeof(errStr), "EntityManager_IsEntityInList: entityManager structure and entity name string must not be NULL");
     return false;
   }
-  if (Utils_CheckNameValidity("EntityManager_IsEntityInList", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) == false) return false;
+  if (!Utils_CheckNameValidity("EntityManager_IsEntityInList", name, MIN_ENTITY_NAME_LEN, MAX_ENTITY_NAME_LEN) ) return false;
   return EntityManager_IsEntityInUsersList(entityManager, name) || EntityManager_IsEntityInGroupsList(entityManager, name) ||
          EntityManager_IsEntityInResourcesList(entityManager, name);
 }
@@ -274,15 +274,15 @@ STATIC bool checkDataAndGetGroup(const EntityManager *entityManager, const char 
     assert(LIB_NAME "EntityManager structure must not be NULL" && false);
     return false;
   }
-  if (EntityManager_IsEntityInGroupsList(entityManager, groupName) == false) {
+  if (!EntityManager_IsEntityInGroupsList(entityManager, groupName) ) {
     snprintf(errStr, sizeof(errStr), "group '%s' is not in groups list", groupName);
     return false;
   }
-  if (EntityManager_IsEntityInUsersList(entityManager, userName) == false) {
+  if (!EntityManager_IsEntityInUsersList(entityManager, userName) ) {
     snprintf(errStr, sizeof(errStr), "user '%s' is not in users list", userName);
     return false;
   }
-  if (getGroup(entityManager, groupName, (void **)gEntity) == false) {
+  if (!getGroup(entityManager, groupName, (void **)gEntity) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: EntityManager_AddUserToGroup: can't get group "
                                      "'%s' is from Groups list",
              userName);
@@ -300,7 +300,7 @@ bool EntityManager_AddUserToGroup(EntityManager *entityManager, const char *grou
              entityManager == NULL, userName, groupName);
     return false;
   }
-  if (checkDataAndGetGroup(entityManager, groupName, userName, &gEntity) == false) {
+  if (!checkDataAndGetGroup(entityManager, groupName, userName, &gEntity) ) {
     return false;
   }
   return addUserToGroup(gEntity, userName);
@@ -315,7 +315,7 @@ bool EntityManager_RemoveUserFromGroup(EntityManager *entityManager, const char 
              entityManager == NULL, userName, groupName);
     return false;
   }
-  if (checkDataAndGetGroup(entityManager, groupName, userName, &gEntity) == false) {
+  if (!checkDataAndGetGroup(entityManager, groupName, userName, &gEntity) ) {
     return false;
   }
   return removeAUserFromGroup(gEntity, userName);
@@ -330,7 +330,7 @@ bool EntityManager_IsUserPartOfAGroup(const EntityManager *entityManager, const 
              entityManager == NULL, userName, groupName);
     return false;
   }
-  if (checkDataAndGetGroup(entityManager, groupName, userName, &gEntity) == false) {
+  if (!checkDataAndGetGroup(entityManager, groupName, userName, &gEntity) ) {
     return false;
   }
   return isUserPartOfGroup(gEntity, userName);
@@ -367,7 +367,7 @@ STATIC bool removeUserFromAllResources(EntityManager *entityManager, const char 
   if (hfirst(t)) {
     do {
       r = (resourceData *)hstuff(t);
-      if (EntityManager_GetProperty(entityManager, r->Name, ACL_PROPERTY_NAME, &a) == true) {
+      if (EntityManager_GetProperty(entityManager, r->Name, ACL_PROPERTY_NAME, &a)) {
         Acl_RemoveEntry(a, name);
       }
     } while (hnext(t));
@@ -406,8 +406,8 @@ bool EntityManager_Free(EntityManager *entityManager, const char *entityName) {
     snprintf(errStr, sizeof(errStr), "EntityManager_Free: entityManager structure and entity name must not be NULL");
     return false;
   }
-  if (EntityManager_RemoveUser(entityManager, entityName) == true) return true;
-  if (EntityManager_RemoveGroup(entityManager, entityName) == true) return true;
+  if (EntityManager_RemoveUser(entityManager, entityName)) return true;
+  if (EntityManager_RemoveGroup(entityManager, entityName)) return true;
   return EntityManager_RemoveResource(entityManager, entityName);
 }
 
@@ -443,7 +443,7 @@ bool EntityManager_StoreName(const SecureStorageS *storage, const char *modulePr
   Utils_Malloc((void **)(prefix), prefixLen);
   snprintf(*prefix, prefixLen, ENTITY_NAME_FMT, modulePrefix, ENTITY_NAME_POSTFIX);
   snprintf(data, sizeof(data), ENTITY_STORE_FMT, name);
-  if (SecureStorage_AddItem(storage, (unsigned char *)*prefix, strlen(*prefix), (unsigned char *)data, strlen(data)) == false) {
+  if (!SecureStorage_AddItem(storage, (unsigned char *)*prefix, strlen(*prefix), (unsigned char *)data, strlen(data)) ) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", *prefix, data);
     Utils_Free((void *)*prefix);
     return false;
@@ -462,7 +462,7 @@ bool EntityManager_LoadName(const SecureStorageS *storage, const char *modulePre
   prefixLen = strlen(modulePrefix) + strlen(ENTITY_NAME_POSTFIX) + 1;
   Utils_Malloc((void **)(prefix), prefixLen);
   snprintf(*prefix, prefixLen, ENTITY_NAME_FMT, modulePrefix, ENTITY_NAME_POSTFIX);
-  if (SecureStorage_GetItem(storage, (unsigned char *)*prefix, strlen(*prefix), (unsigned char **)name) == false) {
+  if (!SecureStorage_GetItem(storage, (unsigned char *)*prefix, strlen(*prefix), (unsigned char **)name) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: Read from secure storage key '%s' not found", *prefix);
     Utils_Free((void *)*prefix);
     return false;
@@ -479,7 +479,7 @@ bool EntityManager_Store(const EntityManager *entityManager, const char *fileNam
     snprintf(errStr, sizeof(errStr), "EntityManager_Store: entityManager structure, file name, secret and salt strings must not be NULL");
     return false;
   }
-  if (SecureStorage_NewStorage(secret, salt, &storage) == false) return false;
+  if (!SecureStorage_NewStorage(secret, salt, &storage) ) return false;
   ret = ItemsList_AddToStorage(storeUsers, entityManager->Users, &storage, USER_PREFIX);
   ret = ret && ItemsList_AddToStorage(storeGroups, entityManager->Groups, &storage, GROUP_PREFIX);
   ret = ret && ItemsList_AddToStorage(storeResources, entityManager->Resources, &storage, RESOURCE_PREFIX);
@@ -500,7 +500,7 @@ bool EntityManager_Load(EntityManager **entityManager, const char *fileName, con
   }
   EntityManager_Free(*entityManager, ROOT_USER_NAME);
   EntityManager_Free(*entityManager, ALL_ACL_NAME);
-  if (SecureStorage_LoadSecureStorageFromFile(fileName, secret, salt, &storage) == false) {
+  if (!SecureStorage_LoadSecureStorageFromFile(fileName, secret, salt, &storage) ) {
     return false;
   }
   ret = ItemsList_LoadFromStorage(load, &((*entityManager)->Users), &storage, USER_PREFIX, freeUser);
@@ -517,11 +517,11 @@ STATIC bool getEntity(EntityManager *entityManager, const char *entityName, void
     assert(LIB_NAME "EntityManager structure and entityName string must not be NULL" && false);
     return false;
   }
-  if (EntityManager_IsEntityInUsersList(entityManager, entityName) == true) {
+  if (EntityManager_IsEntityInUsersList(entityManager, entityName)) {
     getUser(entityManager, entityName, entity);
-  } else if (EntityManager_IsEntityInGroupsList(entityManager, entityName) == true) {
+  } else if (EntityManager_IsEntityInGroupsList(entityManager, entityName)) {
     getGroup(entityManager, entityName, entity);
-  } else if (EntityManager_IsEntityInResourcesList(entityManager, entityName) == true) {
+  } else if (EntityManager_IsEntityInResourcesList(entityManager, entityName)) {
     getResource(entityManager, entityName, entity);
   } else {
     snprintf(errStr, sizeof(errStr), "EntityManager: getEntity: entity '%s' is not in entityManager", entityName);
@@ -553,16 +553,16 @@ bool EntityManager_RegisterProperty(EntityManager *entityManager, const char *en
         Utils_Abort(errStr);
         return false;
     }
-  if (getEntity(entityManager, entityName, &entity) == false) {
+  if (!getEntity(entityManager, entityName, &entity) ) {
     snprintf(errStr, sizeof(errStr), "EntityManager_RegisterProperty: entity '%s' is not in entityManager", entityName);
     return false;
   }
   debug_print("Add property '%s'\n", propertyName);
-  if (EntityManager_IsEntityInUsersList(entityManager, entityName) == true)
+  if (EntityManager_IsEntityInUsersList(entityManager, entityName))
     return ItemsList_AddItem(((userData *)entity)->PropertiesData, propertyName, itemData);
-  else if (EntityManager_IsEntityInGroupsList(entityManager, entityName) == true)
+  else if (EntityManager_IsEntityInGroupsList(entityManager, entityName))
     return ItemsList_AddItem(((groupData *)entity)->PropertiesData, propertyName, itemData);
-  else if (EntityManager_IsEntityInResourcesList(entityManager, entityName) == true)
+  else if (EntityManager_IsEntityInResourcesList(entityManager, entityName))
     return ItemsList_AddItem(((resourceData *)entity)->PropertiesData, propertyName, itemData);
   return false;
 }
@@ -591,11 +591,11 @@ bool EntityManager_RemoveProperty(EntityManager *entityManager, const char *enti
   }
   getEntity(entityManager, entityName, &entity);
   if (entity == NULL) return false;
-  if (EntityManager_IsEntityInUsersList(entityManager, entityName) == true)
+  if (EntityManager_IsEntityInUsersList(entityManager, entityName))
     return removeProperty((void *)(((userData *)entity)->PropertiesData), propertyName, standAlone);
-  else if (EntityManager_IsEntityInGroupsList(entityManager, entityName) == true)
+  else if (EntityManager_IsEntityInGroupsList(entityManager, entityName))
     return removeProperty((void *)(((groupData *)entity)->PropertiesData), propertyName, standAlone);
-  else if (EntityManager_IsEntityInResourcesList(entityManager, entityName) == true)
+  else if (EntityManager_IsEntityInResourcesList(entityManager, entityName))
     return removeProperty((void *)(((resourceData *)entity)->PropertiesData), propertyName, standAlone);
   return false;
 }
@@ -611,21 +611,21 @@ bool EntityManager_GetProperty(const EntityManager *entityManager, const char *e
       Utils_Abort(errStr);
       return false;
   }
-  if (EntityManager_IsEntityInUsersList(entityManager, entityName) == true) {
-    if (getUser(entityManager, entityName, &entity) == false) {
+  if (EntityManager_IsEntityInUsersList(entityManager, entityName)) {
+    if (!getUser(entityManager, entityName, &entity) ) {
       snprintf(errStr, sizeof(errStr), "EntityManager_GetProperty: property for user '%s' was not found", entityName);
       return false;
     }
     propertyData = ((userData *)entity)->PropertiesData;
-  } else if (EntityManager_IsEntityInGroupsList(entityManager, entityName) == true) {
-    if (getGroup(entityManager, entityName, &entity) == true)
+  } else if (EntityManager_IsEntityInGroupsList(entityManager, entityName)) {
+    if (getGroup(entityManager, entityName, &entity))
       propertyData = ((groupData *)entity)->PropertiesData;
     else {
       snprintf(errStr, sizeof(errStr), "EntityManager_GetProperty: property for group '%s' was not found", entityName);
       return false;
     }
-  } else if (EntityManager_IsEntityInResourcesList(entityManager, entityName) == true) {
-    if (getResource(entityManager, entityName, &entity) == false) {
+  } else if (EntityManager_IsEntityInResourcesList(entityManager, entityName)) {
+    if (!getResource(entityManager, entityName, &entity) ) {
       snprintf(errStr, sizeof(errStr), "EntityManager_GetProperty: property for resource '%s' was not found", entityName);
       return false;
     }

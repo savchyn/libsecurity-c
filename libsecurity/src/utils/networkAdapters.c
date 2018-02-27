@@ -96,7 +96,7 @@ bool NetworkAdapters_GetMacAddress(unsigned char mac[MAC_ADDRESS_LEN]) {
 
 bool NetworkAdapters_OpenDTLSClient(const char *serverIpStr, int16_t port, int16_t *serverId, const char *cacertFile, const char *serverName) {
   (void)serverId;
-  if (Utils_IsIpStrValid(serverIpStr) == false) return false;
+  if (!Utils_IsIpStrValid(serverIpStr)) return false;
   if (cacertFile != NULL && serverName != NULL) {
     connectionIsDtls = true;
     bool ret = DTLS_ClientInit(cacertFile, serverIpStr, port, serverName);
@@ -109,7 +109,7 @@ bool NetworkAdapters_OpenDTLSClient(const char *serverIpStr, int16_t port, int16
 
 bool NetworkAdapters_SendDTLSData(int16_t serverId, const char *str, int16_t sLen) {
   (void)serverId;
-  if (connectionIsOpen == false) {
+  if (!connectionIsOpen ) {
     snprintf(errStr, sizeof(errStr), "The connection must be set first");
     return false;
   }
@@ -122,7 +122,7 @@ bool NetworkAdapters_SendDTLSData(int16_t serverId, const char *str, int16_t sLe
 
 bool NetworkAdapters_CloseDTLSLog(int16_t serverId) {
   (void)serverId;
-  if (connectionIsOpen == false) {
+  if (!connectionIsOpen ) {
     snprintf(errStr, sizeof(errStr), "The connection must be set first");
     return false;
   }
@@ -139,7 +139,7 @@ static struct sockaddr_in serverSocket;
 bool NetworkAdapters_OpenClient(const char *serverIpStr, int16_t port, int16_t *serverId, const char *cacertFile, const char *serverName) {
   (void)cacertFile;
   (void)serverName;
-  if (Utils_IsIpStrValid(serverIpStr) == false) return false;
+  if (!Utils_IsIpStrValid(serverIpStr) ) return false;
   if (((*serverId) = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
     snprintf(errStr, sizeof(errStr), "Can't open socket");
     return false;
@@ -156,7 +156,7 @@ bool NetworkAdapters_OpenClient(const char *serverIpStr, int16_t port, int16_t *
 }
 
 bool NetworkAdapters_SendData(int16_t serverId, const char *str, int16_t sLen) {
-  if (connectionIsOpen == false) {
+  if (!connectionIsOpen ) {
     snprintf(errStr, sizeof(errStr), "The connection must be set first");
     return false;
   }
@@ -167,7 +167,7 @@ bool NetworkAdapters_SendData(int16_t serverId, const char *str, int16_t sLen) {
 }
 
 bool NetworkAdapters_CloseLog(int16_t serverId) {
-  if (connectionIsOpen == false) {
+  if (!connectionIsOpen ) {
     snprintf(errStr, sizeof(errStr), "The connection must be set first");
     return false;
   }
@@ -184,7 +184,7 @@ static EthernetInterface eth;
 static bool ethWasSet = false;
 
 bool NetworkAdapters_GetEth(void **eth1) {
-  if (ethWasSet == false) {
+  if (!ethWasSet ) {
     eth.init();
     eth.connect();
     ethWasSet = true;
@@ -228,7 +228,7 @@ bool NetworkAdapters_OpenClient(const char *serverIpStr, int16_t port, int16_t *
 bool NetworkAdapters_SendData(int16_t serverId, const char *str, int16_t sLen) {
   (void)serverId;
   (void)sLen;
-  if (connectionIsOpen == false) {
+  if (!connectionIsOpen ) {
     snprintf(errStr, sizeof(errStr), "The connection must be set first");
     return false;
   }

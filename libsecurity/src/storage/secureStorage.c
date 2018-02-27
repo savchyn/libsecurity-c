@@ -58,9 +58,9 @@ STATIC bool calcHash(const SecureStorageS *storage, unsigned char *hash) {
           data = (unsigned char *)hkey(t);
         else
           data = (unsigned char *)hstuff(t);
-        if (Utils_GetCharArrayLen(data, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
+        if (!Utils_GetCharArrayLen(data, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
         len += UTILS_STR_LEN_SIZE;
-        if (Utils_GetCharArrayLen(storage->caSecret, &secretLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) {
+        if (!Utils_GetCharArrayLen(storage->caSecret, &secretLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) {
           return false;
         }
         Crypto_CalcHmac(&(storage->caSecret[UTILS_STR_LEN_SIZE]), secretLen, data, len, cHash);
@@ -79,12 +79,12 @@ STATIC bool getValue(htab *t, const unsigned char *key, unsigned char **val) {
     assert(LIB_NAME "Hash structure and key string must not be NULL" && false);
     return false;
   }
-  if (Utils_GetCharArrayLen(key, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
+  if (!Utils_GetCharArrayLen(key, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
   len += UTILS_STR_LEN_SIZE;
-  if (hfind(t, key, len) == false) {
+  if (!hfind(t, key, len) ) {
     return false;
   }
-  if (Utils_GetCharArrayLen((unsigned char *)hstuff(t), &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
+  if (!Utils_GetCharArrayLen((unsigned char *)hstuff(t), &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
   Utils_CreateAndCopyUcString(val, (unsigned char *)hstuff(t), len + UTILS_STR_LEN_SIZE);
   return true;
 }
@@ -98,8 +98,8 @@ STATIC bool clearKey(const SecureStorageS *storage, const unsigned char *key) {
     return false;
   }
   t = storage->Data;
-  if (Utils_GetCharArrayLen(key, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
-  if (key != NULL && hfind(t, key, len + UTILS_STR_LEN_SIZE) == true) { // override existing item
+  if (!Utils_GetCharArrayLen(key, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
+  if (key != NULL && hfind(t, key, len + UTILS_STR_LEN_SIZE)) { // override existing item
     Utils_Free(hkey(t));
     Utils_Free(hstuff(t));
     hdel(t);
@@ -129,8 +129,8 @@ STATIC bool updateData(const SecureStorageS *storage, const unsigned char *key, 
   }
   t = storage->Data;
   clearKey(storage, key);
-  if (Utils_GetCharArrayLen(key, &kLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false ||
-      Utils_GetCharArrayLen(val, &vLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false)
+  if (!Utils_GetCharArrayLen(key, &kLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN)  ||
+      !Utils_GetCharArrayLen(val, &vLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) )
     return false;
   if (hadd(t, key, kLen + UTILS_STR_LEN_SIZE, val)) {
     Utils_CreateAndCopyUcString(&keyStr, key, kLen + UTILS_STR_LEN_SIZE);
@@ -151,7 +151,7 @@ STATIC bool isSaltValid(const unsigned char *caSalt) {
     assert(LIB_NAME "Salt string must not be NULL" && false);
     return false;
   }
-  if (Utils_GetCharArrayLen(caSalt, &len, MIN_SALT_LEN, KEY_VAL_MAX_STR_LEN) == false) { // salt can be empty string
+  if (!Utils_GetCharArrayLen(caSalt, &len, MIN_SALT_LEN, KEY_VAL_MAX_STR_LEN) ) { // salt can be empty string
     return false;
   }
   return true;
@@ -164,7 +164,7 @@ STATIC bool isSecretValid(const unsigned char *caSecret) {
     assert(LIB_NAME "Secret string must not be NULL" && false);
     return false;
   }
-  if (Utils_GetCharArrayLen(caSecret, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) {
+  if (!Utils_GetCharArrayLen(caSecret, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) {
     return false;
   }
   // in NaCl it must be at least 32, so the common is exactly 32B
@@ -184,7 +184,7 @@ STATIC bool isLengthValid(const unsigned char *caStr, int16_t minLen, int16_t ma
     len = 0;
     assert(LIB_NAME "Input string must not be NULL" && false);
   } else {
-    if (Utils_GetCharArrayLen(caStr, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
+    if (!Utils_GetCharArrayLen(caStr, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
   }
   if (caStr == NULL || minLen > len || len > maxLen) {
     snprintf(errStr, sizeof(errStr), "Error: number of characters %d in '%s' must be between %d-%d", len, caStr, minLen, maxLen);
@@ -194,7 +194,7 @@ STATIC bool isLengthValid(const unsigned char *caStr, int16_t minLen, int16_t ma
 }
 
 STATIC bool isDataValid(const unsigned char *caSecret, const unsigned char *caSalt) {
-  if (isSaltValid(caSalt) == false) {
+  if (!isSaltValid(caSalt) ) {
     return false;
   }
   return isSecretValid(caSecret);
@@ -220,7 +220,7 @@ bool SecureStorage_NewStorage(const unsigned char *sSecret, const unsigned char 
   }
   Utils_GenerateCharArray(sSecret, strlen((const char *)sSecret), &secretStr);
   Utils_GenerateCharArray(sSalt, strlen((const char *)sSalt), &saltStr);
-  if (isDataValid(secretStr, saltStr) == false) {
+  if (!isDataValid(secretStr, saltStr) ) {
     Utils_Free(secretStr);
     Utils_Free(saltStr);
     return false;
@@ -245,7 +245,7 @@ STATIC bool encrypt(const unsigned char *caText, unsigned char *ivStr, const uns
     assert(LIB_NAME "Input text, initiation vector and secret strings must not be NULL" && false);
     return false;
   }
-  if (Utils_GetCharArrayLen(caText, &textLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
+  if (!Utils_GetCharArrayLen(caText, &textLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
   textLen += UTILS_STR_LEN_SIZE;
   textLen += Crypto_GetAesPadFactor(textLen);
   if (textLen > NaCl_MAX_TEXT_LEN_BYTES) {
@@ -278,7 +278,7 @@ STATIC bool decrypt(unsigned char *caText, const unsigned char *caSecret, unsign
     assert(LIB_NAME "TExt and secret strings must not be NULL" && false);
     return false;
   }
-  if (Utils_GetCharArrayLen((unsigned char *)caText, &len, KEY_VAL_MIN_STR_LEN + FULL_IV_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
+  if (!Utils_GetCharArrayLen((unsigned char *)caText, &len, KEY_VAL_MIN_STR_LEN + FULL_IV_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
   // both the encrypted and the IV have UTILS_STR_LEN_SIZE
   textLen = len - FULL_IV_LEN;
   longLen = textLen;
@@ -306,7 +306,7 @@ STATIC void getHKey(const unsigned char *caKey, unsigned char *cahKey) {
     return;
   }
   memset(cahKey, 0, SHA256_LEN);
-  if (Utils_GetCharArrayLen(caKey, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return;
+  if (!Utils_GetCharArrayLen(caKey, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return;
   keyPtr = (const unsigned char *)(caKey + UTILS_STR_LEN_SIZE);
   Crypto_SHA256(keyPtr, len, hash);
   memcpy(cahKey + UTILS_STR_LEN_SIZE, hash, SHA256_LEN);
@@ -329,7 +329,7 @@ STATIC bool getRandomFromKey(const SecureStorageS *storage, const unsigned char 
   t = storage->Data;
   getHKey(caKey, cahKey);
   ret = getValue(t, cahKey, carKey);
-  if (ret == false) {
+  if (!ret ) {
     if (SECURE_DEBUG) {
       Utils_PrintHexStr(stderr, "Random from key not found ", cahKey, SHA256_LEN);
     }
@@ -399,24 +399,24 @@ bool SecureStorage_AddItem(const SecureStorageS *storage, const unsigned char *s
     snprintf(errStr, sizeof(errStr), "SecureStorage_AddItem: key len %d and val len %d must be positives\n", keyLen, valLen);
     return false;
   }
-  if (READABLE_STORAGE == true)
+  if (READABLE_STORAGE)
     saltLen = 0;
-  else if (Utils_GetCharArrayLen(storage->caSalt, &saltLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false)
+  else if (!Utils_GetCharArrayLen(storage->caSalt, &saltLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) )
     return false;
-  if (isSecretValid(storage->caSecret) == false) return false;
-  if (generateAlignedCharAray(sKey, keyLen, storage->caSalt, saltLen, &caKey) == false) return false;
-  if (generateAlignedCharAray(sVal, valLen, NULL, 0, &caVal) == false) {
+  if (!isSecretValid(storage->caSecret) ) return false;
+  if (!generateAlignedCharAray(sKey, keyLen, storage->caSalt, saltLen, &caKey) ) return false;
+  if (!generateAlignedCharAray(sVal, valLen, NULL, 0, &caVal) ) {
     Utils_Free(caKey);
     return false;
   }
-  if (isLengthValid(caKey, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1) == false ||
-      isLengthValid(caVal, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1) == false) {
+  if (!isLengthValid(caKey, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1)
+   || !isLengthValid(caVal, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1) ) {
     Utils_Free(caKey);
     Utils_Free(caVal);
     return false;
   }
   keyWasAlreadyStored = getRandomFromKey(storage, caKey, cahKey, &tKey);
-  if (SECURE_DEBUG && keyWasAlreadyStored == true) {
+  if (SECURE_DEBUG && keyWasAlreadyStored) {
     Utils_PrintHexStr(stderr, "random of key ", tKey, SHA256_LEN);
   }
   if (keyWasAlreadyStored) {
@@ -433,14 +433,14 @@ bool SecureStorage_AddItem(const SecureStorageS *storage, const unsigned char *s
   if (SECURE_DEBUG) {
     Utils_PrintHexStr(stderr, "Use random of key ", rKey, SHA256_LEN);
   }
-  if (encrypt(caKey, rKey, storage->caSecret, &caEncKey) == false) {
+  if (!encrypt(caKey, rKey, storage->caSecret, &caEncKey) ) {
     Utils_Free(caKey);
     Utils_Free(caVal);
     return false;
   }
   Crypto_Random(rKey1 + UTILS_STR_LEN_SIZE, IV_LEN);
   Utils_SetCharArrayLen(rKey1, IV_LEN);
-  if (encrypt(caVal, rKey1, storage->caSecret, &caEncVal) == false) {
+  if (!encrypt(caVal, rKey1, storage->caSecret, &caEncVal) ) {
     Utils_Free(caKey);
     Utils_Free(caVal);
     Utils_Free(caEncKey);
@@ -449,7 +449,7 @@ bool SecureStorage_AddItem(const SecureStorageS *storage, const unsigned char *s
   debug_print("Add key: usedKey: %d, key '%s', val '%s'\n", keyWasAlreadyStored, caKey, caVal);
   Utils_Free(caKey);
   Utils_Free(caVal);
-  if (Utils_GetCharArrayLen(caEncKey, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) return false;
+  if (!Utils_GetCharArrayLen(caEncKey, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) return false;
   if (keyWasAlreadyStored != true) {
     updateData(storage, cahKey, rKey);
     if (SECURE_DEBUG) {
@@ -480,17 +480,17 @@ bool SecureStorage_GetItem(const SecureStorageS *storage, const unsigned char *s
     return false;
   }
   t = storage->Data;
-  if (READABLE_STORAGE == true)
+  if (READABLE_STORAGE)
     saltLen = 0;
-  else if (Utils_GetCharArrayLen(storage->caSalt, &saltLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false)
+  else if (!Utils_GetCharArrayLen(storage->caSalt, &saltLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) )
     return false;
-  if (generateAlignedCharAray(sKey, keyLen, storage->caSalt, saltLen, &caKey) == false) return false;
-  if (isLengthValid(caKey, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1) == false ||
-      Utils_GetCharArrayLen(caKey, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) {
+  if (!generateAlignedCharAray(sKey, keyLen, storage->caSalt, saltLen, &caKey) ) return false;
+  if (!isLengthValid(caKey, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1)  ||
+      !Utils_GetCharArrayLen(caKey, &len, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) {
     Utils_Free(caKey);
     return false;
   }
-  if (getRandomFromKey(storage, caKey, cahKey, &rKey) == false) {
+  if (!getRandomFromKey(storage, caKey, cahKey, &rKey) ) {
     Utils_Free(caKey);
     return false;
   }
@@ -499,13 +499,13 @@ bool SecureStorage_GetItem(const SecureStorageS *storage, const unsigned char *s
   }
   ret = encrypt(caKey, rKey, storage->caSecret, &caEncKey);
   Utils_Free(rKey);
-  if (ret == false) {
+  if (!ret ) {
     Utils_Free(caKey);
     return false;
   }
   ret = getValue(t, caEncKey, &caEncVal);
   Utils_Free(caEncKey);
-  if (ret == false) {
+  if (!ret ) {
     snprintf(errStr, sizeof(errStr), "Error: key '%s' was not found", caKey);
     Utils_Free(caKey);
     return false;
@@ -533,26 +533,26 @@ bool SecureStorage_RemoveItem(const SecureStorageS *storage, const unsigned char
     snprintf(errStr, sizeof(errStr), "SecureStorage_RemoveItem: key len %d must be positives\n", keyLen);
     return false;
   }
-  if (READABLE_STORAGE == true)
+  if (READABLE_STORAGE)
     saltLen = 0;
-  else if (Utils_GetCharArrayLen(storage->caSalt, &saltLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false)
+  else if (!Utils_GetCharArrayLen(storage->caSalt, &saltLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) )
     return false;
-  if (generateAlignedCharAray(sKey, keyLen, storage->caSalt, saltLen, &caKey) == false) return false;
-  if (isLengthValid(caKey, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1) == false || getRandomFromKey(storage, caKey, cahKey, &rKey) == false) {
+  if (!generateAlignedCharAray(sKey, keyLen, storage->caSalt, saltLen, &caKey) ) return false;
+  if (!isLengthValid(caKey, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN - 1)  || !getRandomFromKey(storage, caKey, cahKey, &rKey) ) {
     Utils_Free(caKey);
     return false;
   }
   ret1 = clearKey(storage, cahKey);
-  if (ret1 == false) { // continue to try to remove the "real" key value
+  if (!ret1 ) { // continue to try to remove the "real" key value // ???
     snprintf(errStr, sizeof(errStr), "Error: key for random '%s' was not found", cahKey);
   }
   ret = encrypt(caKey, rKey, storage->caSecret, &caEncKey);
   Utils_Free(rKey);
-  if (ret == false) {
+  if (!ret) {
     Utils_Free(caKey);
     return false;
   }
-  if (clearKey(storage, caEncKey) == false) {
+  if (!clearKey(storage, caEncKey) ) {
     Utils_Free(caEncKey);
     snprintf(errStr, sizeof(errStr), "Error: key '%s' was not found", caKey);
     return false;
@@ -578,10 +578,10 @@ STATIC bool calcHMac(const SecureStorageS *storage, unsigned char *caData) {
   }
   Utils_GetCharArrayLen(storage->caSalt, &len, MIN_SALT_LEN, KEY_VAL_MAX_STR_LEN);
 
-  if (Utils_GetCharArrayLen(storage->caSecret, &secretLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false) {
+  if (!Utils_GetCharArrayLen(storage->caSecret, &secretLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) ) {
     return false;
   }
-  if (Crypto_CalcHmac(&(storage->caSecret[UTILS_STR_LEN_SIZE]), secretLen, storage->caSalt, len + UTILS_STR_LEN_SIZE, tmpHash) == false)
+  if (!Crypto_CalcHmac(&(storage->caSecret[UTILS_STR_LEN_SIZE]), secretLen, storage->caSalt, len + UTILS_STR_LEN_SIZE, tmpHash) )
     return false;
   calcHashXor(hash, tmpHash, SHA256_LEN);
   memcpy(caData + UTILS_STR_LEN_SIZE, hash, SHA256_LEN);
@@ -595,8 +595,8 @@ STATIC bool writeHeader(FILE *fp, SecureStorageS *storage) {
     assert(LIB_NAME "Storage structure and storage salt string must not be NULL" && false);
     return false;
   }
-  if (Utils_WriteCharArray(fp, storage->caSalt) == false) return false;
-  if (Utils_WriteCharArray(fp, storage->caSign) == false) return false;
+  if (!Utils_WriteCharArray(fp, storage->caSalt) ) return false;
+  if (!Utils_WriteCharArray(fp, storage->caSign) ) return false;
   debug_print("Write to file: salt: '%s', signature '%s'\n", storage->caSalt, storage->caSign);
   return true;
 }
@@ -608,10 +608,10 @@ STATIC bool readHeader(FILE *fp, SecureStorageS *storage) {
   if (storage == NULL) {
     assert(LIB_NAME "Storage structure must not be NULL" && false);
   }
-  if (Utils_ReadCharArray(fp, caSalt, KEY_VAL_MAX_STR_LEN) == false) {
+  if (!Utils_ReadCharArray(fp, caSalt, KEY_VAL_MAX_STR_LEN) ) {
     return false;
   }
-  if (Utils_ReadCharArray(fp, caSign, KEY_VAL_MAX_STR_LEN) == false) {
+  if (!Utils_ReadCharArray(fp, caSign, KEY_VAL_MAX_STR_LEN) ) {
     return false;
   }
   debug_print("Read from file: salt: '%s', signature '%s'\n", caSalt, caSign);
@@ -625,15 +625,15 @@ STATIC void printDecryptedData(const char *header, unsigned char *caKey, unsigne
   int16_t keyLen = 0, valLen = 0;
   unsigned char *dKey = NULL, *dVal = NULL;
 
-  if (caKey == NULL || caVal == false) {
+  if (caKey == NULL || !caVal ) {
     assert(LIB_NAME "Key and value strings must not be NULL" && false);
     return;
   }
-  if (Utils_GetCharArrayLen(caKey, &keyLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false ||
-      Utils_GetCharArrayLen(caVal, &valLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false)
+  if (!Utils_GetCharArrayLen(caKey, &keyLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN)  ||
+      !Utils_GetCharArrayLen(caVal, &valLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) )
     return;
-  if (decrypt(caKey, caSecret, &dKey) == false) return;
-  if (decrypt(caVal, caSecret, &dVal) == false) {
+  if (!decrypt(caKey, caSecret, &dKey) ) return;
+  if (!decrypt(caVal, caSecret, &dVal) ) {
     Utils_Free(dKey);
     return;
   }
@@ -688,8 +688,8 @@ STATIC bool readKeyValue(FILE *fp, const SecureStorageS *storage) {
   }
   debug_print("Total number of items to read %d\n", total);
   for (i = 0; i < total; i++) {
-    if (Utils_ReadCharArray(fp, caKey, KEY_VAL_MAX_STR_LEN) == false || 
-        Utils_ReadCharArray(fp, caVal, KEY_VAL_MAX_STR_LEN) == false) {
+    if (!Utils_ReadCharArray(fp, caKey, KEY_VAL_MAX_STR_LEN)  ||
+        !Utils_ReadCharArray(fp, caVal, KEY_VAL_MAX_STR_LEN) ) {
       return false;
     }
     if (SECURE_DEBUG) {
@@ -708,7 +708,7 @@ bool SecureStorage_StoreSecureStorageToFile(const char *fileName, SecureStorageS
     snprintf(errStr, sizeof(errStr), "Storage and file name must initiated first");
     return false;
   }
-  if (calcHMac(storage, storage->caSign) == false) {
+  if (!calcHMac(storage, storage->caSign) ) {
     return false;
   }
   ofp = FileAdapters_Fopen(fileName, "w");
@@ -716,7 +716,7 @@ bool SecureStorage_StoreSecureStorageToFile(const char *fileName, SecureStorageS
     snprintf(errStr, sizeof(errStr), "Attempt to write the Secure storage to file '%s' failed", fileName);
     return false;
   }
-  if (writeHeader(ofp, storage) == false) return false;
+  if (!writeHeader(ofp, storage) ) return false;
   writeKeyValue(ofp, storage);
   FileAdapters_Fclose(ofp);
   return true;
@@ -736,11 +736,11 @@ bool SecureStorage_LoadSecureStorageFromFile(const char *fileName, const unsigne
     snprintf(errStr, sizeof(errStr), "Attempt to read Secure storage file '%s' failed", fileName);
     return false;
   }
-  if (SecureStorage_NewStorage(sSecret, sSalt, storage) == false) return false;
-  if (readHeader(ifp, storage) == false) return false;
+  if (!SecureStorage_NewStorage(sSecret, sSalt, storage) ) return false;
+  if (!readHeader(ifp, storage) ) return false;
   ret = readKeyValue(ifp, storage);
   FileAdapters_Fclose(ifp);
-  if (ret == false) {
+  if (!ret) {
     printf("%s\n", errStr);
     return false;
   }

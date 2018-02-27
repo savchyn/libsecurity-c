@@ -235,7 +235,7 @@ void Utils_PrintCharArray(FILE *ofp, const char *header, const unsigned char *st
     fprintf(ofp, "%s\n", header);
     return;
   }
-  if (Utils_GetCharArrayLen(str, &len, 0, ERR_STR_LEN) == false) return;
+  if (!Utils_GetCharArrayLen(str, &len, 0, ERR_STR_LEN) ) return;
   Utils_PrintHexStr(ofp, header, str, len + UTILS_STR_LEN_SIZE);
 }
 
@@ -266,10 +266,10 @@ bool Utils_GenerateCharArray(const unsigned char *str, int16_t len, unsigned cha
   unsigned char *ptr = NULL;
 
   if (str == NULL) return false;
-  if (Utils_Malloc((void **)caStr, len + UTILS_STR_LEN_SIZE + 1) == false) return false;
+  if (!Utils_Malloc((void **)caStr, len + UTILS_STR_LEN_SIZE + 1) ) return false;
   ptr = *caStr;
   memcpy(ptr + UTILS_STR_LEN_SIZE, str, len);
-  if (Utils_SetCharArrayLen(*caStr, len) == false) return false;
+  if (!Utils_SetCharArrayLen(*caStr, len) ) return false;
   ptr[len + UTILS_STR_LEN_SIZE] = 0;
   return true;
 }
@@ -278,7 +278,7 @@ bool Utils_ConvertCharArrayToStr(const unsigned char *caStr, unsigned char **str
   int16_t len = 0;
 
   if (caStr == NULL) return false;
-  if (Utils_GetCharArrayLen(caStr, &len, 0, ERR_STR_LEN) == false) return false;
+  if (!Utils_GetCharArrayLen(caStr, &len, 0, ERR_STR_LEN) ) return false;
   return Utils_CreateAndCopyUcString(str, &(caStr[UTILS_STR_LEN_SIZE]), len);
 }
 
@@ -289,7 +289,7 @@ bool Utils_GetCharArrayLen(const unsigned char *caStr, int16_t *len, int16_t min
   if (caStr == NULL) return false;
   for (i = 0; i < UTILS_STR_LEN_SIZE; i++) {
     if (caStr[i] == 0) return false;
-    if (isdigit(caStr[i]) == false) {
+    if (!isdigit(caStr[i]) ) {
       snprintf(errStr, sizeof(errStr), "Internal error: can't extract the string length from string, "
                                        "the %d leading bytes must digits\n",
                UTILS_STR_LEN_SIZE);
@@ -320,7 +320,7 @@ bool Utils_WriteCharArray(FILE *ofp, const unsigned char *caStr) {
   int16_t i = 0, len = 0;
 
   if (caStr == NULL || ofp == NULL) return false;
-  if (Utils_GetCharArrayLen(caStr, &len, 0, ERR_STR_LEN) == false) return false;
+  if (!Utils_GetCharArrayLen(caStr, &len, 0, ERR_STR_LEN) ) return false;
   fprintf(ofp, "%03d", len);
   for (i = UTILS_STR_LEN_SIZE; i < len + UTILS_STR_LEN_SIZE; i++) {
     fprintf(ofp, "%02x", caStr[i]);
@@ -360,7 +360,7 @@ bool Utils_CharArrayCmp(const unsigned char *caStr1, const unsigned char *caStr2
 
   if (caStr1 == NULL && caStr2 == NULL) return true;
   if (caStr1 == NULL || caStr2 == NULL) return false;
-  if (Utils_GetCharArrayLen(caStr1, &len1, 0, ERR_STR_LEN) == false || Utils_GetCharArrayLen(caStr2, &len2, 0, ERR_STR_LEN) == false)
+  if (!Utils_GetCharArrayLen(caStr1, &len1, 0, ERR_STR_LEN)  || !Utils_GetCharArrayLen(caStr2, &len2, 0, ERR_STR_LEN) )
     return false;
   if (len1 != len2) {
     snprintf(errStr, sizeof(errStr), "Strings are not equal len1 %d != len2 %d", len1, len2);
@@ -412,7 +412,7 @@ bool Utils_AddToHash(htab *t, const unsigned char *key, int16_t keyLen, void *va
 
 bool Utils_GetValFromHash(htab *t, const unsigned char *key, int16_t keyLen, void **val) {
   if (t == NULL || key == NULL || keyLen < 1) return false;
-  if (hfind(t, key, keyLen) == false) {
+  if (!hfind(t, key, keyLen) ) {
     snprintf(errStr, sizeof(errStr), "Hash doesn't contain key '%s', len %d", key, keyLen);
     return false;
   }
@@ -428,7 +428,7 @@ bool Utils_IsEqualHash(htab *t1, htab *t2) {
   if (hfirst(t1)) {
     do {
       key = (char *)hkey(t1);
-      if (hfind(t2, (unsigned char *)key, strlen(key)) == false) return false;
+      if (!hfind(t2, (unsigned char *)key, strlen(key)) ) return false;
     } while (hnext(t1));
   }
   return true;
@@ -436,7 +436,7 @@ bool Utils_IsEqualHash(htab *t1, htab *t2) {
 
 bool Utils_DeleteKeyFromHash(htab *t, const unsigned char *key, int16_t keyLen) {
   if (t == NULL || key == NULL || keyLen < 1) return false;
-  if (hfind(t, key, keyLen) == false) {
+  if (!hfind(t, key, keyLen) ) {
     return false;
   }
   Utils_Free(hkey(t));

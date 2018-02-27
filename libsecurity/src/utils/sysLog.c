@@ -132,7 +132,7 @@ STATIC bool setMacAddressToHostName() {
   char macAddress[MAC_ADDRESS_STR_LEN + 1];
 
   ret = NetworkAdapters_GetMacAddress(mac);
-  if (ret == false) return false;
+  if (!ret) return false;
   snprintf(macAddress, sizeof(macAddress), "%02x-%02x-%02x-%02x-%02x-%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   strncpy(hostName, macAddress, MAX_HOST_NAME);
   return true;
@@ -154,7 +154,7 @@ bool Syslog_SetDtls(bool setDtls) {
 bool Syslog_UpdateAppName(const char *str) {
   int16_t i = 0, len = strlen(str);
 
-  if (appNameWasSet == false) snprintf(appName, sizeof(appName), NOT_VALID_APP_NAME);
+  if (!appNameWasSet ) snprintf(appName, sizeof(appName), NOT_VALID_APP_NAME);
   if (len == 0) return false;
   for (i = 0; i < len; i++) {
     if (!isalpha((unsigned char)str[i]) && !isdigit((unsigned char)str[i])) {
@@ -196,7 +196,7 @@ bool Syslog_Log(int16_t severity, const char *format, ...) {
   vsnprintf(str, sizeof(str), format, arglist);
   va_end(arglist);
 
-  if (isLogOpen == false) {
+  if (!isLogOpen ) {
     snprintf(errStr, sizeof(errStr), "Syslog must be open before sending data to Syslog_Log");
     return false;
   }
@@ -210,7 +210,7 @@ bool Syslog_Log(int16_t severity, const char *format, ...) {
 }
 
 bool Syslog_Mule(int16_t type, const char *metric, int16_t val) {
-  if (isLogOpen == false) {
+  if (!isLogOpen ) {
     snprintf(errStr, sizeof(errStr), "Syslog must be open before sending data to Syslog_Mule");
     return false;
   }

@@ -211,7 +211,7 @@ bool DTLS_ClientInit(const char *cacertFile, const char *serverAddr, int16_t por
 }
 
 bool DTLS_ClientSendPacket(const uint8_t *body, int len) {
-  if (clientWasInit == false) {
+  if (!clientWasInit) {
     snprintf(errStr, sizeof(errStr), "DTLS_ClientSendPacket: client must be initialized first");
     return false;
   }
@@ -219,7 +219,7 @@ bool DTLS_ClientSendPacket(const uint8_t *body, int len) {
 }
 
 void DTLS_ClientFree() {
-  if (clientWasInit == false) {
+  if (!clientWasInit) {
     return;
   }
   clientWasInit = false;
@@ -341,7 +341,7 @@ bool DTLS_ClientInit(const char *cacertFile, const char *serverAddr, int16_t por
 bool DTLS_ClientSendPacket(const uint8_t *body, int body_len) {
   int16_t ret;
 
-  if (clientWasInit == false) {
+  if (!clientWasInit) {
     snprintf(errStr, sizeof(errStr), "DTLS_ClientSendPacket: client must be initialized first");
     return false;
   }
@@ -358,7 +358,7 @@ bool DTLS_ClientSendPacket(const uint8_t *body, int body_len) {
 void DTLS_ClientFree() {
   int16_t ret;
 
-  if (clientWasInit == false) {
+  if (!clientWasInit) {
     return;
   }
 

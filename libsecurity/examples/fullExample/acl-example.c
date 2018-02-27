@@ -9,7 +9,7 @@ static bool createResources(EntityManager *entityManager) {
   int16_t i=0;
 
   for (i=0 ; i<EXP_NUM_OF_RESOURCES ; i++) {
-    if (EntityManager_AddResource(entityManager, resourcesList[i]) == false) {
+    if (!EntityManager_AddResource(entityManager, resourcesList[i])) {
       printf("Error: Can't add resource '%s' to the entity manager, error: %s\n", resourcesList[i], errStr);
       return false;
     }
@@ -29,7 +29,7 @@ static bool addPermissionsToResource(EntityManager *entityManager) {
     snprintf(userName, sizeof(userName), USER_NAME_FMT, i);
     resourceName = resourcesList[i%EXP_NUM_OF_RESOURCES];
     permissionName = permissionsList[i%EXP_NUM_OF_PERMISSIONS];
-    if (Acl_AddPermissionToResource(entityManager, resourceName, userName, permissionName) == false) {
+    if (!Acl_AddPermissionToResource(entityManager, resourceName, userName, permissionName)) {
       printf("Error when attempting to add permission '%s' to user '%s', error: %s\n", permissionName, userName, errStr);      
       return false;
     }
@@ -40,7 +40,7 @@ static bool addPermissionsToResource(EntityManager *entityManager) {
   }
   resourceName = resourcesList[0];
   // set the permission to the resource to all users of the group
-  if (Acl_AddPermissionToResource(entityManager, resourceName, GROUP_NAME_FMT, groupPermission) == false) {
+  if (!Acl_AddPermissionToResource(entityManager, resourceName, GROUP_NAME_FMT, groupPermission)) {
     printf("Error when attempting to add permission '%s' to user '%s', error: %s\n", groupPermission, GROUP_NAME_FMT, errStr);
     return false;
   }

@@ -35,13 +35,13 @@ STATIC bool testAddStorage() {
       if (ret && (i == 1 || (j != SECRET_LEN))) {
         printf("Test testAddStorage failed, secure storage was generated for invalid parameters: salt = '%s', secret length = %d\n", salts[i], j);
         pass = false;
-      } else if (ret == false && i != 1 && j == SECRET_LEN) {
+      } else if (!ret && i != 1 && j == SECRET_LEN) {
         printf("Test testAddStorage failed, secure storage was not generated for legal parameters: "
                "salt = '%s', secret length = %d, error: %s\n",
                salts[i], j, errStr);
         pass = false;
       }
-      if (ret == true) SecureStorage_FreeStorage(&storage);
+      if (ret) SecureStorage_FreeStorage(&storage);
       strcat((char *)secret, "a");
     }
   }
@@ -67,16 +67,16 @@ STATIC bool testAddRemoveItemToStorage() {
            "expected to '%s', error: %s\n", keys[0], val, values[0], errStr);
     pass = false;
   }
-  if (ret == true) Utils_Free(val);
+  if (ret) Utils_Free(val);
   ret = SecureStorage_GetItem(&storage, keys[1], lens[0], &val);
-  if (ret == true) {
+  if (ret) {
     printf("Test testAddRemoveItemToStorage failed: Received value '%s' for key '%s' that is not in the storage\n", val, keys[1]);
     pass = false;
     Utils_Free(val);
   }
   SecureStorage_RemoveItem(&storage, keys[0], lens[0]);
   ret = SecureStorage_GetItem(&storage, keys[0], lens[0], &val);
-  if (ret == true) {
+  if (ret) {
     printf("Test testAddRemooveItemToStorage failed: Received value '%s' for key '%s' that was already removed from the storage\n", val, keys[0]);
     pass = false;
     Utils_Free(val);
@@ -87,7 +87,7 @@ STATIC bool testAddRemoveItemToStorage() {
     printf("Test testAddRemoveItemToStorage failed: The value received for key '%s' was '%s' but expected to '%s'\n", keys[0], val, values[1]);
     pass = false;
   }
-  if (ret == true) Utils_Free(val);
+  if (ret) Utils_Free(val);
   SecureStorage_RemoveItem(&storage, keys[0], lens[0]);
   SecureStorage_FreeStorage(&storage);
   return pass;
@@ -121,19 +121,19 @@ STATIC bool testCreateSaveReadSecureStorage() {
       printf("Test testCreateSaveReadSecureStorage failed: The value received for key '%s' was '%s' but expected to '%s'\n", keys[i], val, values[i]);
       pass = false;
     }
-    if (ret[1] == true) Utils_Free(val);
+    if (ret[1]) Utils_Free(val);
   }
-  if (SecureStorage_StoreSecureStorageToFile(fileName, &storage) == false) {
+  if (!SecureStorage_StoreSecureStorageToFile(fileName, &storage) ) {
     printf("Test testCreateSaveReadSecureStorage failed: can't store to file '%s', error: %s\n", fileName, errStr);
     pass = false;
   }
-  if (SecureStorage_LoadSecureStorageFromFile(fileName, SECRET, SALT, &storage1) == false) {
+  if (!SecureStorage_LoadSecureStorageFromFile(fileName, SECRET, SALT, &storage1) ) {
     printf("Test testCreateSaveReadSecureStorage failed: can't load from file '%s', error: %s\n", fileName, errStr);
     pass = false;
   }
   for (i = dataLen - 1; i >= 0; i--) {
     ret[0] = SecureStorage_GetItem(&storage1, keys[i], strlen((char *)keys[i]), &val);
-    if (ret[0] == false) {
+    if (!ret[0] ) {
       printf("Test testCreateSaveReadSecureStorage failed: Reading saved storage, key '%s' was not found in data base, error: %s\n", keys[i], errStr);
       pass = false;
     } else if (strcmp((char *)values[i], (char *)val) != 0) {
@@ -141,10 +141,11 @@ STATIC bool testCreateSaveReadSecureStorage() {
       keys[i], val, values[i]);
       pass = false;
     }
-    if (ret[0] == true) Utils_Free(val);
+    if (ret[0]) Utils_Free(val);
   }
-  if (Utils_CharArrayCmp(storage.caSalt, storage1.caSalt) == false || Utils_CharArrayCmp(storage.caSecret, storage1.caSecret) == false ||
-      Utils_CharArrayCmp(storage.caSign, storage1.caSign) == false) {
+  if (!Utils_CharArrayCmp(storage.caSalt, storage1.caSalt)
+   || !Utils_CharArrayCmp(storage.caSecret, storage1.caSecret)
+   || !Utils_CharArrayCmp(storage.caSign, storage1.caSign)) {
     printf("Test testCreateSaveReadSecureStorage failed: Reading saved storage, The save and load files headers are differt:\n");
     Utils_PrintCharArray(stderr, "salt1: ", storage.caSalt);
     Utils_PrintCharArray(stderr, "salt2: ", storage1.caSalt);
@@ -155,7 +156,7 @@ STATIC bool testCreateSaveReadSecureStorage() {
     pass = false;
   }
   SecureStorage_FreeStorage(&storage1);
-  if (pass == true) {
+  if (pass) {
     // printf("Now to corrupted file\n");
     for (i = 0; i < 30; i++) {
       cnt = 0;
@@ -175,22 +176,22 @@ STATIC bool testCreateSaveReadSecureStorage() {
       }
       FileAdapters_Fclose(ifp);
       FileAdapters_Fclose(ofp);
-      if (changeWasDone == true) {
+      if (changeWasDone) {
         ret[0] = SecureStorage_LoadSecureStorageFromFile(fileNameErr, SECRET, SALT, &storage1);
-        if (ret[0] == true) {
+        if (ret[0]) {
           printf("Test testCreateSaveReadSecureStorage failed: touched secure storage file pass the signature test, idx %d\n", i);
           pass = false;
         }
         SecureStorage_FreeStorage(&storage1);
       }
-      if (pass == false) break;
+      if (!pass ) break;
     }
   }
   for (i = 0; i < dataLen; i++) {
     SecureStorage_RemoveItem(&storage, keys[i], strlen((char *)keys[i]));
   }
   SecureStorage_FreeStorage(&storage);
-  if (SECURE_DEBUG == false) {
+  if (!SECURE_DEBUG ) {
     FileAdapters_Remove(fileName);
     FileAdapters_Remove(fileNameErr);
   }
@@ -209,7 +210,7 @@ STATIC bool testAddFindRemoveNotValidItemsToStorage() {
   maxLen = min(KEY_VAL_MAX_STR_LEN, NaCl_MAX_TEXT_LEN_BYTES - UTILS_STR_LEN_SIZE);
   step = maxLen / 10;
   SecureStorage_NewStorage(SECRET, SALT, &storage);
-  if (READABLE_STORAGE == true)
+  if (READABLE_STORAGE)
     saltLen = 0;
   else if (Utils_GetCharArrayLen(storage.caSalt, &saltLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN) == false)
     return false;
@@ -222,7 +223,7 @@ STATIC bool testAddFindRemoveNotValidItemsToStorage() {
       printf("Test testAddFindRemoveNotValidItemsToStorage failed, Add illegal item to secure storage, key length = %d, max length %d\n", i, maxKeyLen);
       pass = false;
       breakFlag = true;
-    } else if (ret == false && i <= maxKeyLen && i != 0) {
+    } else if (!ret && i <= maxKeyLen && i != 0) {
       printf("Test testAddFindRemoveNotValidItemsToStorage failed, Adding legal key length %d to secure storage failed, error: %s\n", i, errStr);
       pass = false;
       breakFlag = true;
@@ -234,7 +235,7 @@ STATIC bool testAddFindRemoveNotValidItemsToStorage() {
              i, maxValLen, saltLen, maxLen, ALIGN_FACTOR, storage.caSalt);
       pass = false;
       breakFlag = true;
-    } else if (ret == false && i <= maxValLen && i != 0) {
+    } else if (!ret && i <= maxValLen && i != 0) {
       printf("Test testAddFindRemoveNotValidItemsToStorage failed, Adding legal val length %d, max "
              "val length %d,  to secure storage failed, error: %s\n",
              i, maxValLen, errStr);
@@ -246,25 +247,25 @@ STATIC bool testAddFindRemoveNotValidItemsToStorage() {
       printf("Test testAddFindRemoveNotValidItemsToStorage failed, Get item with illegal key length = %d, value: '%s'\n", i, tmpVal);
       breakFlag = true;
       pass = false;
-    } else if (ret == false && i <= maxKeyLen && i != 0) {
+    } else if (!ret && i <= maxKeyLen && i != 0) {
       printf("Test testAddFindRemoveNotValidItemsToStorage failed, Get item with legal key length "
              "%d from secure storage failed, error: %s\n",
              i, errStr);
       pass = false;
       breakFlag = true;
     }
-    if (ret == true) Utils_Free(tmpVal);
+    if (ret) Utils_Free(tmpVal);
     ret = SecureStorage_RemoveItem(&storage, str, i);
     if (ret && (i == 0 || i > maxKeyLen)) {
       printf("Test testAddFindRemoveNotValidItemsToStorage failed, Remove item with illegal key length = %d\n", i);
       breakFlag = true;
       pass = false;
-    } else if (ret == false && i <= maxKeyLen && i != 0) {
+    } else if (!ret && i <= maxKeyLen && i != 0) {
       printf("Test testAddFindRemoveNotValidItemsToStorage failed, Remove item with legal key length %d failed, error: %s\n", i, errStr);
       breakFlag = true;
       pass = false;
     }
-    if (breakFlag == true) {
+    if (breakFlag) {
       break; // may add storage print
     }
     SecureStorage_RemoveItem(&storage, str1, str1Len);
@@ -295,11 +296,11 @@ STATIC bool testEncryptDecrypt() {
     ret[0] = encrypt((unsigned char *)text, testIvStr, SECRET, &encKey);
     ret[1] = encrypt((unsigned char *)text, testIvStr, SECRET, &encKey1);
     if (strlen(text) > NaCl_MAX_TEXT_LEN_BYTES) {
-      if (ret[0] == true) {
+      if (ret[0]) {
         printf("Test testEncryptDecrypt failed, idx: %d, Successfully encrypted too long text %d\n", i, (int16_t)strlen(text));
         pass = false;
-        if (ret[0] == true) Utils_Free(encKey);
-        if (ret[1] == true) Utils_Free(encKey1);
+        if (ret[0]) Utils_Free(encKey);
+        if (ret[1]) Utils_Free(encKey1);
         break;
       } else
         continue;
@@ -312,11 +313,11 @@ STATIC bool testEncryptDecrypt() {
              "(len %d) != 2'nd encrypted text '%s' (%d)\n",
              i, text, (int16_t)strlen(text), encKey + UTILS_STR_LEN_SIZE, textLen, encKey1 + UTILS_STR_LEN_SIZE, textLen1);
       pass = false;
-      if (ret[0] == true) Utils_Free(encKey);
-      if (ret[1] == true) Utils_Free(encKey1);
+      if (ret[0]) Utils_Free(encKey);
+      if (ret[1]) Utils_Free(encKey1);
       break;
     }
-    if (ret[1] == true) Utils_Free(encKey1);
+    if (ret[1]) Utils_Free(encKey1);
     ret[2] = decrypt(encKey, SECRET, &val);
     if (ret[2] && memcmp(val, text, strlen(text)) != 0 && strlen(text) < KEY_VAL_MAX_STR_LEN) {
       Utils_GetCharArrayLen(val, &textLen, KEY_VAL_MIN_STR_LEN, KEY_VAL_MAX_STR_LEN);
@@ -325,9 +326,9 @@ STATIC bool testEncryptDecrypt() {
       pass = false;
       breakFlag = true;
     }
-    if (ret[2] == true) Utils_Free(val);
-    if (ret[0] == true) Utils_Free(encKey);
-    if (breakFlag == true) break;
+    if (ret[2]) Utils_Free(val);
+    if (ret[0]) Utils_Free(encKey);
+    if (breakFlag) break;
     sprintf(charArray, "%c", 'a' + i);
     strcat(text, charArray);
     Utils_SetCharArrayLen((unsigned char *)text, strlen(text) - UTILS_STR_LEN_SIZE);
@@ -346,7 +347,7 @@ STATIC bool testStorageCorners() {
   if (SecureStorage_AddItem(NULL, data, 6, data, 6) || SecureStorage_AddItem(&storage, NULL, 6, data, 6) ||
       SecureStorage_AddItem(&storage, data, 6, NULL, 6) || SecureStorage_GetItem(&storage, NULL, 1, &tmp) ||
       SecureStorage_GetItem(NULL, data, 6, &tmp) || SecureStorage_RemoveItem(NULL, data, 6) ||
-      SecureStorage_RemoveItem(&storage, NULL, 6) == true) {
+      SecureStorage_RemoveItem(&storage, NULL, 6)) {
     printf("Test testStorageCorners failed, function with NUKK parameters retur true\n");
     pass = false;
   }

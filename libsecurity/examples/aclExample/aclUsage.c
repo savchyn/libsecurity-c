@@ -40,7 +40,7 @@ static bool createAndAddMembers(EntityManager *entityManager, const char *groupN
 //  3. Can watch channel 22 is allowed to all the family members
 //  4. To poweron and power off the TV is allowed to everybody
 static bool addAcl(EntityManager *entityManager, const char *resourceName, const char *groupName) {
-  if (EntityManager_AddResource(entityManager, resourceName) == false) {
+  if (!EntityManager_AddResource(entityManager, resourceName)) {
     printf("Error: Can't add resource '%s' to the entity manager, error: %s\n", resourceName, errStr);
     return false;
   }
@@ -96,7 +96,7 @@ static void clean(EntityManager *entityManager) {
 
 //  Storing the data in a secure file for further useage
 static bool storeToFile(EntityManager *entityManager, const char *fileName, const unsigned char *secret, const unsigned char *salt) {
-  if (EntityManager_Store(entityManager, fileName, secret, salt) == false) {
+  if (!EntityManager_Store(entityManager, fileName, secret, salt)) {
     printf("Error while storing data to file '%s', error %s\n", fileName, errStr);
     return false;
   }
@@ -113,7 +113,7 @@ int main(void) {
   const unsigned char *storageSalt = ((const unsigned char *)"The salt");
 
   EntityManager entityManager;
-  if (Utils_GenerateNewValidPassword(&storageSecret, SECRET_LEN) == false) {
+  if (!Utils_GenerateNewValidPassword(&storageSecret, SECRET_LEN)) {
     printf("Fatal error: can't generate a new valid password, error: %s\n", errStr);
     return false;
   }

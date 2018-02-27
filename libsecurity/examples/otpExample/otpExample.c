@@ -5,12 +5,12 @@ static bool addUsersAndResource(EntityManager *entityManager, const char *usersL
   int16_t i=0;
 
   for (i=0 ; i<len ; i++) {
-    if (EntityManager_AddUser(entityManager, usersList[i]) == false) {
+    if (!EntityManager_AddUser(entityManager, usersList[i]) ) {
       printf("Error: Can't add user '%s' to the entity manager, error: %s\n", usersList[i], errStr);
       return false;
     }
   }
-  if (EntityManager_AddResource(entityManager, resourceName) == false) {
+  if (!EntityManager_AddResource(entityManager, resourceName) ) {
     printf("Error: Can't add resource '%s' to the entity manager, error: %s\n", resourceName, errStr);
     return false;
   }
@@ -25,7 +25,7 @@ static bool addPermission(EntityManager *entityManager, const char *resourceName
 static bool createAndAddOtpToResource(EntityManager *entityManager, const char *resourceName, const unsigned char *otpSecret) {
   OtpUserS *otpUser;
 
-  if (OtpUser_NewSimpleUser(&otpUser, otpSecret) == false) {
+  if (!OtpUser_NewSimpleUser(&otpUser, otpSecret) ) {
     printf("createAndAddOtpToResource failed, Can't create OTP, error: %s\n", errStr);
     return false;
   }
@@ -36,7 +36,7 @@ static bool createAndAddOtpToResource(EntityManager *entityManager, const char *
 static bool syncOtpCounters(EntityManager *entityManager, const char *resourceName, const char *otpVal) {
   OtpUserS *otpData;
 
-  if (EntityManager_GetProperty(entityManager, resourceName, OTP_PROPERTY_NAME, (void **)&otpData) == false) {
+  if (!EntityManager_GetProperty(entityManager, resourceName, OTP_PROPERTY_NAME, (void **)&otpData) ) {
     printf("calcExpectedOtpOfWaterMeter failed, can't get user '%s' OTP property, Error: %s\n", resourceName, errStr);
     return false;
   }
@@ -48,11 +48,11 @@ static bool calcExpectedOtpOfWaterMeter(EntityManager *entityManager, const char
   OtpUserS *otpUser;
 
   // Check if user has permission for resource
-  if (Acl_CheckEntityPermission(entityManager, resourceName, userName, requiredPrrmission) == false) {
+  if (!Acl_CheckEntityPermission(entityManager, resourceName, userName, requiredPrrmission) ) {
     printf("calcExpectedOtpOfWaterMeter: User '%s' doesn't have permission '%s' for resource '%s'\n", userName, requiredPrrmission, resourceName);
     return false;
   }
-  if (EntityManager_GetProperty(entityManager, resourceName, OTP_PROPERTY_NAME, (void **)&otpUser) == false) {
+  if (!EntityManager_GetProperty(entityManager, resourceName, OTP_PROPERTY_NAME, (void **)&otpUser) ) {
     printf("calcExpectedOtpOfWaterMeter failed, can't get user '%s' OTP property, Error: %s\n", resourceName, errStr);
     return false;
   }
@@ -62,7 +62,7 @@ static bool calcExpectedOtpOfWaterMeter(EntityManager *entityManager, const char
   }else {
     res = Otp_GetTotpNow(otpUser->BaseTotp, otpVal);
   }
-  if (res == false) {
+  if (!res ) {
     printf("calcExpectedOtpOfWaterMeter failed, can't calulate expected OTP code, error: %s\n", errStr);
     Utils_Free(otpVal);
     return false;
@@ -77,7 +77,7 @@ static void clean(EntityManager *entityManager) {
 }
 
 static bool storeToFile(EntityManager *entityManager, const char *fileName, const unsigned char *secret, const unsigned char *salt) {
-  if (EntityManager_Store(entityManager, fileName, secret, salt) == false) {
+  if (!EntityManager_Store(entityManager, fileName, secret, salt) ) {
     printf("Error while storing data to file '%s', error %s\n", fileName, errStr);
     return false;
   }
@@ -97,7 +97,7 @@ int main(void) {
   const unsigned char *storageSalt = ((const unsigned char *)"The salt");
   EntityManager entityManager;
 
-  if (Utils_GenerateNewValidPassword(&storageSecret, SECRET_LEN) == false) {
+  if (!Utils_GenerateNewValidPassword(&storageSecret, SECRET_LEN) ) {
     printf("Fatal error: can't generate a new valid password, error: %s\n", errStr);
     return false;
   }
@@ -114,16 +114,16 @@ int main(void) {
   printf("\n\n");
   EntityManager_New(&entityManager);
   do {
-    if (WaterMeter_InitWaterMeter(otpSecret) == false ||
-        addUsersAndResource(&entityManager, usersList, len, resourceName) == false ||
-        addPermission(&entityManager, resourceName, technicianName, permission) == false ||
-        createAndAddOtpToResource(&entityManager, resourceName, otpSecret) == false ||
-        calcExpectedOtpOfWaterMeter(&entityManager, technicianName, resourceName, permission, TOTP_TYPE, &totpVal) == false)
+    if (!WaterMeter_InitWaterMeter(otpSecret)  ||
+        !addUsersAndResource(&entityManager, usersList, len, resourceName)  ||
+        !addPermission(&entityManager, resourceName, technicianName, permission)  ||
+        !createAndAddOtpToResource(&entityManager, resourceName, otpSecret)  ||
+        !calcExpectedOtpOfWaterMeter(&entityManager, technicianName, resourceName, permission, TOTP_TYPE, &totpVal) )
       break;
     for (i=0 ; i<2 ; i++) {
-      if (calcExpectedOtpOfWaterMeter(&entityManager, technicianName, resourceName, permission, HOTP_TYPE, &otpVal) == false)
+      if (!calcExpectedOtpOfWaterMeter(&entityManager, technicianName, resourceName, permission, HOTP_TYPE, &otpVal) )
         continue;
-      if (WaterMeter_ReadWaterMeterValue(otpVal, HOTP_TYPE, &value) == true) {
+      if (WaterMeter_ReadWaterMeterValue(otpVal, HOTP_TYPE, &value)) {
         printf("Using HOTP: The curent '%s' value is: %d\n", resourceName, value);
         syncOtpCounters(&entityManager, resourceName, otpVal);
       }else {
@@ -133,14 +133,14 @@ int main(void) {
       Utils_Free(otpVal);
     }
     // Unauthorized user is tring to read the water meter
-    if (calcExpectedOtpOfWaterMeter(&entityManager, otherUserName, resourceName, permission, TOTP_TYPE, &otpVal) == true) {
+    if (calcExpectedOtpOfWaterMeter(&entityManager, otherUserName, resourceName, permission, TOTP_TYPE, &otpVal)) {
       printf("Error: User '%s' read the water meter despite not bing allowed to\n", otherUserName);
     }else {
       printf("User '%s' is not allowed to read the water meter\n", otherUserName);
     }
     // Read the water meter using time based OTP
     // Note: In order to use the time based OTP there should be a delay of OTP time base window (default is 30 sec)
-    if (WaterMeter_ReadWaterMeterValue(totpVal, TOTP_TYPE, &value) == true) {
+    if (WaterMeter_ReadWaterMeterValue(totpVal, TOTP_TYPE, &value)) {
       printf("Using TOTP: The curent '%s' value is: %d\n", resourceName, value);
     }else {
       printf("Can't get '%s' value (using TOTP), error %s\n", resourceName, errStr);

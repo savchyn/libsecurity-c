@@ -60,7 +60,7 @@ void Acl_Print(FILE *ofp, const char *prefix, const void *a) {
   fprintf(ofp, "Acl: ");
   if (hfirst(t)) {
     do {
-      if (getEntry(acl, (char *)hkey(t), &aclEntry) == true) {
+      if (getEntry(acl, (char *)hkey(t), &aclEntry)) {
         fprintf(ofp, "Entry name '%s'\n", (char *)hkey(t));
         Acl_PrintPermissionsList(ofp, "", (void *)hstuff(t));
       }
@@ -160,7 +160,7 @@ bool Acl_RemoveEntry(void *a, const char *entryName) {
   }
   acl = (AclS *)a;
   t = acl->Entries;
-  if (hfind(t, (const ub1 *)entryName, (ub4)strlen(entryName)) == true) {
+  if (hfind(t, (const ub1 *)entryName, (ub4)strlen(entryName))) {
     Utils_Free(hkey(t));
     Acl_FreePermissionsList(hstuff(t));
     hdel(t);
@@ -186,7 +186,7 @@ STATIC bool getEntry(const AclS *acl, const char *name, AclPermissionsS **aclEnt
     return false;
   }
   t = acl->Entries;
-  if (hfind(t, (const ub1 *)name, (ub4)strlen(name)) == true) {
+  if (hfind(t, (const ub1 *)name, (ub4)strlen(name))) {
     *aclEntry = (AclPermissionsS *)hstuff(t);
     return true;
   }
@@ -205,11 +205,11 @@ STATIC bool addEntry(AclS *acl, const char *entityName, AclPermissionsS **aclEnt
     assert(LIB_NAME "Entity name string must not be NULL" && false);
     return false;
   }
-  if (Acl_NewPermissionsList(entityName, aclEntry) == false) {
+  if (!Acl_NewPermissionsList(entityName, aclEntry)) {
     snprintf(errStr, sizeof(errStr), "creating new entry fail");
     return false;
   }
-  if (hadd(acl->Entries, (const ub1 *)entityName, (ub4)strlen(entityName), aclEntry) == true) {
+  if (hadd(acl->Entries, (const ub1 *)entityName, (ub4)strlen(entityName), aclEntry)) {
     Utils_CreateAndCopyString(&nameStr, entityName, strlen(entityName));
     hkey(acl->Entries) = (unsigned char *)nameStr;
     hstuff(acl->Entries) = *aclEntry;
@@ -225,7 +225,7 @@ STATIC bool addPermissionToResource(AclS *acl, const char *entityName, const cha
     assert(LIB_NAME "Acl structure, entityName string and permission string must not be NULL" && false);
     return false;
   }
-  if (getEntry(acl, entityName, &aclEntry) == false) {
+  if (!getEntry(acl, entityName, &aclEntry)) {
     if (hcount(acl->Entries) >= MAX_NUMBER_OF_USERS_IN_ACL) {
       snprintf(errStr, sizeof(errStr), "can't add the new permission to entity '%s', the ACL already "
                                        "have the maximum number of entries %d",
@@ -245,11 +245,11 @@ STATIC bool addPermissionToResourceHandler(const EntityManager *entityManager, c
     assert(LIB_NAME "EntityManager structure, resourceName, entityName and permission strings must not be NULL" && false);
     return false;
   }
-  if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl)) == false) {
+  if (!EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl))) {
     printf("Error: the resource '%s' doesn't have ACL property\n", resourceName);
     return false;
   }
-  if (EntityManager_IsEntityInUsersList(entityManager, entityName) == false && EntityManager_IsEntityInGroupsList(entityManager, entityName) == false) {
+  if (!EntityManager_IsEntityInUsersList(entityManager, entityName) && !EntityManager_IsEntityInGroupsList(entityManager, entityName) ) {
     snprintf(errStr, sizeof(errStr), "The entity '%s' must be added to the entity manager first", entityName);
     return false;
   }
@@ -272,11 +272,11 @@ bool Acl_RemovePermissionFromResource(const EntityManager *entityManager, const 
     snprintf(errStr, sizeof(errStr), "Acl, entity name and permission must not be NULL");
     return false;
   }
-  if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl)) == false) {
+  if (!EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl))) {
     printf("Error: the resource '%s' doesn't have ACL property\n", resourceName);
     return false;
   }
-  if (getEntry(acl, entityName, &aclEntry) == false) {
+  if (!getEntry(acl, entityName, &aclEntry)) {
     snprintf(errStr, sizeof(errStr), "resource doesn't have permission aclaclEntryS for '%s'", entityName);
     return false;
   }
@@ -290,14 +290,14 @@ bool Acl_GetAllPermissions(const EntityManager *entityManager, const char *resou
   htab *t = NULL;
 
   if (resourceName == NULL || entityManager == NULL || pEntry == NULL) return false;
-  if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl)) == false) {
+  if (!EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl))) {
     printf("Error: the resource '%s' doesn't have ACL property\n", resourceName);
     return false;
   }
   t = acl->Entries;
   if (hfirst(t)) {
     do {
-      if (getEntry(acl, (char *)hkey(t), &aclEntry) == true) {
+      if (getEntry(acl, (char *)hkey(t), &aclEntry)) {
         updateEntryPermissions(aclEntry, &pEntry);
       }
     } while (hnext(t));
@@ -315,18 +315,18 @@ bool Acl_GetUserPermissions(const EntityManager *entityManager, const char *reso
   AclS *acl = NULL;
   htab *t = NULL;
   if (resourceName == NULL || userName == NULL || entityManager == NULL || pEntry == NULL || *pEntry == NULL) return false;
-  if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl)) == false) {
+  if (!EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl))) {
     printf("Error: the resource '%s' doesn't have ACL property\n", resourceName);
     return false;
   }
-  if (EntityManager_IsEntityInUsersList(entityManager, userName) == false && EntityManager_IsEntityInGroupsList(entityManager, userName) == false)
+  if (!EntityManager_IsEntityInUsersList(entityManager, userName) && !EntityManager_IsEntityInGroupsList(entityManager, userName) )
     return true;
   t = acl->Entries;
   if (hfirst(t)) {
     do {
-      if (getEntry(acl, (char *)hkey(t), &aclEntry) == false) continue;
+      if (!getEntry(acl, (char *)hkey(t), &aclEntry)) continue;
       if (isItAllEntry(aclEntry->Name) || strcmp(aclEntry->Name, userName) == 0 ||
-          EntityManager_IsUserPartOfAGroup(entityManager, aclEntry->Name, userName) == true) {
+          EntityManager_IsUserPartOfAGroup(entityManager, aclEntry->Name, userName)) {
         updateEntryPermissions(aclEntry, pEntry);
       }
     } while (hnext(t));
@@ -341,12 +341,12 @@ bool Acl_CheckEntityPermission(const EntityManager *entityManager, const char *r
   AclPermissionsS *pEntry = NULL;
 
   if (resourceName == NULL || userName == NULL || permission == NULL || entityManager == NULL) return false;
-  if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl)) == false) {
+  if (!EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, (void **)(&acl))) {
     printf("Error: the resource '%s' doesn't have ACL property\n", resourceName);
     return false;
   }
   Acl_NewPermissionsList("tmp", &pEntry);
-  if (Acl_GetUserPermissions(entityManager, resourceName, userName, &pEntry) == true) {
+  if (Acl_GetUserPermissions(entityManager, resourceName, userName, &pEntry)) {
     ret = checkPermissionOfEntry(pEntry, permission);
   }
   Acl_FreePermissionsList(pEntry);
@@ -367,7 +367,7 @@ bool Acl_WhoUseAPermission(const EntityManager *entityManager, const char *permi
   if (resourceDup != NULL) {
     do {
       resourceName = (char *)hkey(resourceDup);
-      if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, &a) == true) {
+      if (EntityManager_GetProperty(entityManager, resourceName, ACL_PROPERTY_NAME, &a)) {
         acl = (AclS *)a;
         entryDup = hcreate(H_TAB_SIZE);
         Utils_DuplicateHash(acl->Entries, entryDup);
@@ -375,7 +375,7 @@ bool Acl_WhoUseAPermission(const EntityManager *entityManager, const char *permi
         if (hfirst(t)) {
           do {
             entityName = (char *)hkey(t);
-            if (Acl_CheckEntityPermission(entityManager, resourceName, entityName, permission) == true) {
+            if (Acl_CheckEntityPermission(entityManager, resourceName, entityName, permission)) {
               debug_print("Permission '%s' for '%s' was found\n", permission, entityName);
               if (strcmp(entityName, ALL_ACL_NAME) == 0) {
                 Utils_DuplicateHash(entityManager->Users->Items, names);
@@ -405,7 +405,7 @@ STATIC bool storeEntry(const void *a, const SecureStorageS *storage, const char 
     assert(LIB_NAME "Acl permission and storage structures as well as module prefix strings must not be NULL" && false);
     return false;
   }
-  if (Utils_IsPrefixValid("storeEntry", modulePrefix) == false) return false;
+  if (!Utils_IsPrefixValid("storeEntry", modulePrefix)) return false;
   aclEntry = (const AclPermissionsS *)a;
   t = aclEntry->Permissions;
   sprintf(data, "%d", (int16_t)hcount(t));
@@ -414,18 +414,18 @@ STATIC bool storeEntry(const void *a, const SecureStorageS *storage, const char 
   Utils_Malloc((void **)(&prefix), prefixLen);
   snprintf(prefix, prefixLen, ACL_ENTRY_PREFIX_FMT, ACL_ENTRY_PREFIX, modulePrefix);
 
-  if (SecureStorage_AddItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char *)data, strlen(data)) == false) {
+  if (!SecureStorage_AddItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char *)data, strlen(data))) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", prefix, data);
     Utils_Free((void *)prefix);
     return false;
   }
   debug_print("Add to storage: num of permissions key: '%s' val '%s'\n", prefix, data);
-  if (EntityManager_StoreName(storage, prefix, aclEntry->Name, &entryPrefix) == false) return false;
+  if (!EntityManager_StoreName(storage, prefix, aclEntry->Name, &entryPrefix)) return false;
   Utils_Free(entryPrefix);
   if (hfirst(t)) {
     do {
       snprintf(data, sizeof(data), ACL_ENTRY_KEY_FMT, PERMISSION_PREFIX, prefix, cnt++);
-      if (SecureStorage_AddItem(storage, (unsigned char *)data, strlen(data), (unsigned char *)hkey(t), strlen((char *)hkey(t))) == false) {
+      if (!SecureStorage_AddItem(storage, (unsigned char *)data, strlen(data), (unsigned char *)hkey(t), strlen((char *)hkey(t)))) {
         snprintf(errStr, sizeof(errStr), "can't add item '%s' value '%s' to storage", data, (char *)hkey(t));
         Utils_Free((void *)prefix);
         return false;
@@ -444,14 +444,14 @@ bool Acl_Store(const void *a, const SecureStorageS *storage, const char *moduleP
   const AclS *acl = NULL;
 
   if (a == NULL || storage == NULL || modulePrefix == NULL) return false;
-  if (Utils_IsPrefixValid("Acl_Store", modulePrefix) == false) return false;
+  if (!Utils_IsPrefixValid("Acl_Store", modulePrefix)) return false;
   acl = (const AclS *)a;
   t = acl->Entries;
   sprintf(data, "%d", (int16_t)hcount(t));
   prefixLen = strlen(modulePrefix) + strlen(ACL_PREFIX) + 1;
   Utils_Malloc((void **)(&prefix), prefixLen);
   snprintf(prefix, prefixLen, ACL_PREFIX_FMT, ACL_PREFIX, modulePrefix);
-  if (SecureStorage_AddItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char *)data, strlen(data)) == false) {
+  if (!SecureStorage_AddItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char *)data, strlen(data))) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", prefix, data);
     Utils_Free((void *)prefix);
     return false;
@@ -477,7 +477,7 @@ STATIC bool loadEntry(AclS *acl, const SecureStorageS *storage, const char *modu
     assert(LIB_NAME "Storage structure must not be NULL" && false);
     return false;
   }
-  if (Utils_IsPrefixValid("loadEntry", modulePrefix) == false) {
+  if (!Utils_IsPrefixValid("loadEntry", modulePrefix)) {
     assert(LIB_NAME "Module prefix strings must be valid" && false);
     return false;
   }
@@ -486,7 +486,7 @@ STATIC bool loadEntry(AclS *acl, const SecureStorageS *storage, const char *modu
   Utils_Malloc((void **)(&prefix), prefixLen);
   snprintf(prefix, prefixLen, ACL_ENTRY_PREFIX_FMT, ACL_ENTRY_PREFIX, modulePrefix);
 
-  if (SecureStorage_GetItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char **)&val) == false) {
+  if (!SecureStorage_GetItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char **)&val) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: loadEntry, Read from secure "
                                      "storage key '%s' not found",
              prefix);
@@ -504,8 +504,8 @@ STATIC bool loadEntry(AclS *acl, const SecureStorageS *storage, const char *modu
   debug_print("read: key: '%s' num of permissions %d\n", prefix, len);
   for (i = 0; i < len; i++) {
     snprintf(key, sizeof(key), ACL_ENTRY_KEY_FMT, PERMISSION_PREFIX, prefix, i + 1);
-    if (EntityManager_LoadName(storage, prefix, &name, &entryPrefix) == false) return false;
-    if (SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)&val) == false) {
+    if (!EntityManager_LoadName(storage, prefix, &name, &entryPrefix)) return false;
+    if (!SecureStorage_GetItem(storage, (unsigned char *)key, strlen(key), (unsigned char **)&val)) {
       snprintf(errStr, sizeof(errStr), "Internal Error: aclEntry_loadEntry, Read "
                                        "from secure storage key '%s' not found",
                key);
@@ -514,7 +514,7 @@ STATIC bool loadEntry(AclS *acl, const SecureStorageS *storage, const char *modu
       return false;
     }
     debug_print("read: key: '%s' permission val '%s'\n", key, val);
-    if (addPermissionToResource(acl, name, val) == false) {
+    if (!addPermissionToResource(acl, name, val)) {
       printf("Internal error when reading from secure storage: can't add "
              "permission '%s' to '%s'\n",
              val, name);
@@ -537,13 +537,13 @@ bool Acl_Load(void **acl, const SecureStorageS *storage, const char *modulePrefi
     snprintf(errStr, sizeof(errStr), "Storage must be intiated first");
     return false;
   }
-  if (Utils_IsPrefixValid("Acl_Load", modulePrefix) == false) {
+  if (!Utils_IsPrefixValid("Acl_Load", modulePrefix)) {
     return false;
   }
   prefixLen = strlen(modulePrefix) + strlen(ACL_PREFIX) + 1;
   Utils_Malloc((void **)(&prefix), prefixLen);
   snprintf(prefix, prefixLen, ACL_PREFIX_FMT, ACL_PREFIX, modulePrefix);
-  if (SecureStorage_GetItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char **)&val) == false) {
+  if (!SecureStorage_GetItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char **)&val)) {
     snprintf(errStr, sizeof(errStr), "Internal Error: Acl_Load, Read from secure storage key '%s' not found", prefix);
     Utils_Free((void *)prefix);
     return false;
@@ -554,7 +554,7 @@ bool Acl_Load(void **acl, const SecureStorageS *storage, const char *modulePrefi
   debug_print("read: key: '%s' num of entries %d\n", prefix, len);
   for (i = 0; i < len; i++) {
     snprintf(key, sizeof(key), ACL_KEY_FMT, ACL_KEY_PREFIX, prefix, i + 1);
-    if (loadEntry(*acl, storage, key) == false) {
+    if (!loadEntry(*acl, storage, key)) {
       Utils_Free((void *)prefix);
       return false;
     }
@@ -576,12 +576,12 @@ bool Acl_IsEqual(const void *a1, const void *a2) {
   if (hfirst(p1)) {
     do {
       debug_print("Compare entries '%s'\n", (char *)hkey(p1));
-      if (getEntry(acl1, (char *)hkey(p1), &e1) == false) return false;
-      if (getEntry(acl2, (char *)hkey(p1), &e2) == false) {
+      if (!getEntry(acl1, (char *)hkey(p1), &e1)) return false;
+      if (!getEntry(acl2, (char *)hkey(p1), &e2)) {
         debug_print("Entry '%s' wasn't found on the second acl\n", (char *)hkey(p1));
         return false;
       }
-      if (isEqualEntry((void *)e1, (void *)e2) == false) {
+      if (!isEqualEntry((void *)e1, (void *)e2)) {
         debug_print("Entry '%s' is not equal\n", (char *)hkey(p1));
         return false;
       }
@@ -609,7 +609,7 @@ STATIC bool isEqualEntry(const void *e1, const void *e2) {
   if (hfirst(p1)) {
     do {
       debug_print("Compare permission '%s'\n", (char *)hkey(p1));
-      if (checkPermissionOfEntry(aclEntry2, (char *)hkey(p1)) == false) {
+      if (!checkPermissionOfEntry(aclEntry2, (char *)hkey(p1))) {
         debug_print("Permission '%s' wasn't found on the second AclPermissionsS\n", (char *)hkey(p1));
         return false;
       }

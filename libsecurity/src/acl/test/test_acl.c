@@ -26,7 +26,7 @@ STATIC bool testAddPermission() {
   strcpy(name, "");
   for (i = 0; i < len; i++) {
     ret = addPermissionToEntry(aclEntry, name);
-    if (ret == false && strlen(name) > 0 && strlen(name) <= MAX_PERMISSION_NAME_LEN) {
+    if (!ret && strlen(name) > 0 && strlen(name) <= MAX_PERMISSION_NAME_LEN) {
       printf("testAddPermission fail: permission with legal name '%s' was not "
              "added to ACL entry "
              "'%s', error: %s\n",
@@ -40,13 +40,13 @@ STATIC bool testAddPermission() {
       pass = false;
     }
     strcat(name, "a");
-    if (isEqualEntry(aclEntry, aclEntry) == false) {
+    if (!isEqualEntry(aclEntry, aclEntry) ) {
       printf("testAddAclEntry fail: equal ACL entries did not found equal\n");
       Acl_PrintPermissionsList(stdout, "", aclEntry);
       pass = false;
     }
     ret = addPermissionToEntry(aclEntryRef, name);
-    if (ret && isEqualEntry(aclEntry, aclEntryRef) == true) {
+    if (ret && isEqualEntry(aclEntry, aclEntryRef)) {
       printf("testAddAclEntry fail: unequal ACL entries found equal\n");
       Acl_PrintPermissionsList(stdout, "", aclEntry);
       Acl_PrintPermissionsList(stdout, "", aclEntryRef);
@@ -100,10 +100,10 @@ STATIC bool testAddRemoveCheckPermission() {
   EntityManager_AddGroup(entityManager, BOTH_ENTRY_NAME);
   setup(entityManager, namesLen, names);
   // add ACL_ENTRY_NAME as member of BOTH_ENTRY_NAME
-  if (EntityManager_AddUserToGroup(entityManager, BOTH_ENTRY_NAME, ACL_ENTRY_NAME) == false) {
+  if (!EntityManager_AddUserToGroup(entityManager, BOTH_ENTRY_NAME, ACL_ENTRY_NAME) ) {
     printf("The user '%s' was not added to group '%s', error %s\n", ACL_ENTRY_NAME, BOTH_ENTRY_NAME, errStr);
   }
-  if (EntityManager_GetProperty(entityManager, AclResourceName, ACL_PROPERTY_NAME, (void **)(&acl)) == false) {
+  if (!EntityManager_GetProperty(entityManager, AclResourceName, ACL_PROPERTY_NAME, (void **)(&acl)) ) {
     printf("Error: Can't get ACL property from '%s'\n", names[i]);
     return false;
   }
@@ -132,14 +132,14 @@ STATIC bool testAddRemoveCheckPermission() {
                i, j, addRemove[j], permission[0], names[i], exp1[j], ret1);
         pass = false;
       }
-      if (addRemove[j] == 'a' && ret2 == false) {
+      if (addRemove[j] == 'a' && !ret2 ) {
         printf("testAddRemoveCheckPermission fail for ret2: permission must be "
                "set i=%d, j=%d, "
                "action %c, permission '%s' entry '%s', exp2 %d, ret2 %d\n",
                i, j, addRemove[j], permission[0], ACL_ENTRY_NAME, true, ret2);
         pass = false;
       }
-      if (ret0 == true) {
+      if (ret0) {
         printf("testAddRemoveCheckPermission fail for ret0: permission was "
                "never set for entry "
                "'%s', permission '%s'\n",
@@ -179,10 +179,10 @@ STATIC bool testGetCheckWhoUseGetAllPermissions() {
   EntityManager_AddGroup(entityManager, BOTH_ENTRY_NAME);
   setup(entityManager, namesLen, names);
   // add ACL_ENTRY_NAME as member of BOTH_ENTRY_NAME
-  if (EntityManager_AddUserToGroup(entityManager, BOTH_ENTRY_NAME, ACL_ENTRY_NAME) == false) {
+  if (!EntityManager_AddUserToGroup(entityManager, BOTH_ENTRY_NAME, ACL_ENTRY_NAME) ) {
     printf("The user '%s' was not added to group '%s', error %s\n", ACL_ENTRY_NAME, BOTH_ENTRY_NAME, errStr);
   }
-  if (EntityManager_GetProperty(entityManager, AclResourceName, ACL_PROPERTY_NAME, &a) == false) {
+  if (!EntityManager_GetProperty(entityManager, AclResourceName, ACL_PROPERTY_NAME, &a) ) {
     printf("Error: Can't get ACL property from '%s'\n", names[i]);
     return false;
   }
@@ -214,7 +214,7 @@ STATIC bool testGetCheckWhoUseGetAllPermissions() {
     Acl_FreePermissionsList(permissionsVec);
     whoUses = hcreate(H_TAB_SIZE);
     Acl_WhoUseAPermission(entityManager, permissions[i], whoUses);
-    if (Utils_IsEqualHash(whoUses, expectedUsersName[i]) == false) {
+    if (!Utils_IsEqualHash(whoUses, expectedUsersName[i]) ) {
       printf("testGetCheckWhoUseGetAllPermissions fail expected entity names "
              "for who use the "
              "permission '%s' was not matched\n",
@@ -236,7 +236,7 @@ STATIC bool testGetCheckWhoUseGetAllPermissions() {
     pass = false;
   }
   for (i = 0; i < namesLen; i++) {
-    if (permissions[i] != NULL && checkPermissionOfEntry(permissionsVec, permissions[i]) == false) {
+    if (permissions[i] != NULL && !checkPermissionOfEntry(permissionsVec, permissions[i]) ) {
       printf("testGetCheckWhoUseGetAllPermissions fail permission '%s' was set "
              "but not found in "
              "the full list permissions\n",
@@ -269,7 +269,7 @@ STATIC bool testAclCorners() {
 
   namesLen = sizeof(names) / sizeof(char *);
   Acl_NewPermissionsList("test", &aclEntry);
-  if (updateEntryPermissions(aclEntry, NULL) || updateEntryPermissions(NULL, &aclEntry) == true) {
+  if (updateEntryPermissions(aclEntry, NULL) || updateEntryPermissions(NULL, &aclEntry)) {
     printf("testAclCorners fail updateEntryPermissions with NULL return successfully\n");
     pass = false;
   }
@@ -280,31 +280,31 @@ STATIC bool testAclCorners() {
   EntityManager_GetProperty(entityManager, AclResourceName, ACL_PROPERTY_NAME, &a);
   acl = (AclS *)a;
   for (i = 0; i < namesLen; i++) {
-    if (Acl_RemoveEntry(a, names[i]) == false) {
+    if (!Acl_RemoveEntry(a, names[i]) ) {
       printf("testAclCorners fail testAclCorners failed to removed entry '%s' from ACL\n", names[i]);
       pass = false;
     }
-    if (Acl_RemoveEntry(a, names[i]) || Acl_RemoveEntry(a, NULL) == true) {
+    if (Acl_RemoveEntry(a, names[i]) || Acl_RemoveEntry(a, NULL)) {
       printf("testAclCorners fail testAclCorners removed successfully already removed entry '%s' from ACL\n", names[i]);
       pass = false;
     }
   }
-  if (addEntry(acl, NULL, &aclEntry) == true) {
+  if (addEntry(acl, NULL, &aclEntry)) {
     printf("testAclCorners fail testAclCorners: Successfully add entry to NULL entry name\n");
     pass = false;
   }
   if (Acl_AddPermissionToResource(entityManager, NULL, AclResourceName, permission) ||
-      Acl_AddPermissionToResource(NULL, AclResourceName, NULL, permission) == true) {
+      Acl_AddPermissionToResource(NULL, AclResourceName, NULL, permission)) {
     printf("testAclCorners fail testAclCorners: Successfully add permission to NULL ACL or resource name\n");
     pass = false;
   }
   EntityManager_AddGroup(entityManager, names[1]);
-  if (Acl_AddPermissionToResource(entityManager, AclResourceName, names[1], permission) == false) {
+  if (!Acl_AddPermissionToResource(entityManager, AclResourceName, names[1], permission) ) {
     printf("testAclCorners fail testAclCorners: error while add permission to resource, error: %s\n", errStr);
     pass = false;
   }
   if (Acl_RemovePermissionFromResource(entityManager, NULL, AclResourceName, permission) ||
-      Acl_RemovePermissionFromResource(NULL, AclResourceName, names[0], permission) == true) {
+      Acl_RemovePermissionFromResource(NULL, AclResourceName, names[0], permission)) {
     printf("testAclCorners fail testAclCorners: Successfully remove permission from NULL ACL or resource "
            "name\n");
     pass = false;
@@ -329,7 +329,7 @@ STATIC bool testStoreLoadAcl() {
   AclS *acl = NULL;
 
   namesLen = sizeof(names) / sizeof(char *);
-  if (SecureStorage_NewStorage(SECRET, DEFAULT_SALT, &storage) == false) {
+  if (!SecureStorage_NewStorage(SECRET, DEFAULT_SALT, &storage) ) {
     printf("testStoreLoadAcl failed: Error when try to create new storage, "
            "error: %s\n",
            errStr);
@@ -341,7 +341,7 @@ STATIC bool testStoreLoadAcl() {
   EntityManager_AddGroup(entityManager, BOTH_ENTRY_NAME);
   setup(entityManager, namesLen, names);
   EntityManager_AddUserToGroup(entityManager, BOTH_ENTRY_NAME, ACL_ENTRY_NAME);
-  if (EntityManager_GetProperty(entityManager, AclResourceName, ACL_PROPERTY_NAME, &a) == false) {
+  if (!EntityManager_GetProperty(entityManager, AclResourceName, ACL_PROPERTY_NAME, &a) ) {
     printf("Error: Can't get ACL property from '%s'\n", names[i]);
     return false;
   }
@@ -349,22 +349,22 @@ STATIC bool testStoreLoadAcl() {
   for (i = 0; i < namesLen; i++) {
     addPermissionToResource(acl, names[i], permission);
   }
-  if (Acl_Store(acl, &storage, prefix) == false) {
+  if (!Acl_Store(acl, &storage, prefix) ) {
     printf("testStoreLoadAcl failed: Error when try to store ACL to "
            "storage, error: %s\n",
            errStr);
     pass = false;
   }
-  if (Acl_Load((void **)(&a1), NULL, prefix, &tName) == true) {
+  if (Acl_Load((void **)(&a1), NULL, prefix, &tName)) {
     printf("testStoreLoadAcl failed: successfully load from NULL strorage\n");
     pass = false;
   }
-  if (Acl_Load((void **)(&a1), &storage, prefix, &tName) == false) {
+  if (!Acl_Load((void **)(&a1), &storage, prefix, &tName) ) {
     printf("testStoreLoadAcl failed: Error when try to load ACL from "
            "storage, error: %s\n",
            errStr);
     pass = false;
-  } else if (Acl_IsEqual(a, a1) == false) {
+  } else if (!Acl_IsEqual(a, a1) ) {
     printf("testStoreLoadAcl failed: stored and loaded ACLs are not equal, error: %s\n", errStr);
     Acl_Print(stdout, "Acl1:\n", a);
     Acl_Print(stdout, "Acl2:\n", a1);
@@ -394,7 +394,7 @@ int main()
 
   len = sizeof(callFunc) / sizeof(Utils_TestFuncS);
   for (i = 0; i < len; i++) {
-    if ((callFunc[i]).testFunc() == false) {
+    if (!(callFunc[i]).testFunc() ) {
       res = "fail";
       pass = false;
     } else

@@ -12,7 +12,7 @@ static bool addWiFiInfoToStorage(SecureStorageS *storage, int16_t numOfItems, co
   bool pass = true;
 
   for (i=0 ; i<numOfItems ; i++) {
-    if (SecureStorage_AddItem(storage, keys[i], (int32_t) strlen((const char *)keys[i]), values[i], (int32_t) strlen((const char *)values[i])) == false) {
+    if (!SecureStorage_AddItem(storage, keys[i], (int32_t) strlen((const char *)keys[i]), values[i], (int32_t) strlen((const char *)values[i])) ) {
       printf("Error while adding key '%s' with value '%s' to the storage, erorr %s\n", keys[i], values[i], errStr);
       return false;
     }
@@ -21,7 +21,7 @@ static bool addWiFiInfoToStorage(SecureStorageS *storage, int16_t numOfItems, co
 }
 
 static bool storeToFile(const char *fileName, SecureStorageS *storage) {
-    if (SecureStorage_StoreSecureStorageToFile(fileName, storage) == false) {
+    if (!SecureStorage_StoreSecureStorageToFile(fileName, storage) ) {
       printf("storeToFile failed: can't store to file '%s', error: %s\n", fileName, errStr);
       return false;
     }
@@ -34,13 +34,13 @@ static bool loadFromFileAndVerifyData(const char *fileName, const unsigned char 
   unsigned char *val=NULL;
   SecureStorageS storage;
 
-  if (SecureStorage_LoadSecureStorageFromFile(fileName, storageSecret, storageSalt, &storage) == false) {
+  if (!SecureStorage_LoadSecureStorageFromFile(fileName, storageSecret, storageSalt, &storage) ) {
     printf("loadFromFileAndVerifyData failed: can't load from file '%s', error: %s\n", fileName, errStr);
     return false;
   }
   // Loading the secure storage from file and verifing its authenticity
   for (i=0 ; i<numOfItems ; i++) {
-    if (SecureStorage_GetItem(&storage, keys[i], (int32_t) strlen((const char *)keys[i]), &val) == false) {
+    if (!SecureStorage_GetItem(&storage, keys[i], (int32_t) strlen((const char *)keys[i]), &val) ) {
       printf("loadFromFileAndVerifyData failed: Can't read key '%s' from the storage, error: %s\n", keys[i], errStr);
       pass = false;
       break;
@@ -51,7 +51,7 @@ static bool loadFromFileAndVerifyData(const char *fileName, const unsigned char 
       pass = false;
     }
     Utils_Free(val);
-    if (pass== false)
+    if (!pass)
       break;
   }
   SecureStorage_FreeStorage(&storage);
@@ -68,7 +68,7 @@ int main(void) {
   unsigned char *storageSecret = NULL;
   const unsigned char *storageSalt = ((const unsigned char *)"The salt");
 
-  if (Utils_GenerateNewValidPassword(&storageSecret, SECRET_LEN) == false) {
+  if (!Utils_GenerateNewValidPassword(&storageSecret, SECRET_LEN) ) {
     printf("Fatal error: can't generate a new valid password, error: %s\n", errStr);
     return false;
   }
@@ -77,7 +77,7 @@ int main(void) {
   printf("Through this example each key and password are stored after encryption using AES algorithm\n");
   printf("Before storing the secure storage to a file, it is signed to ensure that it won't be compromised\n\n");
   len = sizeof(keys) / sizeof (unsigned char *);
-  if (SecureStorage_NewStorage(storageSecret, storageSalt, &storage) == false) {
+  if (!SecureStorage_NewStorage(storageSecret, storageSalt, &storage) ) {
     printf("SecureStorage_NewStorage failed, error %s\n", errStr);
     return false;
   }

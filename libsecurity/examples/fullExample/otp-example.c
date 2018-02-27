@@ -6,7 +6,7 @@ static bool verifyCodeHotp(OtpUserS *otpUser, int16_t codeOffset, bool isMatchEx
   bool ret = false;
   char *val1 = NULL;
 
-  if (Otp_GetHotpAtCount(otpUser->BaseHotp, otpUser->BaseHotp->Count + codeOffset, &val1) == false) {
+  if (!Otp_GetHotpAtCount(otpUser->BaseHotp, otpUser->BaseHotp->Count + codeOffset, &val1)) {
     printf("verifyCodeHotp failed, can't calulate expected code, error: %s\n", errStr);
     return false;
   }
@@ -36,7 +36,7 @@ static bool verifyCodeTotp(OtpUserS *otpUser, bool isMatchExpected) {
   bool ret = false;
   char *val1 = NULL;
 
-  if (Otp_GetTotpNow(otpUser->BaseTotp, &val1) == false) {
+  if (!Otp_GetTotpNow(otpUser->BaseTotp, &val1) ) {
     printf("verifyCodeTotp failed, can't calulate expected code, Error: %s\n", errStr);
     return false;
   }
@@ -66,7 +66,7 @@ static bool checkOtp(EntityManager *entityManager, const char *userName) {
   bool pass=true;
   OtpUserS *otpUser;
 
-  if (EntityManager_GetProperty(entityManager, userName, OTP_PROPERTY_NAME, (void **)&otpUser) == false) {
+  if (!EntityManager_GetProperty(entityManager, userName, OTP_PROPERTY_NAME, (void **)&otpUser) ) {
     printf("checkOtp failed, can't get user '%s' OTP property, Error: %s\n", userName, errStr);
     return false;
   }
@@ -81,7 +81,7 @@ static bool checkOtp(EntityManager *entityManager, const char *userName) {
 static bool createAndAddOtp(EntityManager *entityManager, const char *userName) {
   OtpUserS *otpUser;
 
-  if (OtpUser_NewSimpleUser(&otpUser, OtpSecret) == false) {
+  if (!OtpUser_NewSimpleUser(&otpUser, OtpSecret) ) {
     printf("createAndAddOtp failed, Can't create OTP user, error: %s\n", errStr);
     return false;
   }

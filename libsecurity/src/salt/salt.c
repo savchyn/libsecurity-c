@@ -64,8 +64,10 @@ bool Salt_IsValid(const SaltS *salt) {
     snprintf(errStr, sizeof(errStr), "Salt_IsValid: salt structure must not be NULL");
     return false;
   }
-  if (isValidSaltSecret(salt->caSecret) == false || isValidSalt(salt->caSalt) == false || isValidOutputLen(salt->OutputLen) == false ||
-      isValidNumOfIterations(salt->Iterations) == false) {
+  if( !isValidSaltSecret(salt->caSecret)
+    ||!isValidSalt(salt->caSalt)
+    ||!isValidOutputLen(salt->OutputLen)
+    ||!isValidNumOfIterations(salt->Iterations)) {
     return false;
   }
   return true;
@@ -80,12 +82,12 @@ bool Salt_NewSalt(SaltS **newSalt, const unsigned char *sSecret, const unsigned 
     return false;
   }
   Utils_GenerateCharArray(sSecret, (int16_t)strlen((const char *)sSecret), &caSecret);
-  if (isValidSaltSecret(caSecret) == false) {
+  if (!isValidSaltSecret(caSecret) ) {
     Utils_Free(caSecret);
     return false;
   }
   Utils_GenerateCharArray(sSalt, (int16_t)strlen((const char *)sSalt), &caSalt);
-  if (isValidSalt(caSalt) == false) {
+  if (!isValidSalt(caSalt) ) {
     Utils_Free(caSecret);
     Utils_Free(caSalt);
     return false;
@@ -129,7 +131,7 @@ bool Salt_Generate(const SaltS *salt, unsigned char **caNewPwd) {
   unsigned char digest[crypto_hash_BYTES];
 
   if (salt == NULL || caNewPwd == NULL) return false;
-  if (Salt_IsValid(salt) == false) {
+  if (!Salt_IsValid(salt) ) {
     return false;
   }
   len = crypto_hash_BYTES;
@@ -172,13 +174,13 @@ bool Salt_GenerateSaltedPassword(const unsigned char *sPwd, const unsigned char 
   unsigned char *newSalt = NULL;
   SaltS *s = NULL;
 
-  if (sPwd == NULL || sSalt == NULL || caNewPwd == NULL || (randomSaltLen < 0 && randomSalt == true)) return false;
+  if (sPwd == NULL || sSalt == NULL || caNewPwd == NULL || (randomSaltLen < 0 && randomSalt)) return false;
   if (randomSalt) {
-    if (getRandomSalt(randomSaltLen, &newSalt) == false) return false;
+    if (!getRandomSalt(randomSaltLen, &newSalt) ) return false;
   } else {
     Utils_CreateAndCopyUcString(&newSalt, sSalt, (int16_t)strlen((const char *)sSalt));
   }
-  if (Salt_NewSalt(&s, sPwd, newSalt) == false) {
+  if (!Salt_NewSalt(&s, sPwd, newSalt) ) {
     Utils_Free(newSalt);
     return false;
   }
@@ -192,8 +194,8 @@ bool Salt_GenerateCharArraySaltedPassword(const unsigned char *caPwd, const unsi
   int16_t saltLen = 0, pwdLen = 0;
 
   if (caPwd == NULL || caSalt == NULL || caNewPwd == NULL) return false;
-  if (Utils_GetCharArrayLen(caPwd, &pwdLen, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) == false ||
-      Utils_GetCharArrayLen(caSalt, &saltLen, MIN_SALT_LEN, MAX_SALT_LEN) == false)
+  if (!Utils_GetCharArrayLen(caPwd, &pwdLen, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)  ||
+      !Utils_GetCharArrayLen(caSalt, &saltLen, MIN_SALT_LEN, MAX_SALT_LEN) )
     return false;
   return Salt_GenerateSaltedPassword(caPwd + UTILS_STR_LEN_SIZE, caSalt + UTILS_STR_LEN_SIZE, false, 0, caNewPwd);
 }
@@ -202,8 +204,8 @@ bool Salt_IsEqual(const SaltS *s1, const unsigned char *caPwd) {
   bool ok = false;
   unsigned char *newPwd = NULL;
 
-  if (s1 == NULL || caPwd == NULL || isValidSaltSecret(caPwd) == false) return false;
-  if (Salt_Generate(s1, &newPwd) == false) {
+  if (s1 == NULL || caPwd == NULL || !isValidSaltSecret(caPwd) ) return false;
+  if (!Salt_Generate(s1, &newPwd) ) {
     snprintf(errStr, sizeof(errStr), "Error: Can't generate password for salt");
     return false;
   }

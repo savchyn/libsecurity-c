@@ -20,7 +20,7 @@
 //     encoded string.
 //  3. The option for resetting a HOTP counter to another value of counter is
 //  currently not implemented as it is defined as an extension in the RFC
-
+#include <math.h>
 #include "libsecurity/otp/otp_int.h"
 #include "libsecurity/utils/crypto.h"
 
@@ -62,8 +62,8 @@ STATIC bool isValidOtpSecret(const unsigned char *secret) {
 }
 
 STATIC bool isValidOtp(const OtpS *otp) {
-  if (isValidDigits(otp->Digits) == false) return false;
-  if (isValidDigest(otp->DigestType) == false) return false;
+  if (!isValidDigits(otp->Digits) ) return false;
+  if (!isValidDigest(otp->DigestType) ) return false;
   return true;
 }
 /*
@@ -86,9 +86,9 @@ STATIC bool setSecretStr(unsigned char fixedSecret[crypto_auth_BYTES + 1], const
 // Generate Otp
 bool Otp_NewAdvance(OtpS **otp, const unsigned char *secret, int16_t numOfDigits, int16_t digestType) {
   
-  if (isValidOtpSecret(secret) == false) return false;
-  if (isValidDigits(numOfDigits) == false) return false;
-  if (isValidDigest(digestType) == false) return false;
+  if (!isValidOtpSecret(secret) ) return false;
+  if (!isValidDigits(numOfDigits) ) return false;
+  if (!isValidDigest(digestType) ) return false;
   Utils_Malloc((void **)(otp), sizeof(OtpS));
   (*otp)->Secret = (unsigned char *)strdup((const void *)secret);
   (*otp)->Digits = numOfDigits;
@@ -99,7 +99,7 @@ bool Otp_NewAdvance(OtpS **otp, const unsigned char *secret, int16_t numOfDigits
 // The default OTP: sha1 with 6 digits
 // Any number of digits and any (hash) function are allowed
 bool Otp_New(OtpS **otp, const unsigned char *secret) {
-  if (isValidOtpSecret(secret) == false) return false;
+  if (!isValidOtpSecret(secret) ) return false;
   return Otp_NewAdvance(otp, secret, DEFAULT_NUM_OF_DIGITS, DEFAULT_HASH_FUNC_IDX);
 }
 
@@ -169,7 +169,7 @@ bool Otp_Generate(const OtpS *otp, int64_t seed, char **val) {
   char str[len];
 
   if (otp == NULL) return false;
-  if (isValidOtp(otp) == false) return false;
+  if (!isValidOtp(otp) ) return false;
   snprintf(str, len, "%032ld", (long int)seed); // 32 is the size of crypto_auth_KEYBYTES
   return generateHmac(otp, str, val);
 }
@@ -185,7 +185,7 @@ bool Otp_IsEqual(const OtpS *otp1, const OtpS *otp2) {
 bool Otp_ReplaceSecret(OtpS *otp, const unsigned char *secret) {
   unsigned char *secretStr = NULL;
 
-  if (otp == NULL || secret == NULL || isValidOtpSecret(secret) == false) return false;
+  if (otp == NULL || secret == NULL || !isValidOtpSecret(secret) ) return false;
   if (otp->Secret != NULL) Utils_Free(otp->Secret);
   Utils_CreateAndCopyUcString(&secretStr, secret, strlen((const char *)secret));
   otp->Secret = secretStr;
@@ -226,9 +226,9 @@ STATIC bool isValidTotp(const TotpS *totp) {
 
 // Default lifespan of a TotpS is 30 seconds
 bool Otp_NewTotp(TotpS **totp, const unsigned char *secret) {
-  if (isValidOtpSecret(secret) == false) return false;
+  if (!isValidOtpSecret(secret) ) return false;
   Utils_Malloc((void **)(totp), sizeof(TotpS));
-  if (Otp_New(&((*totp)->BaseOtp), secret) == false) return false;
+  if (!Otp_New(&((*totp)->BaseOtp), secret) ) return false;
   (*totp)->Interval = DEFAULT_INTERVAL_SEC;
   return true;
 }
@@ -243,7 +243,7 @@ void Otp_FreeTotp(TotpS *totp) {
 bool Otp_GetTotpAtTime(const TotpS *totp, MicroSecTimeStamp t, char **val) {
   MicroSecTimeStamp sec = timeCode(totp, t);
 
-  if (isValidTotp(totp) == false) {
+  if (!isValidTotp(totp) ) {
     return false;
   }
   return Otp_Generate(totp->BaseOtp, sec, val);
@@ -256,7 +256,7 @@ bool Otp_GetTotpNow(const TotpS *totp, char **val) {
 
 bool Otp_IsEqualTotp(const TotpS *totp1, const TotpS *totp2) {
   if (totp1 == NULL || totp2 == NULL) return false;
-  return (totp1->Interval == totp2->Interval && Otp_IsEqual(totp1->BaseOtp, totp2->BaseOtp) == true);
+  return (totp1->Interval == totp2->Interval && Otp_IsEqual(totp1->BaseOtp, totp2->BaseOtp));
 }
 
 bool Otp_StoreTotp(const TotpS *totp, const SecureStorageS *storage, const char *prefix) {
@@ -266,13 +266,13 @@ bool Otp_StoreTotp(const TotpS *totp, const SecureStorageS *storage, const char 
 
   if (totp == NULL || storage == NULL || prefix == NULL) return false;
   prefixLen = strlen(prefix) + strlen(TOTP_PREFIX) + 1;
-  if (Utils_IsPrefixValid("Otp_StoreTotp", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Otp_StoreTotp", prefix) ) return false;
   Utils_Malloc((void **)(&totpStr), otpStrLen + 1);
   totpStructToStr(totp, totpStr, otpStrLen);
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf(key, prefixLen, OTP_PREFIX_FMT, TOTP_PREFIX, prefix);
   debug_print("Otp store: Write key '%s' val '%s'\n", key, totpStr);
-  if (SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)totpStr, strlen(totpStr)) == false) {
+  if (!SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)totpStr, strlen(totpStr)) ) {
     Utils_Free(key);
     Utils_Free(totpStr);
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", key, totpStr);
@@ -298,10 +298,10 @@ bool Otp_LoadTotp(void **totp, const SecureStorageS *storage, const char *prefix
     return false;
   }
   prefixLen = strlen(prefix) + strlen(TOTP_PREFIX) + 1;
-  if (Utils_IsPrefixValid("Otp_LoadTotp", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Otp_LoadTotp", prefix) ) return false;
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf((char *)key, prefixLen, OTP_PREFIX_FMT, TOTP_PREFIX, prefix);
-  if (SecureStorage_GetItem(storage, key, strlen((char *)key), &val) == false) {
+  if (!SecureStorage_GetItem(storage, key, strlen((char *)key), &val) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: Read from secure storage key '%s' not found", key);
     debug_print("Internal Error: Read from secure storage key '%s' not found", key);
     Utils_Free(key);
@@ -310,7 +310,7 @@ bool Otp_LoadTotp(void **totp, const SecureStorageS *storage, const char *prefix
   debug_print("read: key: '%s' totp info '%s'\n", key, val);
   sscanf((char *)val, TOTP_STRUCT_FMT, secret, &digits, &digestType, &interval);
   debug_print("Load data for totp: '%s', %d %d %d\n", secret, digits, digestType, interval);
-  if (Otp_NewTotp((TotpS **)totp, secret) == false) {
+  if (!Otp_NewTotp((TotpS **)totp, secret) ) {
     printf("Error: %s\n", errStr);
     return false;
   }
@@ -342,11 +342,11 @@ STATIC void hotpStructToStr(const HotpS *hotp, char *str, int16_t maxStrLen) {
 }
 
 bool Otp_NewHotp(HotpS **hotp, const unsigned char *secret, int64_t count) {
-  if (isValidOtpSecret(secret) == false) {
+  if (!isValidOtpSecret(secret) ) {
     return false;
   }
   Utils_Malloc((void **)(hotp), sizeof(HotpS));
-  if (Otp_New(&((*hotp)->BaseOtp), secret) == false) return false;
+  if (!Otp_New(&((*hotp)->BaseOtp), secret) ) return false;
   (*hotp)->Count = count;
   return true;
 }
@@ -395,7 +395,7 @@ bool Otp_IsEqualHotp(const HotpS *hotp1, const HotpS *hotp2) {
   if (hotp1 == NULL || hotp2 == NULL) {
     return false;
   }
-  return (hotp1->Count == hotp2->Count && Otp_IsEqual(hotp1->BaseOtp, hotp2->BaseOtp) == true);
+  return (hotp1->Count == hotp2->Count && Otp_IsEqual(hotp1->BaseOtp, hotp2->BaseOtp));
 }
 
 bool Otp_StoreHotp(const HotpS *hotp, const SecureStorageS *storage, const char *prefix) {
@@ -404,13 +404,13 @@ bool Otp_StoreHotp(const HotpS *hotp, const SecureStorageS *storage, const char 
 
   if (hotp == NULL || storage == NULL || prefix == NULL) return false;
   prefixLen = strlen(prefix) + strlen(HOTP_PREFIX) + 1;
-  if (Utils_IsPrefixValid("Otp_StoreHotp", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Otp_StoreHotp", prefix) ) return false;
   Utils_Malloc((void **)(&hotpStr), otpStrLen + 1);
   hotpStructToStr(hotp, hotpStr, otpStrLen);
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf(key, prefixLen, OTP_PREFIX_FMT, HOTP_PREFIX, prefix);
   debug_print("Otp_StoreHotp write key '%s' val '%s'\n", key, hotpStr);
-  if (SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)hotpStr, strlen(hotpStr)) == false) {
+  if (!SecureStorage_AddItem(storage, (unsigned char *)key, strlen(key), (unsigned char *)hotpStr, strlen(hotpStr)) ) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", key, hotpStr);
     Utils_Free(hotpStr);
     Utils_Free(key);
@@ -437,10 +437,10 @@ bool Otp_LoadHotp(void **hotp, const SecureStorageS *storage, const char *prefix
     return false;
   }
   prefixLen = strlen(prefix) + strlen(HOTP_PREFIX) + 1;
-  if (Utils_IsPrefixValid("Otp_LoadHotp", prefix) == false) return false;
+  if (!Utils_IsPrefixValid("Otp_LoadHotp", prefix) ) return false;
   Utils_Malloc((void **)(&key), prefixLen);
   snprintf((char *)key, prefixLen, OTP_PREFIX_FMT, HOTP_PREFIX, prefix);
-  if (SecureStorage_GetItem(storage, key, strlen((char *)key), &val) == false) {
+  if (!SecureStorage_GetItem(storage, key, strlen((char *)key), &val) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: Read from secure storage key '%s' not found", key);
     debug_print("Internal Error: Read from secure storage key '%s' not found\n", key);
     Utils_Free(key);
@@ -449,7 +449,7 @@ bool Otp_LoadHotp(void **hotp, const SecureStorageS *storage, const char *prefix
   debug_print("read: key: '%s' hotp info '%s'\n", key, val);
   sscanf((char *)val, HOTP_STRUCT_FMT, secret, &digits, &digestType, &count);
   debug_print("Load data for hotp: '%s', %d %d %ld\n", secret, digits, digestType, count);
-  if (Otp_NewHotp((HotpS **)hotp, secret, count) == false) {
+  if (!Otp_NewHotp((HotpS **)hotp, secret, count) ) {
     printf("Error: %s\n", errStr);
     return false;
   }

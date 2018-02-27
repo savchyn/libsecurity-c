@@ -31,17 +31,17 @@ STATIC bool testNewUser() {
           printf("testNewUser fail: AM was created but the parameters are not "
                  "legal: privilege '%s' pwdLen %d, saltLen %d\n", privilege[j], pwdLen, saltLen);
           pass = false;
-        } else if (ret == false && (j > 0 && pwdLen >= MIN_PASSWORD_LENGTH && pwdLen <= MAX_PASSWORD_LENGTH && saltLen >= MIN_SALT_LEN &&
+        } else if (!ret && (j > 0 && pwdLen >= MIN_PASSWORD_LENGTH && pwdLen <= MAX_PASSWORD_LENGTH && saltLen >= MIN_SALT_LEN &&
                                     saltLen <= MAX_SALT_LEN)) {
           printf("testNewUser fail: AM was not created but the parameters are legal: privilege "
                  "'%s' pwdLen %d, ('%s') saltLen %d ('%s'), error: %s\n", privilege[j], pwdLen, pwd, saltLen, salt, errStr);
           pass = false;
         }
-        if (ret == true) {
+        if (ret) {
           Accounts_FreeUser(user);
         }
         if (saltLen >= 0) strcat(salt, "ab12");
-        if (pass == false) return false;
+        if (!pass ) return false;
       }
       if (pwdLen >= 0) strcat(pwd, "#$ab");
     }
@@ -62,7 +62,7 @@ STATIC bool testSetUserPrivilege() {
     if (ret && (i == 0 || i == privelegeLen - 1)) {
       printf("testSetUserPrivilege fail: ilegal user privilege '%s' was setted\n", privilege[i]);
       pass = false;
-    } else if (ret == false && i > 0 && i < privelegeLen - 1) {
+    } else if (!ret && i > 0 && i < privelegeLen - 1) {
       printf("testSetUserPrivilege fail: legal privilege was not setted '%s', index %d, error: %s\n", privilege[i], i, errStr);
       pass = false;
     }
@@ -83,14 +83,14 @@ STATIC bool testUpdateLoginPwd() {
   char *cPwd = NULL, *pwdPtr = NULL;
   AmUserInfoS *user = NULL;
 
-  if (Accounts_NewUser(&user, SUPER_USER_PERMISSION_STR, DEFAULT_PASSWORD, (unsigned char *)"", STRENGTH_SUFFICIENT) == false) {
+  if (!Accounts_NewUser(&user, SUPER_USER_PERMISSION_STR, DEFAULT_PASSWORD, (unsigned char *)"", STRENGTH_SUFFICIENT) ) {
     printf("testUpdateLoginPwd: Failed to initilized user, error: %s\n", errStr);
     return false;
   }
   cPwd = (char *)DEFAULT_PASSWORD;
   for (i = 0; i < len; i++) {
     ret = Accounts_VerifyPassword(user, (unsigned char *)cPwd);
-    if ((i % 2 == 0 && ret == false) || (i % 2 == 1 && ret == true)) {
+    if ((i % 2 == 0 && !ret) || (i % 2 == 1 && ret)) {
       printf("testUpdateLoginPwd failed: in verify password, idx %d, curent "
              "password '%s' verify "
              "password '%s' match %d, expected match %d, error: %s\n",
@@ -98,8 +98,8 @@ STATIC bool testUpdateLoginPwd() {
       pass = false;
     }
     ret = Accounts_UpdateUserPwd(user, name, (unsigned char *)cPwd, (unsigned char *)pwdVec[i], STRENGTH_SUFFICIENT);
-    if (ret == true) pwdPtr = pwdVec[i];
-    if ((i % 2 == 0 && ret == false) || (i % 2 == 1 && ret == true)) {
+    if (ret) pwdPtr = pwdVec[i];
+    if ((i % 2 == 0 && !ret) || (i % 2 == 1 && ret)) {
       printf("testUpdateLoginPwd failed: in update pwd idx %d, curent password "
              "'%s' new password "
              "'%s' reject %d, expect to reject %d, error: %s\n",
@@ -107,7 +107,7 @@ STATIC bool testUpdateLoginPwd() {
       pass = false;
     }
     if (i % 2 == 1) cPwd = pwdPtr;
-    if (pass == false) {
+    if (!pass ) {
       break;
     }
   }
@@ -124,28 +124,28 @@ STATIC bool testStoreLoadLogin() {
   SecureStorageS storage;
 
   Accounts_NewUser(&u1, SUPER_USER_PERMISSION_STR, DEFAULT_PASSWORD, DEFAULT_SALT, STRENGTH_SUFFICIENT);
-  if (SecureStorage_NewStorage(SECRET, DEFAULT_SALT, &storage) == false) {
+  if (!SecureStorage_NewStorage(SECRET, DEFAULT_SALT, &storage) ) {
     printf("testStoreLoadLogin failed: Error when try to create new storage, "
            "error: %s\n",
            errStr);
     return false;
   }
-  if (Accounts_Store(u1, &storage, prefix) == false) {
+  if (!Accounts_Store(u1, &storage, prefix) ) {
     printf("testStoreLoadLogin failed: Error when try to store password to "
            "storage, error: %s\n",
            errStr);
     pass = false;
   }
-  if (Accounts_Load((void **)(&u2), NULL, prefix, &tName) == true) {
+  if (Accounts_Load((void **)(&u2), NULL, prefix, &tName)) {
     printf("testStoreLoadLogin failed: successfully load from NULL strorage\n");
     pass = false;
   }
-  if (Accounts_Load((void **)(&u2), &storage, prefix, &tName) == false) {
+  if (!Accounts_Load((void **)(&u2), &storage, prefix, &tName) ) {
     printf("testStoreLoadLogin failed: Error when try to load login from "
            "storage, error: %s\n",
            errStr);
     pass = false;
-  } else if (Accounts_IsEqual(u1, u2) == false) {
+  } else if (!Accounts_IsEqual(u1, u2) ) {
     printf("testStoreLoadLogin failed: logins are not equal, error: %s\n", errStr);
     Accounts_Print(stdout, "User1:\n", u1);
     Accounts_Print(stdout, "User2:\n", u2);
@@ -180,7 +180,7 @@ STATIC bool testAccountsCorners() {
       pass = false;
     }
   }
-  if (checkPrivilegeValidity(NULL, &privilegeType) != false) {
+  if (checkPrivilegeValidity(NULL, &privilegeType)) {
     printf("testAccountsCorners failed: checkPrivilegeValidity expect to false\n");
     pass = false;
   }
@@ -212,7 +212,7 @@ int main()
   len = sizeof(callFunc) / sizeof(Utils_TestFuncS);
 
   for (i = 0; i < len; i++) {
-    if ((callFunc[i]).testFunc() == false) {
+    if (!(callFunc[i]).testFunc() ) {
       res = "fail";
       pass = false;
     } else

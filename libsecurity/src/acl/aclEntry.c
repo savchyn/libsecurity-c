@@ -9,9 +9,9 @@ bool addPermissionToEntry(AclPermissionsS *aclEntry, const char *permission) {
     assert(LIB_NAME "Permission structure must not be NULL" && false);
     return false;
   }
-  if (checkPermissionValidity(permission) == false) return false;
+  if (!checkPermissionValidity(permission)) return false;
   t = aclEntry->Permissions;
-  if (hadd(t, (const ub1 *)permission, (ub4)strlen(permission), PERMISSION_VAL) == true) {
+  if (hadd(t, (const ub1 *)permission, (ub4)strlen(permission), PERMISSION_VAL)) {
     Utils_CreateAndCopyString(&keyStr, permission, strlen(permission));
     hkey(t) = (unsigned char *)keyStr;
   } else {
@@ -44,9 +44,9 @@ bool removePermissionFromEntry(const AclPermissionsS *aclEntry, const char *perm
     assert(LIB_NAME "Permission structure must not be NULL" && false);
     return false;
   }
-  if (checkPermissionValidity(permission) == false) return false;
+  if (!checkPermissionValidity(permission)) return false;
   t = aclEntry->Permissions;
-  if (hfirst(t) && hfind(t, (const ub1 *)permission, (ub4)strlen(permission)) == true) {
+  if (hfirst(t) && hfind(t, (const ub1 *)permission, (ub4)strlen(permission))) {
     Utils_Free(hkey(t));
     hdel(t);
     return true;
@@ -77,6 +77,6 @@ bool checkPermissionOfEntry(const AclPermissionsS *aclPermissions, const char *p
     assert(LIB_NAME "Permission structures must not be NULL" && false);
     return false;
   }
-  if (checkPermissionValidity(permission) == false) return false;
+  if (!checkPermissionValidity(permission)) return false;
   return hfind(aclPermissions->Permissions, (const ub1 *)permission, (ub4)strlen(permission));
 }

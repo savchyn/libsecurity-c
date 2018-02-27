@@ -57,43 +57,43 @@ STATIC bool testInitRefSalt() {
           saltOk = isValidSalt(nSalt);
           Utils_Free(nSalt);
           ret = Salt_NewSalt(&s, (unsigned char *)sPtr, (unsigned char *)saltPtr);
-          if (ret && (secretOk == false || saltOk == false)) {
+          if (ret && (!secretOk || !saltOk )) {
             printf("testInitRefSalt fail: Initialize failed: initialize was "
                    "done successfully but "
                    "the input is invalid\n");
             Salt_Print(stdout, "testInitRefSalt", s);
             pass = false;
           }
-          if (ret == false && secretOk && saltOk == true) {
+          if (!ret && secretOk && saltOk) {
             printf("testInitRefSalt fail: Initialize salt failed but secret "
                    "'%s' and salt '%s' are "
                    "valid, error %s\n",
                    sPtr, saltPtr, errStr);
             pass = false;
           }
-          if (ret == true) {
+          if (ret) {
             s->OutputLen = ol;
             s->Iterations = iter;
             ret = Salt_Generate(s, &newPwd);
-            if (ret == false) {
+            if (!ret) {
               Salt_FreeSalt(s);
             }
             olOk = isValidOutputLen(ol);
             iterOk = isValidNumOfIterations(iter);
-            if (ret == false && olOk && iterOk == true) {
+            if (!ret && olOk && iterOk) {
               printf("testInitRefSalt fail: Initialize salt faild but output "
                      "length %d and "
                      "iterations %d are valid\n",
                      ol, iter);
               pass = false;
-            } else if (ret && (olOk == false || iterOk == false)) {
+            } else if (ret && (!olOk  || !iterOk )) {
               printf("testInitRefSalt fail: Initialize failed: initialize was "
                      "done successfully "
                      "but the input is invalid\n");
               Salt_Print(stdout, "testInitRefSalt", s);
               pass = false;
             }
-            if (ret == true) {
+            if (ret) {
               if (NumOfTestsCnt < NUM_OF_TESTS) {
                 refRunsSalt[NumOfTestsCnt].S = s;
                 refRunsSalt[NumOfTestsCnt].Res = newPwd;
@@ -103,18 +103,18 @@ STATIC bool testInitRefSalt() {
                 Utils_Abort(errStr);
               }
             }
-            if (pass == false) break;
+            if (!pass ) break;
           }
-          if (pass == false) break;
+          if (!pass ) break;
         }
-        if (pass == false) break;
+        if (!pass ) break;
       }
-      if (clearSalt == true) {
+      if (clearSalt) {
         Utils_Free(saltR);
         // clearSalt = false;
       }
     }
-    if (clearS == true) {
+    if (clearS) {
       Utils_Free(secretR);
       // clearS = false;
     }
@@ -136,10 +136,10 @@ STATIC bool testSaltParamesChanged() {
         // equal = false;
         continue;
       }
-      if (Utils_CharArrayCmp(refRunsSalt[i].Res, refRunsSalt[j].Res) == false) {
+      if (!Utils_CharArrayCmp(refRunsSalt[i].Res, refRunsSalt[j].Res) ) {
         equal = false;
       }
-      if (equal == true) {
+      if (equal) {
         printf("testSaltParamesChanged failed: different salt parameters "
                "return the same password: '%s'\n",
                refRunsSalt[i].Res);
@@ -163,7 +163,7 @@ STATIC bool testSaltRepetitation() {
 
   for (i = 0; i < NumOfTestsCnt; i++) {
     Salt_Generate(refRunsSalt[i].S, &newPwd);
-    if (Salt_IsEqual(refRunsSalt[i].S, newPwd) == false) {
+    if (!Salt_IsEqual(refRunsSalt[i].S, newPwd) ) {
       printf("testSaltRepetitation failed: The same salt yield to different "
              "results: error %s\n",
              errStr);
@@ -221,7 +221,7 @@ STATIC bool testStaticCalculationSalting() {
     digest[cnt] = 0;
     Utils_SetCharArrayLen(digest, cnt - UTILS_STR_LEN_SIZE);
     s->Iterations = data[i].Iteration;
-    if (Salt_IsEqual(s, digest) == false) {
+    if (!Salt_IsEqual(s, digest) ) {
       printf("testStaticCalculationSalting failed: Expected external password "
              "'%s' did not matched "
              "calculated password, error: %s\n",
@@ -252,13 +252,13 @@ STATIC bool testRandomSalt() {
              "%d\n",
              newSalt, i);
       pass = false;
-    } else if (ret == false && i >= MIN_SALT_LEN && i <= MAX_SALT_LEN) {
+    } else if (!ret && i >= MIN_SALT_LEN && i <= MAX_SALT_LEN) {
       printf("testRandomSalt failed: Generating of random salt for size %d "
              "fail, error: %s\n",
              i, errStr);
       pass = false;
     }
-    if (ret == true) Utils_Free(newSalt);
+    if (ret) Utils_Free(newSalt);
   }
   return pass;
 }
@@ -274,23 +274,23 @@ STATIC bool testPwdGeneration() {
   Utils_GenerateCharArray((unsigned char *)"pass1234", 8, &(pwd[1]));
   Utils_GenerateCharArray((unsigned char *)DEFAULT_SALT, strlen(DEFAULT_SALT), &(salt[0]));
   Utils_GenerateCharArray((unsigned char *)"abc", 3, &(salt[1]));
-  if (Salt_GenerateCharArraySaltedPassword(pwd[0], salt[0], &(resPwd[0])) == false ||
-      Salt_GenerateCharArraySaltedPassword(pwd[0], salt[0], &(resPwd[1])) == false ||
-      Salt_GenerateCharArraySaltedPassword(pwd[0], salt[1], &(resPwd[2])) == false ||
-      Salt_GenerateCharArraySaltedPassword(pwd[1], salt[0], &(resPwd[3])) == false) {
+  if (!Salt_GenerateCharArraySaltedPassword(pwd[0], salt[0], &(resPwd[0]))  ||
+      !Salt_GenerateCharArraySaltedPassword(pwd[0], salt[0], &(resPwd[1]))  ||
+      !Salt_GenerateCharArraySaltedPassword(pwd[0], salt[1], &(resPwd[2]))  ||
+      !Salt_GenerateCharArraySaltedPassword(pwd[1], salt[0], &(resPwd[3])) ) {
     printf("testPwdGeneration failed: fanction with valid parameters return false, error: %s\n", errStr);
     pass = false;
   }
-  if (Utils_CharArrayCmp(resPwd[0], resPwd[1]) == false) {
+  if (!Utils_CharArrayCmp(resPwd[0], resPwd[1]) ) {
     printf("testPwdGeneration failed: pwd1 and pwd2 must be the same\n");
     pass = false;
   }
-  if (Utils_CharArrayCmp(resPwd[0], resPwd[2]) || Utils_CharArrayCmp(resPwd[0], resPwd[3]) == true) {
+  if (Utils_CharArrayCmp(resPwd[0], resPwd[2]) || Utils_CharArrayCmp(resPwd[0], resPwd[3])) {
     printf("testPwdGeneration failed: pwd1 and pwd3, pwd4 must not be the same\n");
     pass = false;
   }
   if (Salt_GenerateCharArraySaltedPassword(NULL, salt[0], &pwd[0]) || Salt_GenerateSaltedPassword(NULL, salt[0], false, 1, &(pwd[0])) ||
-      Salt_GenerateSaltedPassword(pwd[0], NULL, false, 1, &(pwd[0])) == true) {
+      Salt_GenerateSaltedPassword(pwd[0], NULL, false, 1, &(pwd[0]))) {
     printf("testPwdGeneration failed: fanction with NULL parameters return true\n");
     pass = false;
   }
@@ -332,7 +332,7 @@ int main()
 
   len = sizeof(callFunc) / sizeof(Utils_TestFuncS);
   for (i = 0; i < len; i++) {
-    if ((callFunc[i]).testFunc() == false) {
+    if (!(callFunc[i]).testFunc() ) {
       res = "fail";
       pass = false;
     } else

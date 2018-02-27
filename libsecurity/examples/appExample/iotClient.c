@@ -99,7 +99,7 @@ void initConnection() {
   printf("The ca cert file name '%s'\n", cacertFile);
   Syslog_UpdateHostNameType(SYSLOG_USE_IP_ADDRESS_AS_HOST_IDX);
   Syslog_UpdateAppName(appName);
-  if (Syslog_OpenLog(serverHostStr, port, cacertFile, serverHostStr) == false) {
+  if (!Syslog_OpenLog(serverHostStr, port, cacertFile, serverHostStr) ) {
     printf("Fatal error: initConnection, error %s\n", errStr);
     exit(-1);
   }
@@ -117,13 +117,13 @@ static int generateMeterReading(int baseValue) {
 
 bool sendMessageToMule(int val) {
   int value = generateMeterReading(val);
-  if (Syslog_Mule(muleMessageType, mulePath, value) == false)
+  if (!Syslog_Mule(muleMessageType, mulePath, value) )
     printf("sendMessageToMule Error: %s\n", errStr);
   return true;
 }
 
 bool sendLogMessage() {
-  if (Syslog_Log(SevirityError, logMessageStr) == false)
+  if (!Syslog_Log(SevirityError, logMessageStr) )
     printf("sendLogMessage Error: %s\n", errStr);
   return true;
 }

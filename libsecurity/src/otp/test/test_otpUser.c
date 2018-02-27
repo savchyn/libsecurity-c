@@ -13,7 +13,7 @@ bool OtpTestUser_SetUser(OtpUserS **user, unsigned char *secret) {
   char *lastPwdPtr;
   unsigned char fixedSecret[crypto_auth_BYTES + 1];
 
-  if (OtpUser_NewSimpleUser(user, secret) == false) return false;
+  if (!OtpUser_NewSimpleUser(user, secret)) return false;
   (*user)->Throttle->Cliff = 11;
   (*user)->Throttle->DurationSec = 2;
   (*user)->Throttle->throttlingTimerHotp = 3;
@@ -61,31 +61,31 @@ bool OtpUser_TestUserHOTPCode() {
   // and user4 must sync
   // after the first match
   for (i = 0; i < NUM_OF_USERS; i++) {
-    if (OtpUser_NewUser(&(user[i]), SECRET, false, 600, 5, 400, hotpWindowSize[i], 200, startCount + offset[i]) == false) {
+    if (!OtpUser_NewUser(&(user[i]), SECRET, false, 600, 5, 400, hotpWindowSize[i], 200, startCount + offset[i]) ) {
       printf("OtpUser_TestUserHOTPCode failed, Can't create user, Error: %s\n", errStr);
       return false;
     }
   }
   for (u = 0; u < NUM_OF_USERS; u++) {
-    if (OtpUser_VerifyCode(user[u], OTHER_SECRET, HOTP_TYPE) == true) {
+    if (OtpUser_VerifyCode(user[u], OTHER_SECRET, HOTP_TYPE)) {
       printf("OtpUser_TestUserHOTPCode failed, wrong code was excepted, Error: "
              "%s\n",
              errStr);
       pass = false;
     }
     for (i = 0; i < len; i++) {
-      if (Otp_GetHotpAtCount((user[u])->BaseHotp, startCount + i, &val1) == false) {
+      if (!Otp_GetHotpAtCount((user[u])->BaseHotp, startCount + i, &val1) ) {
         printf("OtpUser_TestUserHOTPCode failed, can't calulate expected code, "
                "Error: %s\n",
                errStr);
         pass = false;
       }
       ret = verifyUserCodeHelper(user[u], val1, HOTP_TYPE, user[u]->Throttle->DurationSec);
-      if (ret == false && expected[u] == true) {
+      if (!ret && expected[u]) {
         printf("OtpUser_TestUserHOTPCode failed, code wasn't match as expected, index %d, expected: user code %s, ret %d, Error: %s\n",
                i, val1, ret, errStr);
         pass = false;
-      } else if (ret && expected[u] == false) {
+      } else if (ret && !expected[u] ) {
         printf("OtpUser_TestUserHOTPCode failed, user code %s was matched unexpectedly, index %d\n", val1, i);
         pass = false;
       }
@@ -108,7 +108,7 @@ bool Test_CheckErrorThrottling() {
   char *val = NULL;
   int64_t startCounter = 1000, expected = 0;
 
-  if (OtpUser_NewUser(&user, SECRET, false, cliff, throttleTimeSec, 400, 1, 200, startCounter) == false) {
+  if (!OtpUser_NewUser(&user, SECRET, false, cliff, throttleTimeSec, 400, 1, 200, startCounter) ) {
     printf("Test_CheckErrorThrottling failed, Can't create user, Error: %s\n", errStr);
     return false;
   }
@@ -124,24 +124,24 @@ bool Test_CheckErrorThrottling() {
       pass = false;
     }
     if (i == 0) { // check that the throttling timer work OK for the basic unit
-      if (Otp_GetHotpAtCount(user->BaseHotp, startCounter, &val) == false) {
+      if (!Otp_GetHotpAtCount(user->BaseHotp, startCounter, &val) ) {
         printf("Test_CheckErrorThrottling failed, can't calulate expected code, Error: %s\n", errStr);
         pass = false;
         break;
       }
-      if (OtpUser_VerifyCode(user, val, HOTP_TYPE) == true) { // test should not be checked before throttling duration
+      if (OtpUser_VerifyCode(user, val, HOTP_TYPE)) { // test should not be checked before throttling duration
         printf("Test_CheckErrorThrottling failed, OTP should not be checked before: %d seconds\n", factor);
         pass = false;
         ret = verifyUserCodeHelper(user, val, HOTP_TYPE, factor);
-        if (ret == false) {
+        if (!ret) {
           printf("Test_CheckErrorThrottling failed, expected to be throttle for: %ds, checked after %ds, error: %s\n",
                  (int16_t)throttleTimeSec, (int16_t)factor, errStr);
           pass = false;
         }
-        if (ret == true) { // advance the internal counter
+        if (ret) { // advance the internal counter
           user->BaseHotp->Count = user->BaseHotp->Count + 1;
         }
-        if (pass == false) {
+        if (!pass ) {
           Utils_Free(val);
           break;
         }
@@ -174,19 +174,19 @@ bool Test_CheckAutomaticUnblockUser() {
   char *val = NULL;
   int64_t startCounter = 1000, expected = 0;
 
-  if (OtpUser_NewUser(&user, SECRET, false, cliff, throttleTimeSec, 400, 1, 200, startCounter) == false) {
+  if (!OtpUser_NewUser(&user, SECRET, false, cliff, throttleTimeSec, 400, 1, 200, startCounter) ) {
     printf("Test_CheckAutomaticUnblockUser failed, Can't create user, Error: %s\n", errStr);
     OtpUser_FreeUser(user);
     return false;
   }
   user->Throttle->AutoUnblockSec = DEFAULT_UNBLOCK_SEC;
   for (i = 0; i < user->Throttle->Cliff + 1; i++) {
-    if (verifyUserCodeHelper(user, OTHER_SECRET, HOTP_TYPE, 100) == true) {
+    if (verifyUserCodeHelper(user, OTHER_SECRET, HOTP_TYPE, 100)) {
       printf("Test_CheckAutomaticUnblockUser failed, wrong code was exepted\n");
       pass = false;
     }
   }
-  if (OtpUser_GetBlockState(user) == false) {
+  if (!OtpUser_GetBlockState(user) ) {
     printf("Test_CheckAutomaticUnblockUser failed, user must be blocked after %d wrong tries\n",
            (int16_t)user->Throttle->Cliff);
     OtpUser_FreeUser(user);
@@ -201,7 +201,7 @@ bool Test_CheckAutomaticUnblockUser() {
       Otp_GetHotpAtCount(user->BaseHotp, startCounter, &val);
       ret = verifyUserCodeHelper(user, val, HOTP_TYPE, user->Throttle->AutoUnblockSec + offsetsSec[i]);
       blocked = OtpUser_GetBlockState(user);
-      if (blocked == false && offsetsSec[i] < 0) {
+      if (!blocked  && offsetsSec[i] < 0) {
         printf("Test_CheckAutomaticUnblockUser failed, code match %d, user must not be "
                "automatically unblocked before %d seconds, but it was unblocked after %d sec\n",
                (int16_t)ret, (int16_t)user->Throttle->AutoUnblockSec, (int16_t)user->Throttle->AutoUnblockSec + offsetsSec[i]);
@@ -237,33 +237,33 @@ bool OtpUser_TestUserTOTPCode() {
 
   // user1 is sync with the cuonter, user2, is not sync and couldn't sync, user3 and user4 must sync after the first match
   for (u = 0; u < NUM_OF_USERS; u++) {
-    if (OtpUser_NewUser(&(user[u]), SECRET, false, 600, 5, 400, 3, totpWindowSizeSec[u], 100) == false) {
+    if (!OtpUser_NewUser(&(user[u]), SECRET, false, 600, 5, 400, 3, totpWindowSizeSec[u], 100) ) {
       printf("OtpUser_TestUserTOTPCode failed, Can't create user, Error: %s\n", errStr);
       return false;
     }
   }
   for (u = 0; u < NUM_OF_USERS; u++) {
-    if (OtpUser_VerifyCode(user[u], OTHER_SECRET, TOTP_TYPE) == true) {
+    if (OtpUser_VerifyCode(user[u], OTHER_SECRET, TOTP_TYPE)) {
       printf("OtpUser_TestUserTOTPCode failed, wrong code was excepted, Error: "
              "%s\n",
              errStr);
       pass = false;
     }
     timeSec = ((Utils_GetTimeNowInSec() / (user[u])->BaseTotp->Interval) * (user[u])->BaseTotp->Interval + offsetSec[u]);
-    if (Otp_GetTotpAtTime((user[0])->BaseTotp, timeSec, &val1) == false) {
+    if (!Otp_GetTotpAtTime((user[0])->BaseTotp, timeSec, &val1) ) {
       printf("OtpUser_TestUserTOTPCode failed, can't calulate expected code, Error: %s\n", errStr);
       pass = false;
     }
     ret = verifyUserCodeHelper(user[u], val1, TOTP_TYPE, user[u]->Throttle->DurationSec);
-    if (ret == false && expected[u] == true) {
+    if (!ret && expected[u]) {
       printf("OtpUser_TestUserTOTPCode failed, code wasn't match as expected, index %d, expected: user code %s, ret %d, Error: %s\n",
              u, val1, ret, errStr);
       pass = false;
-    } else if (ret && expected[u] == false) {
+    } else if (ret && !expected[u] ) {
       printf("OtpUser_TestUserTOTPCode failed, user code %s was matched unexpectedly, index %d\n", val1, u);
       pass = false;
     }
-    if (ret && OtpUser_VerifyCode(user[u], val1, TOTP_TYPE) == true) {
+    if (ret && OtpUser_VerifyCode(user[u], val1, TOTP_TYPE)) {
       printf("OtpUser_TestUserTOTPCode failed, The same code %s was matched twice, index %d\n", val1, u);
       pass = false;
     }
@@ -280,16 +280,16 @@ bool OtpUser_TestStoreLoadUser() {
   SecureStorageS storage;
   char *fileName = "tmp.txt", *tName = NULL;
 
-  if (SecureStorage_NewStorage((unsigned char *)SECRET, (unsigned char *)SALT, &storage) == false) {
+  if (!SecureStorage_NewStorage((unsigned char *)SECRET, (unsigned char *)SALT, &storage)) {
     printf("testStoreLoadUser failed, Can't create new storage, Error: %s\n", errStr);
     return false;
   }
   OtpTestUser_SetUser(&user3, SECRET);
   OtpUser_Store(user3, &storage, "u1");
-  if (OtpUser_Load((void **)&user4, &storage, "u1", &tName) == true) {
+  if (OtpUser_Load((void **)&user4, &storage, "u1", &tName)) {
     Utils_Free(tName);
   }
-  if (OtpUserTest_IsEqual(user3, user4) == false) {
+  if (!OtpUserTest_IsEqual(user3, user4) ) {
     printf("testStoreLoadUser failed, stored user != loaded one\n");
     OtpUser_PrintUser(stdout, "Original user:\n", user3);
     OtpUser_PrintUser(stdout, "Loaded user:\n", user4);
@@ -318,7 +318,7 @@ bool OtpUser_TestCorners() {
       initAutoUnblockTimer(NULL) || OtpUser_SetBlockedState(NULL, true) || findHotpCodeMatch(NULL, OTHER_SECRET, 1, NULL, NULL) ||
       findHotpCodeMatch(user, NULL, 1, NULL, NULL) || findTotpCodeMatch(NULL, NULL, 1, NULL) ||
       findTotpCodeMatch(NULL, OTHER_SECRET, 1, &tmp) || handleErrorCode(NULL, 1) || handleOkCode(NULL, NULL, 1, 1) ||
-      verifyUserCodeHelper(NULL, NULL, 1, 1) || OtpUser_VerifyCode(NULL, NULL, 1) || OtpUser_IsUserBlocked(NULL) == true) {
+      verifyUserCodeHelper(NULL, NULL, 1, 1) || OtpUser_VerifyCode(NULL, NULL, 1) || OtpUser_IsUserBlocked(NULL)) {
     printf("OtpUser_TestCorners failed, function with NULL parameters retured true\n");
     pass = false;
   }
@@ -359,7 +359,7 @@ bool OtpUser_TestCorners() {
         user = NULL;
         break;
     }
-    if (OtpUser_IsValid(user) == true) {
+    if (OtpUser_IsValid(user)) {
       printf("OtpUser_Test_CheckAutomaticUnblockUserners failed, OtpUser_IsValid with wrong parameter %d retured true\n", i);
       pass = false;
     }

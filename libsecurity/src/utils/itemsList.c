@@ -42,7 +42,7 @@ bool ItemsList_ClearItem(void (*removeItem)(void *item), ItemsHolder *items, con
 
   if (items == NULL || name == NULL) return false;
   t = items->Items;
-  if (hfind(t, (const ub1 *)name, (ub4)strlen(name)) == true) {
+  if (hfind(t, (const ub1 *)name, (ub4)strlen(name))) {
     removeItem((void *)hstuff(t)); // remove the item name and the item node (the sruff)
     Utils_Free(hkey(t));
     hdel(t);
@@ -90,11 +90,11 @@ bool ItemsList_AddItem(const ItemsHolder *items, const char *name, void *newItem
     snprintf(errStr, sizeof(errStr), "New item/Name is NULL");
     return false;
   }
-  if (hfind(items->Items, (const ub1 *)name, (ub4)strlen(name)) == true) {
+  if (hfind(items->Items, (const ub1 *)name, (ub4)strlen(name))) {
     snprintf(errStr, sizeof(errStr), "Item '%s' was already in list", name);
     return false;
   }
-  if (Utils_AddToHash(items->Items, (const unsigned char *)name, strlen(name), (void *)newItem) == false) {
+  if (!Utils_AddToHash(items->Items, (const unsigned char *)name, strlen(name), (void *)newItem) ) {
     printf("Internal error: Item: %s is already used\n", name);
     return false;
   }
@@ -120,7 +120,7 @@ bool ItemsList_AddToStorage(bool (*storeItem)(const void *item, const SecureStor
   if (items == NULL || storage == NULL) return false;
   t = items->Items;
   sprintf(data, "%d", (int)hcount(t));
-  if (SecureStorage_AddItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char *)data, strlen(data)) == false) {
+  if (!SecureStorage_AddItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char *)data, strlen(data)) ) {
     snprintf(errStr, sizeof(errStr), "Can't add item '%s' value '%s' to storage", prefix, data);
     return false;
   }
@@ -130,7 +130,7 @@ bool ItemsList_AddToStorage(bool (*storeItem)(const void *item, const SecureStor
   if (hfirst(t)) {
     do {
       sprintf(data, ITEM_LIST_FMT, prefix, cnt++);
-      if (storeItem((void *)hstuff(t), storage, data) == false) return false;
+      if (!storeItem((void *)hstuff(t), storage, data) ) return false;
     } while (hnext(t));
   }
   if (ITEMS_LIST_DEBUG) {
@@ -147,7 +147,7 @@ bool ItemsList_LoadFromStorage(bool (*itemLoad)(void **item, const SecureStorage
   void *item = NULL;
 
   if (*items == NULL || storage == NULL) return false;
-  if (SecureStorage_GetItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char **)&val) == false) {
+  if (!SecureStorage_GetItem(storage, (const unsigned char *)prefix, strlen(prefix), (unsigned char **)&val) ) {
     snprintf(errStr, sizeof(errStr), "Internal Error: Read from secure storage key '%s' not found", prefix);
     return false;
   }
@@ -162,8 +162,8 @@ bool ItemsList_LoadFromStorage(bool (*itemLoad)(void **item, const SecureStorage
   Utils_Free(val);
   for (i = 0; i < len; i++) {
     snprintf(key, sizeof(key), ITEM_LIST_FMT, prefix, i + 1);
-    if (itemLoad((void **)(&item), storage, key, &name) == false) return false;
-    if (ItemsList_AddItem(*items, name, item) == false) {
+    if (!itemLoad((void **)(&item), storage, key, &name) ) return false;
+    if (!ItemsList_AddItem(*items, name, item) ) {
       itemFree(item);
     }
     Utils_Free(name);
@@ -181,13 +181,13 @@ STATIC bool containItemsList(bool (*itemEqual)(const void *item1, const void *it
   t1 = items1->Items;
   if (hfirst(t1)) {
     do {
-      if (hfind(items2->Items, (const ub1 *)hkey(t1), strlen((char *)hkey(t1))) == true) {
+      if (hfind(items2->Items, (const ub1 *)hkey(t1), strlen((char *)hkey(t1)))) {
         tItem = (void *)hstuff(items2->Items);
       } else {
         if (ITEMS_LIST_DEBUG) printf("Item '%s' wasn't found on the second items list\n", (char *)hkey(t1));
         return false;
       }
-      if (itemEqual((void *)hstuff(t1), tItem) == false) return false;
+      if (!itemEqual((void *)hstuff(t1), tItem) ) return false;
     } while (hnext(t1));
   }
   return true;

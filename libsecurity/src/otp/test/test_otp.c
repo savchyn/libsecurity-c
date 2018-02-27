@@ -34,14 +34,14 @@ STATIC bool testOtpCreationCorrectness() {
              "was exepted\n",
              i);
       pass = false;
-    } else if (ret == false && (i >= MIN_SECRET_LEN && i <= MAX_SECRET_LEN)) {
+    } else if (!ret && (i >= MIN_SECRET_LEN && i <= MAX_SECRET_LEN)) {
       printf("Test testOtpCreationCorrectness failed: legal secret length %d "
              "was not exepted\n",
              i);
       pass = false;
     }
-    if (ret == true) {
-      if (Otp_Generate(otp, (int64_t)(i * 100 + 2), &val) == true) Utils_Free(val);
+    if (ret) {
+      if (Otp_Generate(otp, (int64_t)(i * 100 + 2), &val)) Utils_Free(val);
       Otp_Free(otp);
     }
     strcat(secret, "1");
@@ -53,13 +53,13 @@ STATIC bool testOtpCreationCorrectness() {
              "%d was exepted\n",
              i);
       pass = false;
-    } else if (ret == false && (i >= MIN_NUM_OF_DIGITS && i <= MAX_NUM_OF_DIGITS)) {
+    } else if (!ret && (i >= MIN_NUM_OF_DIGITS && i <= MAX_NUM_OF_DIGITS)) {
       printf("Test testOtpCreationCorrectness failed: legal number of digits "
              "%d was not exepted\n",
              i);
       pass = false;
     }
-    if (ret == true) Otp_Free(otp);
+    if (ret) Otp_Free(otp);
   }
   for (i = 0; i < MAX_DIGEST_IDX + offset; i++) {
     ret = Otp_NewAdvance(&otp, SECRET, DEFAULT_NUM_OF_DIGITS, i);
@@ -68,13 +68,13 @@ STATIC bool testOtpCreationCorrectness() {
              "was exepted\n",
              i);
       pass = false;
-    } else if (ret == false && (i >= MIN_DIGEST_IDX && i <= MAX_DIGEST_IDX)) {
+    } else if (!ret && (i >= MIN_DIGEST_IDX && i <= MAX_DIGEST_IDX)) {
       printf("Test testOtpCreationCorrectness failed: legal digest index %d "
              "was not exepted\n",
              i);
       pass = false;
     }
-    if (ret == true) Otp_Free(otp);
+    if (ret) Otp_Free(otp);
   }
   return pass;
 }
@@ -95,7 +95,7 @@ STATIC bool testOtpAreEqual() {
     else if (i == 3)
       Otp_ReplaceSecret(otp1, (unsigned char *)"lalalala");
     ret = Otp_IsEqual(otp1, otp2);
-    if ((ret && i > 0) || (ret == false && i == 0)) {
+    if ((ret && i > 0) || (!ret && i == 0)) {
       if (i > 0)
         printf("Test testOtpAreEqual failed: different otp was found equal\n");
       else
@@ -124,13 +124,13 @@ STATIC bool testHotpNextAtCount() {
   char lastVal[MAX_NUM_OF_DIGITS];
   int64_t count = 100;
 
-  if (Otp_NewHotp(&refHotp, SECRET, count - 1) == false) {
+  if (!Otp_NewHotp(&refHotp, SECRET, count - 1) ) {
     printf("Can't run testHotpNext, Error: %s\n", errStr);
     return false;
   }
   Otp_NewHotp(&hotp, SECRET, count - 1);
   for (i = 0; i < len; i++) {
-    if (Otp_GetHotpNext(refHotp, &val) == true) {
+    if (Otp_GetHotpNext(refHotp, &val)) {
       for (j = i - size; j < i + size; j++) {
         Otp_GetHotpAtCount(hotp, j + count, &val1);
         res = strcmp(val, val1);
@@ -156,7 +156,7 @@ STATIC bool testHotpNextAtCount() {
       Utils_Free(val);
     } else
       pass = false;
-    if (Otp_HotpRandom(hotp, &val) == true) {
+    if (Otp_HotpRandom(hotp, &val)) {
       Otp_HotpRandom(hotp, &val1);
       if (strcmp(val, val1) == 0) {
         printf("Test testHotpNextAtCount failed: 2 random OTP give the same result: %s, %s\n", val, val1);
@@ -180,7 +180,7 @@ STATIC bool testTotpNowAtTime() {
   char lastVal[MAX_NUM_OF_DIGITS];
   int64_t timeNow = 0;
 
-  if (Otp_NewTotp(&refTotp, SECRET) == false) {
+  if (!Otp_NewTotp(&refTotp, SECRET) ) {
     printf("Can't run testTotpNext, Error: %s\n", errStr);
     return false;
   }
@@ -190,8 +190,8 @@ STATIC bool testTotpNowAtTime() {
     size = 5 * delta;
     for (i = 0; i < len * delta; i += delta) {
       timeNow = (Utils_GetTimeNowInSec() / totp->Interval) * totp->Interval;
-      if (Otp_GetTotpAtTime(totp, timeNow + i, &val) == true) {
-        if (i == 0 && done == false) {
+      if (Otp_GetTotpAtTime(totp, timeNow + i, &val)) {
+        if (i == 0 && !done ) {
           Otp_GetTotpNow(refTotp, &val1);
           if (strcmp(val, val1) != 0) {
             printf("Test testTotpNowAtTime failed: TOTP for the same time %ld "
@@ -255,7 +255,7 @@ STATIC bool testOtpCorners() {
   Utils_Free(otp1->Secret);
   otp1->Secret = NULL;
   if (generateHmac(otp, "abc", NULL) || generateHmac(otp1, key, NULL) || Otp_New(&otp, NULL) ||
-      timeCode(NULL, 1) != 1 || Otp_IsEqual(otp, otp1) || isValidInterval(MIN_INTERVAL_SEC - 1) == true) {
+      timeCode(NULL, 1) != 1 || Otp_IsEqual(otp, otp1) || isValidInterval(MIN_INTERVAL_SEC - 1)) {
     printf("testOtpCorners failed, function with invalid parameters retured true\n");
     pass = false;
   }
@@ -290,7 +290,7 @@ int32_t main()
 
   len = sizeof(callFunc) / sizeof(Utils_TestFuncS);
   for (i = 0; i < len; i++) {
-    if ((callFunc[i]).testFunc() == false) {
+    if (!(callFunc[i]).testFunc() ) {
       res = "fail";
       pass = false;
     } else

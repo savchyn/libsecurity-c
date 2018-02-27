@@ -7,7 +7,7 @@ typedef struct{
 static WaterMeter waterMeter;
 
 bool WaterMeter_InitWaterMeter(const unsigned char *secret) {
-  if (OtpUser_NewSimpleUser(&(waterMeter.otpData), secret) == false) {
+  if (!OtpUser_NewSimpleUser(&(waterMeter.otpData), secret) ) {
     printf("WaterMeter_InitWaterMeter failed, Can't create OTP, error: %s\n", errStr);
     return false;
   }
@@ -26,7 +26,7 @@ static int32_t getWaterMeterValue(void) {
 }
 
 bool WaterMeter_ReadWaterMeterValue(const char *otpVal, OtpType type, int32_t *val) {
-  if (OtpUser_VerifyCode(waterMeter.otpData, otpVal, type) == false)
+  if (!OtpUser_VerifyCode(waterMeter.otpData, otpVal, type) )
     return false;
   *val = getWaterMeterValue();
   return true;
