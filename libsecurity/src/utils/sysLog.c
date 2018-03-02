@@ -188,7 +188,7 @@ bool Syslog_OpenLog(const char *serverIpStr, int16_t port, const char *cacertFil
   return isLogOpen;
 }
 
-bool Syslog_Log(int16_t severity, const char *format, ...) {
+bool Syslog_Log(int16_t severity, const char * format, ...) {
   char str[SYSLOG_MAX_LOG_LINE_LEN];
   va_list arglist;
 

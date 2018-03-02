@@ -122,18 +122,18 @@ int main(void) {
   groupLen = sizeof(groupMembers) / sizeof(char *);
   numOfPermissions = sizeof(permissions) / sizeof(char *);
 
-  printf("This example shows how to set ACL permissions of a resource, in this case a smart TV, for users and groups of users.\n");
-  printf("The first step is adding the groups (in this case, a single group) and users to the entity list.\n");
-  printf("the second step is adding users to the groups they belong to.\n");
-  printf("The third step is setting the users' and groups' permissions, when permissions can be set for:\n");
-  printf("1. a specific user\n");
-  printf("2. a group of users\n");
-  printf("3. all users\n");
-  printf("This example, includes all 3 types of permissions and demonstrates the way affect each user\n");
-  printf("Notes:\n- Permissions are strings, and are not limited to a specific set of values\n");
-  printf("- The data is saved in a secure way to a file and is later used whenever a user attepts to access the resource");
-  printf("\n\n");
-  createAndAddMembers(&entityManager, groupName, usersList, numOfUsers, groupMembers, groupLen);
+  puts("This example shows how to set ACL permissions of a resource, in this case a smart TV, for users and groups of users.");
+  puts("The first step is adding the groups (in this case, a single group) and users to the entity list.");
+  puts("the second step is adding users to the groups they belong to.");
+  puts("The third step is setting the users' and groups' permissions, when permissions can be set for:");
+  puts("1. a specific user");
+  puts("2. a group of users");
+  puts("3. all users");
+  puts("This example, includes all 3 types of permissions and demonstrates the way affect each user");
+  puts("Notes:\n- Permissions are strings, and are not limited to a specific set of values");
+  puts("- The data is saved in a secure way to a file and is later used whenever a user attepts to access the resource");
+	
+	createAndAddMembers(&entityManager, groupName, usersList, numOfUsers, groupMembers, groupLen);
   addAcl(&entityManager, resourceName, groupName);
   checkPermissions(&entityManager, resourceName, usersList, numOfUsers, permissions, numOfPermissions);
   storeToFile(&entityManager, fileName, storageSecret, storageSalt);
