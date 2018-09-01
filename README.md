@@ -1,3 +1,5 @@
+<img src="https://travis-ci.org/savchyn/sec-c.svg?branch=master" alt="Build Status" />
+
 # sec-c
 (based on IBM's libsecurity-c)
 sec-c lib (below 'the library') is intended to be used for security relevant operations on MC and SOC with low/moderate power consumption. 
