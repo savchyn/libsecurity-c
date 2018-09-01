@@ -1,0 +1,6 @@
+os: linux
+dist: trusty
+sudo: false
+group: stable
+language: c
+#before_install: #sudo apt-get install libusb-1.0-0-dev
