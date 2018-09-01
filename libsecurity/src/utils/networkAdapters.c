@@ -5,9 +5,11 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 
-//#include<hw/nicinfo.h>
-//#include<sys/dcmd_io-net.h>
-//#include <sys/socket.h>
+#ifdef QNX_OS
+#include<hw/nicinfo.h>
+#include<sys/dcmd_io-net.h>
+#include <sys/socket.h>
+#endif
 
 #include "libsecurity/utils/networkAdapters_int.h"
 
@@ -67,17 +69,16 @@ bool NetworkAdapters_SetIpToHostName(char hostName[MAX_HOST_NAME]) {
 
 // Get the MAC address: it's a unique id for the IoT
 bool NetworkAdapters_GetMacAddress(unsigned char mac[MAC_ADDRESS_LEN]) {
-/* QNX
-    struct ifreq s;
-    int16_t fd;
+	int16_t fd;
+	struct ifreq s;
+#ifdef QNX_OS
     fd=open("/dev/io-net/en0",O_RDONLY);
     devctl(fd, DCMD_IO_NET_GET_CONFIG, &s,sizeof(s), NULL);
     for (i = 0; i < MAC_ADDRESS_LEN; ++i) {
         mac[i] = (unsigned char)s.ifr_addr.sa_data[i];
     }
-    
- */
-    /*
+/*#elif LINUX_OS
+
     int16_t i = 0;
     fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
 
@@ -88,7 +89,10 @@ bool NetworkAdapters_GetMacAddress(unsigned char mac[MAC_ADDRESS_LEN]) {
     }
     return true;
   }
-     */
+*/
+#else
+#pragma warning "FIX this!!!Ups, mac adress not given"
+#endif
   return false;
 }
 

@@ -68,18 +68,23 @@
 #endif
 
 #if defined(NaCl_CRYPTO)
+#undef crypto_hash_BYTES
+#undef crypto_auth_BYTES
+#undef crypto_stream_KEYBYTES
 
-//#include "crypto_hash.h"
-//#include "crypto_auth.h"
-//#include "crypto_auth_hmacsha256.h"
-//#include "randombytes.h"
-//#include "crypto_stream.h"
-//#include "crypto_hash_sha256.h"
-//#include "crypto_hash_sha512.h"
+#include "crypto_hash.h"
+#include "crypto_auth.h"
+#include "crypto_auth_hmacsha256.h"
+#include "randombytes.h"
+#include "crypto_stream.h"
+#include "crypto_hash_sha256.h"
+#include "crypto_hash_sha512.h"
 
+/*
 #ifndef crypto_stream_NONCEBYTES
 #define crypto_stream_NONCEBYTES 16
 #endif
+*/
 
 #ifndef crypto_hash_sha256_BYTES
 #define crypto_hash_sha256_BYTES 256

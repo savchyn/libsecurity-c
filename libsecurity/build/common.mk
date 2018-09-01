@@ -1,12 +1,15 @@
 AR=ar rcs
 LIBSECURITY_DIR=../..
+DEPS=$(LIBSECURITY_DIR)/../deps
+MAKE_HOST=t
+
 OUTDIR=.
 LINUX_OS_VAR=-DLINUX_OS
 MBED_OS_VAR=-DMBED_OS
 NACL_CRYPTO_VAR=-DNaCl_CRYPTO
 OPENSSL_CRYPTO_VAR=-DOPENSSL_CRYPTO
 MBEDTLS_CRYPTO_VAR=-DMBEDTLS_CRYPTO
-NACL_CPU_TYPE=amd64
+NACL_CPU_TYPE=x86##amd64
 GCC_C="GCC_C"
 GCC_O="GCC_O"
 CLANG="CLANG"
@@ -37,7 +40,7 @@ endif
 CFLAGS_COMMON = $(TARGET) $(CRYPTO_TYPE)  $(DEBUG) -Wall -Wextra\
     -Wmissing-declarations -Wpointer-arith \
     -Wwrite-strings -Wcast-qual -Wcast-align \
-    -Wformat-security  -Wformat-nonliteral \
+	-Wformat-security \
     -Wmissing-format-attribute \
     -Winline -W -funsigned-char \
     -Wstrict-overflow -fno-strict-aliasing -Wno-missing-field-initializers
@@ -68,15 +71,9 @@ ifdef COV
 	LDFLAGS=-lgcov --coverage
 endif
 
-ifdef TEST_DIR
-	LIBSECURITY_DIR=../..
-else ifdef EXAMPLES_DIR
-	LIBSECURITY_DIR=../..
-endif
-
-DEPS_PATH=$(LIBSECURITY_DIR)/../deps
+DEPS_PATH=$(DEPS)
 HASH=$(DEPS_PATH)
-CRYPTO=$(DEPS_PATH)/crypto/nacl-20110221/build/all
+CRYPTO=$(DEPS_PATH)/crypto/nacl-20110221/build/$(MAKE_HOST)
 
 MBEDTLS_INC_DIR=$(DEPS_PATH)/crypto/mbedtls/include
 MBEDTLS_LIB_DIR=$(DEPS_PATH)/crypto/mbedtls/library
@@ -87,7 +84,7 @@ OPENSSL_INC_DIR=$(DEPS_PATH)/crypto/openssl/include/openssl
 OPENSSL_LIB_DIR=$(DEPS_PATH)/crypto/openssl
 OPENSSL_LIB=-lssl -lcrypto -ldl
 
-INCLUDE_PATH=$(LIBSECURITY_DIR)/include/libsecurity/
+INCLUDE_PATH=$(LIBSECURITY_DIR)/include/libsecurity
 LIBDIR=$(LIBSECURITY_DIR)/bin
 
 INC_BASE=-I$(HASH) -I. -I$(LIBSECURITY_DIR)/include
