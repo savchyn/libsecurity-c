@@ -13,7 +13,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) $(RANDOM_BYTES) -o $@ $(LIB) -laccounts -lpassword -lentity -lacl -lsalt -lstorage -lutils $(LIB_SEC) $(MBEDTLS_LIB) -lm -lmyhash
 
 .c.o:
-	$(CC) $(TARGET) $(CRYPTO_TYPE) $(CFLAGS)  $(INC) $< -o $@
+	$(CC) $(TARGET) $(CRYPTO_TYPE) $(CFLAGS) $(INC) $< -o $@
 
 clean:
 	rm -f *.o

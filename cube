@@ -1,41 +1,27 @@
-LIBSECURITY_DIR ?= libsecurity/src
+# The CUBE®™
+#
+# (c) Savchyn. All rights reserved.
+#
+#
+#make -f cube how="OS=\$x CRYPTO=\$y DEBUG=\$z" X="LINUX MBED" Y="NaCl OPENSSL MBEDTLS" Z="NDEBUG DEBUG"
+#make -s -f cube how="OS=\$x CRYPTO=\$y DEBUG=\$z" X="LINUX MBED" Y="NaCl OPENSSL MBEDTLS" Z="NDEBUG DEBUG"
 
-all: libsecurity-c
 
-deps:
-	$(MAKE) -C deps download_deps build_deps
 
-libsecurity-c:
-	mkdir -p $(LIBSECURITY_DIR)/bin
-	$(MAKE) -C $(LIBSECURITY_DIR)/accounts
-	$(MAKE) -C $(LIBSECURITY_DIR)/acl
-	$(MAKE) -C $(LIBSECURITY_DIR)/entity
-	$(MAKE) -C $(LIBSECURITY_DIR)/password
-	$(MAKE) -C $(LIBSECURITY_DIR)/otp
-	$(MAKE) -C $(LIBSECURITY_DIR)/salt
-	$(MAKE) -C $(LIBSECURITY_DIR)/utils
-	$(MAKE) -C $(LIBSECURITY_DIR)/storage
+#archtectures="arm aarch64 hexagon mips mipsel mips64 mips64el msp430  ppc ppc64 r600 sparc sparcv9 systemz tce thumb x86 x86_64 xcore mblaze nvptx nvptx64 le32 amdil spir spir64"
 
-tests:
-	$(MAKE) -C $(LIBSECURITY_DIR)/../testing
+X=archtectures
 
-examples:
-	$(MAKE) -C $(LIBSECURITY_DIR)/../examples
+X?=x
+Y?=y
+Z?=z
 
-depsclean:
-	$(MAKE) -C deps clean
+#how?="$x$y$z"
 
-clean:
-	rm -Rf $(LIBSECURITY_DIR)/bin/
-	$(MAKE) -C $(LIBSECURITY_DIR)/accounts clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/acl clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/entity clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/password clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/otp clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/salt clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/utils clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/storage clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/../testing clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/../examples clean
-	
-.PHONY: all clean depclean deps libsecurity-c
+what=$(MAKE) $@ $(how)
+command=$(foreach x,$(X), $(foreach y,$(Y),  $(foreach z,$(Z), $(what)&&echo "	$@	$(x)	$y	$z";)))
+
+.PHONY: all clean test
+
+all test clean .IGNORE:
+	$(command)

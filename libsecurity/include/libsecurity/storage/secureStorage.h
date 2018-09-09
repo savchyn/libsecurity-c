@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SECURE_STORAGE_H
+#define SECURE_STORAGE_H
+
 #include "libsecurity/utils/crypto.h"
 #include "libsecurity/libsecurity/libsecurity_params.h"
 #include "libsecurity/utils/utils.h"
@@ -11,8 +13,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-
-#include "SDFileSystem.h"
+#include "fileSystem/SDFileSystem/SDFileSystem.h"
 }
 #endif
 
@@ -34,3 +35,4 @@ bool SecureStorage_RemoveItem(const SecureStorageS *storage, const unsigned char
 bool SecureStorage_StoreSecureStorageToFile(const char *fileName, SecureStorageS *data);
 bool SecureStorage_LoadSecureStorageFromFile(const char *fileName, const unsigned char *sSecret, const unsigned char *sSalt, SecureStorageS *storage);
 void SecureStorage_FreeStorage(void *storage);
+#endif //SECURE_STORAGE_H

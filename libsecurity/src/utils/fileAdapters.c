@@ -6,12 +6,14 @@
 
 #include <stdio.h>
 
-#include "mbed-drivers/mbed.h"
+//#include <mbed-drivers/mbed.h>
+#ifdef __cplusplus
+extern "C" {
 #include "fileSystem/SDFileSystem/SDFileSystem.h"
-
+}
+#endif
 //extern "C" {
-
-SDFileSystem sd(PTE3, PTE1, PTE2, PTE4, DRIVE_PREFIX); // MOSI, MISO, SCK, CS
+//qnd SDFileSystem sd(PTE3, PTE1, PTE2, PTE4, DRIVE_PREFIX); // MOSI, MISO, SCK, CS
 
 FILE *FileAdapters_Fopen(const char *fileName, const char *mode) {
   char filePath[MAX_FILE_PATH];

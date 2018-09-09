@@ -1,35 +1,51 @@
-LIBSECURITY_DIR ?= libsecurity/src
+LIBSECURITY_DIR?=./libsecurity
+export LIBSECURITY_DIR
+export OS
+export CRYPTO
+export MODE
 
-all: libsecurity-c
+VARIANT=bin/$(OS)/$(CRYPTO)
+LIBDIR=../../../$(VARIANT)
+export LIBDIR
+
+test: tests examples
+
+all: sec-c
 
 deps:
 	$(MAKE) -C deps download_deps build_deps
 
-libsecurity-c:
-	mkdir -p $(LIBSECURITY_DIR)/bin
-	$(MAKE) -C $(LIBSECURITY_DIR)/accounts
-	$(MAKE) -C $(LIBSECURITY_DIR)/acl
-	$(MAKE) -C $(LIBSECURITY_DIR)/entity
-	$(MAKE) -C $(LIBSECURITY_DIR)/password
-	$(MAKE) -C $(LIBSECURITY_DIR)/otp
-	$(MAKE) -C $(LIBSECURITY_DIR)/salt
-	$(MAKE) -C $(LIBSECURITY_DIR)/utils
-	$(MAKE) -C $(LIBSECURITY_DIR)/storage
-	$(MAKE) -C $(LIBSECURITY_DIR)/../examples
+sec-c:
+	mkdir -p $(VARIANT)
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/accounts
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/acl
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/entity
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/password
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/otp
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/salt
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/utils
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/storage
+
+tests:
+	$(MAKE) -C $(LIBSECURITY_DIR)/testing
+
+examples:
+	$(MAKE) -C $(LIBSECURITY_DIR)/examples
 
 depsclean:
 	$(MAKE) -C deps clean
 
 clean:
-	rm -Rf $(LIBSECURITY_DIR)/bin/
-	$(MAKE) -C $(LIBSECURITY_DIR)/accounts clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/acl clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/entity clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/password clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/otp clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/salt clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/utils clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/storage clean
-	$(MAKE) -C $(LIBSECURITY_DIR)/../examples clean
+	rm -Rf $(VARIANT)
+	$(MAKE) clean -C $(LIBSECURITY_DIR)/src/accounts
+	$(MAKE) clean -C $(LIBSECURITY_DIR)/src/acl clean
+	$(MAKE) clean -C $(LIBSECURITY_DIR)/src/entity clean
+	$(MAKE) clean -C $(LIBSECURITY_DIR)/src/password clean
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/otp clean
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/salt clean
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/utils clean
+	$(MAKE) -C $(LIBSECURITY_DIR)/src/storage clean
+	$(MAKE) -C $(LIBSECURITY_DIR)/testing clean
+	$(MAKE) -C $(LIBSECURITY_DIR)/examples clean
 	
 .PHONY: all clean depclean deps libsecurity-c

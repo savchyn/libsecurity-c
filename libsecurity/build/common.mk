@@ -1,49 +1,45 @@
 AR=ar rcs
-LIBSECURITY_DIR=../..
-DEPS=$(LIBSECURITY_DIR)/../deps
-MAKE_HOST=t
+DEPS?=../../../deps
+MAKE_HOST?=t
 
-OUTDIR=.
-LINUX_OS_VAR=-DLINUX_OS
-MBED_OS_VAR=-DMBED_OS
-NACL_CRYPTO_VAR=-DNaCl_CRYPTO
-OPENSSL_CRYPTO_VAR=-DOPENSSL_CRYPTO
-MBEDTLS_CRYPTO_VAR=-DMBEDTLS_CRYPTO
-NACL_CPU_TYPE=x86##amd64
+OS?="LINUX" #[LINUX MBED]
+TARGET=-D$(OS)_OS
+
+ifneq ($(CRYPTO), NaCl)
+ifneq ($(CRYPTO), MBEDTLS)
+ifneq ($(CRYPTO), OPENSSL)
+$(error Error! CRYPTO=[$(CRYPTO)] must be set to one of {NaCl OPENSSL MBEDTLS})
+endif
+endif
+endif
+
+$(message CRYPTO=[$(CRYPTO)] must be set to one of {NaCl OPENSSL MBEDTLS})
+
+CRYPTO?=NaCl #[NaCl OPENSSL MBEDTLS]
+export CRYPTO
+CRYPTO_TYPE=-D$(CRYPTO)_CRYPTO
+
+OUTDIR=$(LIBDIR)
+
 GCC_C="GCC_C"
 GCC_O="GCC_O"
 CLANG="CLANG"
+
+COMPILER="clang"
 # the default is export COMPILER="GCC_C"
 
-TARGET=$(LINUX_OS_VAR)
-#TARGET=$(MBED_OS_VAR)
-CRYPTO_TYPE=$(NACL_CRYPTO_VAR)
-#CRYPTO_TYPE=$(MBEDTLS_CRYPTO_VAR)
-#CRYPTO_TYPE=$(OPENSSL_CRYPTO_VAR)
-#DEBUG=-DNDEBUG
+DEBUG?=NDEBUG
 #export PURE=1
 
-ifneq ($(TARGET),$(LINUX_OS_VAR))
-ifneq ($(TARGET),$(MBED_OS_VAR))
-$(error Error! TARGET variable must be set to $(LINUX_OS_VAR) or to $(MBED_OS_VAR))
-endif
-endif
-
-ifneq ($(CRYPTO_TYPE),$(NACL_CRYPTO_VAR))
-ifneq ($(CRYPTO_TYPE),$(MBEDTLS_CRYPTO_VAR))
-ifneq ($(CRYPTO_TYPE),$(OPENSSL_CRYPTO_VAR))
-$(error Error! CRYPTO_TYPE variable must be set to $(NACL_CRYPTO_VAR) or to $(MBEDTLS_CRYPTO_VAR) or to $(OPENSSL_CRYPTO_VAR))
-endif
-endif
-endif
-
-CFLAGS_COMMON = $(TARGET) $(CRYPTO_TYPE)  $(DEBUG) -Wall -Wextra\
+CFLAGS_COMMON = $(TARGET) $(CRYPTO_TYPE) -D$(DEBUG) \
+    -Wall -Wextra\
     -Wmissing-declarations -Wpointer-arith \
     -Wwrite-strings -Wcast-qual -Wcast-align \
 	-Wformat-security \
     -Wmissing-format-attribute \
     -Winline -W -funsigned-char \
-    -Wstrict-overflow -fno-strict-aliasing -Wno-missing-field-initializers
+    -Wstrict-overflow -fno-strict-aliasing \
+    -Wno-missing-field-initializers
 
 ifeq ($(COMPILER),GCC_O)
 	CC=gcc
@@ -73,38 +69,48 @@ endif
 
 DEPS_PATH=$(DEPS)
 HASH=$(DEPS_PATH)
-CRYPTO=$(DEPS_PATH)/crypto/nacl-20110221/build/$(MAKE_HOST)
 
 MBEDTLS_INC_DIR=$(DEPS_PATH)/crypto/mbedtls/include
 MBEDTLS_LIB_DIR=$(DEPS_PATH)/crypto/mbedtls/library
 MBEDTLS_CONFIG_INC=$(MBEDTLS_INC_DIR)/mbedtls/config.h
 MBEDTLS_BASE_LIB=-lmbedtls -lmbedx509 -lmbedcrypto
 
-OPENSSL_INC_DIR=$(DEPS_PATH)/crypto/openssl/include/openssl
+OPENSSL_INC_DIR=$(DEPS_PATH)/crypto/openssl-1.0.2g/include
 OPENSSL_LIB_DIR=$(DEPS_PATH)/crypto/openssl
 OPENSSL_LIB=-lssl -lcrypto -ldl
 
-INCLUDE_PATH=$(LIBSECURITY_DIR)/include/libsecurity
-LIBDIR=$(LIBSECURITY_DIR)/bin
+INCLUDE_PATH=../../include/libsecurity
 
-INC_BASE=-I$(HASH) -I. -I$(LIBSECURITY_DIR)/include
-LIB_BASE=-L$(HASH)/hashtab -L$(LIBDIR)
+INC_BASE= -I. -I$(INCLUDE_PATH) -I$(INCLUDE_PATH)/.. -I$(HASH) -I$(LIBSECURITY_DIR)/src/include
+LIB_BASE= -L$(HASH)/hashtab -L$(LIBDIR)
 
-ifeq ($(CRYPTO_TYPE),$(MBEDTLS_CRYPTO_VAR))
-	INC=$(INC_BASE) -I$(MBEDTLS_INC_DIR)
+INC_OS=-I../../../../sockets -I../../../../minar -I../../../../mbed-os -I../../../../mbed-os/platform -I../../../../mbed-os/hal -I../../../../mbed-os/features -I../../../../mbed-os/rtos/TARGET_CORTEX -I../../../../mbed-os/rtos/TARGET_CORTEX/rtx5/RTX/Source -I../../../../mbed-os/cmsis  -I../../../../mbed-os/cmsis/TARGET_CORTEX_M
+
+#-I../../../../mbed-os/targets/TARGET_STM/TARGET_STM32F4/device
+
+ifeq ($(CRYPTO),MBEDTLS)
+	INC_ADD=-I$(MBEDTLS_INC_DIR)
 	LIB=-L$(MBEDTLS_LIB_DIR) $(LIB_BASE)
 	MBEDTLS_LIB=$(MBEDTLS_BASE_LIB)
-else ifeq ($(CRYPTO_TYPE),$(OPENSSL_CRYPTO_VAR))
-	INC=$(INC_BASE) -I$(OPENSSL_INC_DIR) -I$(MBEDTLS_INC_DIR)
+endif
+
+ifeq ($(CRYPTO),OPENSSL)
+	INC_ADD = -I$(OPENSSL_INC_DIR) -I$(MBEDTLS_INC_DIR)
 	LIB=-L /usr/local/ssl/lib/ -L$(OPENSSL_LIB_DIR) $(LIB_BASE)
 	LIB_SEC=$(OPENSSL_LIB)
-else
-	RANDOM_BYTES=$(CRYPTO)/lib/$(NACL_CPU_TYPE)/randombytes.o
-	CRYPTO_PATH=$(CRYPTO)/include/$(NACL_CPU_TYPE)
-	CRYPTO_LIB=$(CRYPTO)/lib/$(NACL_CPU_TYPE)
+endif
+
+ifeq ($(CRYPTO),NaCl)
+	CRYPTO_DIR=$(DEPS_PATH)/crypto/nacl-20110221/build/$(MAKE_HOST)
+	NACL_CPU_TYPE=x86 #or amd64
+	RANDOM_BYTES=$(CRYPTO_DIR)/lib/$(NACL_CPU_TYPE)/randombytes.o
+	CRYPTO_PATH=$(CRYPTO_DIR)/include/$(NACL_CPU_TYPE)
+	CRYPTO_LIB=$(CRYPTO_DIR)/lib/$(NACL_CPU_TYPE)
 	LIB_SEC=-lnacl
-	INC=$(INC_BASE) -I$(MBEDTLS_INC_DIR) -I$(CRYPTO_PATH)
+	INC_ADD=-I$(MBEDTLS_INC_DIR) -I$(CRYPTO_PATH)
 	LIB=$(LIB_BASE) -L$(MBEDTLS_LIB_DIR) -L$(CRYPTO_LIB)
 	MBEDTLS_LIB=$(MBEDTLS_BASE_LIB)
 endif
 
+
+INC=$(INC_BASE) $(INC_ADD) $(INC_OS)

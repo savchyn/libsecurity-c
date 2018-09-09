@@ -6,9 +6,7 @@
 #include <string.h>
 
 #include "libsecurity/utils/utils.h"
-//#ifdef MBEDTLS_CRYPTO
- 
-//#ifndef OPENSSL_CRYPTO // ravid fix it
+#ifdef MBEDTLS_CRYPTO
 
 #include "mbedtls/config.h"
 #include "mbedtls/platform.h"
@@ -20,17 +18,16 @@
 #include "mbedtls/error.h"
 #include "mbedtls/timing.h"
 
-//#endif
+#endif
 
 
 #define SERVER_PORT_LEN 10
 
 #ifdef MBED_OS
-
-#include "mbed-drivers/mbed.h"
-#include "EthernetInterface.h"
-#include "sockets/UDPSocket.h"
-#include "sal-stack-lwip/lwipv4_init.h"
+#include <PinNames.h>
+#include <mbed-drivers/mbed.h>
+//qnd #include "sockets/UDPSocket.h"
+//qnd #include "sal-stack-lwip/lwipv4_init.h"
 
 #include <stddef.h>
 #include <stdint.h>

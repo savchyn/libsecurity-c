@@ -20,7 +20,7 @@ int32_t fastNewPwdUser(const char *str) {
 	setFastStr(userName, &userNamePtr, str, 0, FAST_USER_NAME_LEN, true);
 	setFastSecretStr(pwdStr, &pwdPtr, str, FAST_USER_NAME_LEN, FAST_SECRET_LEN);
 	setFastStr(saltStr, &saltPtr, str, FAST_USER_NAME_LEN+FAST_SECRET_LEN, FAST_SECRET_LEN, true);
-	if (Pwd_NewUserPwd(&pwdUser, (unsigned char*)pwdPtr, (unsigned char*)saltPtr) == false) {
+	if (Pwd_NewUserPwd(&pwdUser, (unsigned char*)pwdPtr, (unsigned char*)saltPtr, STRENGTH_EXCELLENT) == false) {
 		return false;
 	}
 	if (Debug)
@@ -58,7 +58,7 @@ int32_t fastUpdatePwd(const char *str) {
 	if (Debug)
 		printf("fastUpdatePwdUser with the following parameters: user name '%s', cPwd '%s' nPWd '%s'\n", userNamePtr, cPwdPtr, nPwdPtr);
 	if (EntityManager_GetProperty(EntityListData, userNamePtr,  PWD_PROPERTY_NAME, (void **)&pwdUser) == true)
-		return Pwd_UpdatePassword(pwdUser, (unsigned char *)cPwdPtr, (unsigned char *)nPwdPtr);
+		return Pwd_UpdatePassword(pwdUser, (unsigned char *)cPwdPtr, (unsigned char *)nPwdPtr, STRENGTH_EXCELLENT);
 	return false;
 }
 

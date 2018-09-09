@@ -4,6 +4,21 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>aio.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>samples.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>secureStorageExample.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
 		<key>sexy NaCl.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -17,7 +32,27 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>004060BD20BBE08C00F9B653</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>004060C520BC1B9300F9B653</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>0040FEDA20BC230F00993407</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>00AFE064203A36870076245A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>00B786172046DA3F001B5524</key>
 		<dict>
 			<key>primary</key>
 			<true/>

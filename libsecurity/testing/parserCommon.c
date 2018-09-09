@@ -256,7 +256,7 @@ int32_t parseFlags(int32_t argc, char *argv[]) {
 
 int32_t main(int32_t argc, char *argv[]) {
 	Debug = true;
-	Entity_TestMode = Accounts_TestMode = Otp_TestMode = Acl_TestMode = true;
+//	Entity_TestMode = Accounts_TestMode = Otp_TestMode = Acl_TestMode = true;
 
 	if (parseFlags(argc, argv) == false)
 		return(-1);

@@ -24,7 +24,9 @@
 #include <unistd.h>
 
 #elif MBED_OS
+#ifdef __cplusplus
 #include "sockets/UDPSocket.h"
+#endif
 
 #include <string.h>
 

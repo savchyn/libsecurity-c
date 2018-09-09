@@ -1,11 +1,15 @@
-#ifndef OPENSSL_CRYPTO // ravid fix it
-
 //extern int make_iso_compilers_happy; // gcc when compiled with -pedantic reports a diagnostic when the translation unit is empty as it is requested by the C Standard
 
 #include "libsecurity/utils/dtlsClient_int.h"
 
 
 #if defined(MBED_OS)
+#include "mbed-drivers/mbed_assert.h"
+#ifndef MBED_STATIC_ASSERT
+#define MBED_STATIC_ASSERT(expr, msg) error("Not new compiler")
+#endif
+
+#include "netsocket/EthernetInterface.h"
 
 // use the K64F random number generator
 bool DTLS_GetRandom(unsigned char *random, int16_t len) {
@@ -95,7 +99,7 @@ class UDPConnect {
       snprintf(errStr, sizeof(errStr), "mbedtls_ssl_handshake fail");
       return false;
     }
-    // TODO mbedtls_ssl_get_verify_result(&ssl) and report errors;
+    // TODO? mbedtls_ssl_get_verify_result(&ssl) and report errors;
     return true;
   }
 
@@ -243,6 +247,13 @@ bool DTLS_GetRandom(unsigned char *random, int len){
 #else // mbed on LINUX_OS
 
 extern "C" {
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/aes.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/timing.h>
+#include <mbedtls/net.h>
+
 
 static mbedtls_entropy_context entropy;
 static mbedtls_ctr_drbg_context ctr_drbg;
@@ -297,11 +308,8 @@ bool DTLS_ClientInit(const char *cacertFile, const char *serverAddr, int16_t por
     DTLS_ClientFree();
     return false;
   }
-  // fix it
-  /* OPTIONAL is usually a bad choice for security, but makes interop easier
-   * in this simplified example, in which the ca chain is hardcoded.
-   * Production code should set a proper ca chain and use REQUIRED. */
-  mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
+  
+  mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_ca_chain(&conf, &cacert, NULL);
   mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
 
@@ -378,4 +386,3 @@ void DTLS_ClientFree() {
 
 #endif
 
-#endif

@@ -13,16 +13,20 @@
 
 #include "libsecurity/utils/networkAdapters_int.h"
 
-#include "libsecurity/utils/UDPSyslog.h"
-#include "libsecurity/utils/dtlsClient.h"
+//qnd #include "libsecurity/utils/UDPSyslog.h"
+//qnd #include "libsecurity/utils/dtlsClient.h"
 
 #ifdef MBED_OS
-UDPSyslog *UDPSyslog::_pInstance = NULL;
+//qnd fix it!!!
+//UDPSyslog *UDPSyslog::_pInstance = NULL;
+
+static void * _pInstance = NULL;
+
 #endif
 
 
 #include "libsecurity/utils/utils.h"
-#include "libsecurity/utils/dtlsClient.h"
+//qnd #include "libsecurity/utils/dtlsClient.h"
 
 static bool connectionIsOpen = false;
 static bool connectionIsDtls = false;
@@ -183,14 +187,18 @@ bool NetworkAdapters_CloseLog(int16_t serverId) {
 
 #elif defined(MBED_OS)
 
+typedef void UDPSyslog; //qnd fix
+typedef int EthernetInterface; //qnd fix
+
 UDPSyslog *udpSysLog;
+
 static EthernetInterface eth;
 static bool ethWasSet = false;
 
 bool NetworkAdapters_GetEth(void **eth1) {
   if (!ethWasSet ) {
-    eth.init();
-    eth.connect();
+    //todo eth.init();
+    //todo eth.connect();
     ethWasSet = true;
   }
   *eth1 = (void *)(&eth);
@@ -201,7 +209,7 @@ bool NetworkAdapters_SetIpToHostName(char hostName[MAX_HOST_NAME]) {
   EthernetInterface *eth1 = NULL;
 
   NetworkAdapters_GetEth((void **)&eth1);
-  snprintf(hostName, MAX_HOST_NAME, "%15s", eth1->getIPAddress());
+	snprintf(hostName, MAX_HOST_NAME, "%15s", "192.168.0.1"); //todo eth1->getIPAddress());
   return true;
 }
 
@@ -220,11 +228,16 @@ bool NetworkAdapters_OpenClient(const char *serverIpStr, int16_t port, int16_t *
     return ret;
   }
   lwipv4_socket_init();
-  udpSysLog = UDPSyslog::getInstance();
+	
   // synchronization is too complex, so direct call will be used
   // mbed::util::FunctionPointer2<void, const char *, int16_t> fp(udpSysLog, &UDPSyslog::init);
   // minar::Scheduler::postCallback(fp.bind(serverIpStr, port));
-  int16_t ret = udpSysLog->init(serverIpStr, port);
+	
+  int16_t ret = 0;
+	//todo   udpSysLog = UDPSyslog::getInstance();
+
+	//todo ret = udpSysLog->init(serverIpStr, port);
+	
   if (ret) connectionIsOpen = true;
   return ret;
 }
@@ -239,7 +252,7 @@ bool NetworkAdapters_SendData(int16_t serverId, const char *str, int16_t sLen) {
   if (connectionIsDtls) {
     return DTLS_ClientSendPacket((const uint8_t *)str, sLen);
   }
-  udpSysLog->onSend(str);
+  //todo udpSysLog->onSend(str);
   return true;
 }
 

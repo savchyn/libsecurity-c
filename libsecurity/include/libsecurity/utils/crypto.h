@@ -13,9 +13,14 @@
 #define MAX_SECRET_LEN 255
 #define crypto_auth_BYTES 32
 #define crypto_stream_KEYBYTES 32
+#define IV_LEN 16
+#define SHA256_LEN 32
+#define crypto_hash_BYTES 32
 
 
 #define AES_BLOCK_SIZE 16
+
+
 
 #if defined(MBED_OS) || defined(MBEDTLS_CRYPTO)
 
@@ -26,10 +31,11 @@
 
 #include "mbedtls/sha256.h"
 
-#define SHA256_LEN 32
-#define IV_LEN 16
+//#define SHA256_LEN 32
+//#define IV_LEN 16
 #define AES_OUTPUT_LEN 32
 #define crypto_hash_BYTES 32
+
 
 #define ALIGN_FACTOR UTILS_STR_LEN_SIZE
 
@@ -39,6 +45,8 @@
 #define CRYPTO_DECRYPT_MODE MBEDTLS_AES_DECRYPT
 
 #define SECRET_LEN 32
+
+#else
 
 #endif
 
@@ -68,17 +76,18 @@
 #endif
 
 #if defined(NaCl_CRYPTO)
+
 #undef crypto_hash_BYTES
 #undef crypto_auth_BYTES
 #undef crypto_stream_KEYBYTES
 
-#include "crypto_hash.h"
-#include "crypto_auth.h"
-#include "crypto_auth_hmacsha256.h"
-#include "randombytes.h"
-#include "crypto_stream.h"
-#include "crypto_hash_sha256.h"
-#include "crypto_hash_sha512.h"
+#include <crypto_hash.h>
+#include <crypto_auth.h>
+#include <crypto_auth_hmacsha256.h>
+#include <randombytes.h>
+#include <crypto_stream.h>
+#include <crypto_hash_sha256.h>
+#include <crypto_hash_sha512.h>
 
 /*
 #ifndef crypto_stream_NONCEBYTES

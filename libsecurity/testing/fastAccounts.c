@@ -23,8 +23,8 @@ int32_t fastNewAmUser(const char *str) {
 	setFastStr(privilegeStr, &tmpPtr, str, FAST_USER_NAME_LEN, FAST_ONE_DIGIT_LEN, false);
 	setFastSecretStr(pwdStr, &pwdPtr, str, FAST_USER_NAME_LEN+FAST_ONE_DIGIT_LEN, FAST_SECRET_LEN);
 	setFastStr(saltStr, &saltPtr, str, FAST_USER_NAME_LEN+FAST_ONE_DIGIT_LEN+FAST_SECRET_LEN, FAST_SECRET_LEN, true);
-	privilegeIdx = (privilegeStr[0] % (NUM_OF_PRIVILEGE+1)) && 0xf;
-	if (Accounts_NewUser(&amUser, PrivilegeVec[privilegeIdx], (unsigned char*) pwdPtr, (unsigned char*) saltPtr) == false) {
+	privilegeIdx = (privilegeStr[0] % (NUM_OF_PRIVILEGE+1)) & 0xf;
+	if (Accounts_NewUser(&amUser, PrivilegeVec[privilegeIdx], (unsigned char*) pwdPtr, (unsigned char*) saltPtr, STRENGTH_EXCELLENT) == false) {
 		printf("Error while generating new AM user '%s', error: %s\n", userNamePtr, errStr);
 		return false;
 	}
@@ -63,7 +63,7 @@ int32_t fastUpdateAmPwd(const char *str) {
 	if (Debug)
 		printf("fastUpdateAmUser with the following parameters: user name '%s', cPwd '%s' nPWd '%s'\n", userNamePtr, cPwdPtr, nPwdPtr);
 	if (EntityManager_GetProperty(EntityListData, userNamePtr,  AM_PROPERTY_NAME, (void **)&amUser) == true)
-		return Accounts_UpdateUserPwd(amUser, userNamePtr, (unsigned char *)cPwdPtr, (unsigned char *)nPwdPtr);
+		return Accounts_UpdateUserPwd(amUser, userNamePtr, (unsigned char *)cPwdPtr, (unsigned char *)nPwdPtr, STRENGTH_EXCELLENT);
 	return false;
 }
 

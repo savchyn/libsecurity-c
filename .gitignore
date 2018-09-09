@@ -4,7 +4,7 @@
 *.out
 tmp
 *.txt
-
+*.xcuserstate
 deps/crypto
 
 mbed/K64F/libsecurity/source/*.[ch]

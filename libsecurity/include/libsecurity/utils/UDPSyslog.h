@@ -2,10 +2,10 @@
 #define UDPSYSLOG_H
 #ifdef MBED_OS
 #include "mbed-drivers/mbed.h"
-#include "EthernetInterface.h"
+#include "netsocket/EthernetInterface.h"
 #include "sockets/UDPSocket.h"
 #include "sal/socket_api.h"
-#include "minar/minar.h"
+//#include "minar/minar.h"
 #include "core-util/FunctionPointer.h"
 
 #include <stddef.h>
@@ -16,7 +16,7 @@
 
 #include "libsecurity/utils/utils.h"
 
-using namespace mbed::Sockets::v0;
+//using namespace mbed::Sockets::v0;
 
 #define UDP_SYSLOG_PORT 514
 

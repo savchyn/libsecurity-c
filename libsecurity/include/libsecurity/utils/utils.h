@@ -21,6 +21,10 @@
 
 #define H_TAB_SIZE 8
 
+#define ERR_STR_LEN 255
+extern char errStr[ERR_STR_LEN];
+
+
 #ifndef __GNUC__
 #define __attribute__(x) /*nothing*/
 #endif
@@ -28,11 +32,9 @@
 extern void logprintf(const char *format, ...) __attribute__((format(printf, 1, 2)));
 extern void logprintva(const char *format, va_list args) __attribute__((format(printf, 1, 0)));
 
-#define ERR_STR_LEN 255
 
 #define UTILS_STR_LEN_SIZE 3
 
-extern char errStr[ERR_STR_LEN];
 
 #define MIN_PASSWORD_LENGTH 6 // at least 2 chars, 2 digits and 2 extra chars
 #define MAX_PASSWORD_LENGTH 255

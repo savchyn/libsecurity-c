@@ -47,7 +47,7 @@ STATIC bool isValidDigest(int16_t val);
 STATIC bool isValidOtpSecret(const unsigned char *secret);
 STATIC bool isValidOtp(const OtpS *otp);
 //STATIC bool setSecretStr(unsigned char fixedSecret[crypto_auth_BYTES + 1], const unsigned char *secret);
-#define setSecretStr(x, y) (x)=(y) //todo remove this
+//#define setSecretStr(x, y) (x)=(y) //todo remove this
 STATIC bool generateHmac(const OtpS *otp, char *key, char **val);
 STATIC MicroSecTimeStamp timeCode(const TotpS *tp, MicroSecTimeStamp t);
 STATIC void totpStructToStr(const TotpS *totp, char *str, int16_t maxStrLen);

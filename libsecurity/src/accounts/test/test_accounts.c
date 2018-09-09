@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "libsecurity/accounts/accounts_int.h"
+#include <libsecurity/accounts/accounts_int.h>
 #include "libsecurity/salt/salt_int.h"
 
 #define NUM_OF_USERS 4
